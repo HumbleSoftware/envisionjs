@@ -1,0 +1,41 @@
+.handle {
+    position: absolute;
+    z-index: 10;
+    cursor: pointer;
+    background: #eeeeee; 
+    border: 1px solid #bbbbbb; 
+    border-radius: 3px;
+    -webkit-border-radius: 3px; 
+    -moz-border-radius: 3px;
+    -moz-user-select: none;;
+}
+.zoomHandle {
+    width: 5px; 
+    height: 20px; 
+}
+.scrollHandle {
+    width: 100px;
+    height: 12px;
+}
+.flag {
+    border: 1px solid #4499FF;
+    background: white;
+    padding: 1px 2px 1px 2px;
+}
+.flagpole {
+    border-left: 1px solid #4499FF;
+}
+.flotr-grid-label {
+    font-size: 11px;
+    background: #ffffff;
+    margin: 2px 0px 0px 4px;
+}
+.flotr-mouse-value {
+	font-size: 10px;
+}
+#summaryGraph .flotr-grid-label {
+    margin-top: -16px;
+    background: transparent;
+    text-align: left;
+}
+
