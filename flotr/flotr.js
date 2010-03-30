@@ -901,10 +901,14 @@ Flotr.Graph = Class.create({
 		            (y2.options.title ? (y2.titleSize.width + margin) : 0) + maxOutset;
     
 		p.top = Math.floor(p.top); // In order the outline not to be blured
-		p.bottom = 0;
-		p.top = 0;
-		p.left = 0;
-		p.right = 0;
+        
+        if (margin == 0) {
+            p.bottom = 0;
+            p.top = 0;
+            p.left = 0;
+            p.right = 0;
+        }
+        
 		this.plotWidth  = this.canvasWidth - p.left - p.right;
 		this.plotHeight = this.canvasHeight - p.bottom - p.top;
 		
