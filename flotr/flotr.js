@@ -1932,7 +1932,7 @@ Flotr.Graph = Class.create({
 			
 			var x1 = xa.d2p(prevHit.x - bw/2) + plotOffset.left - lw;
             var y1 = ya.d2p(prevHit.y >= 0 ? prevHit.y : 0) + plotOffset.top - lw;
-            var x2 = x2pre - x1 + lw * 2;
+            var x2 = x2pre - x1 + plotOffset.left + lw * 2;
             var y2 = ya.d2p(prevHit.y < 0 ? prevHit.y : 0) + lw * 2;
             
 			this.octx.clearRect(x1, y1, x2, y2);
