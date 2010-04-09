@@ -583,7 +583,7 @@ var HumbleFinance = {
             
             if (x < min) {
                 continue;
-            } else if (x >= min && x <= xmax) {
+            } else if (x >= min && x <= max) {
                 // Draw the flag
                 var point = this.priceData[x];
                 var flagContent = this.flagData[i][1];
@@ -600,7 +600,7 @@ var HumbleFinance = {
                 this.containers.flags.insert(flag);
                 this.containers.flags.insert(flagpole);
                 
-            } else if (x >= xmax) {
+            } else if (x >= max) {
                 break;
             }
         }
