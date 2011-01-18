@@ -143,7 +143,7 @@ var HumbleFinance = {
         this.graphs.summary.setSelection(area);
     },
 
-    clear_container: function() {
+    clearContainer: function() {
         var elems = ['priceGraph', 'volumeGraph', 'summaryGraph',
             'flagContainer', 'leftHandle', 'rightHandle', 'scrollHandle'];
         var id = this.id;
@@ -160,7 +160,7 @@ var HumbleFinance = {
     buildDOM: function () {
 
         var container = $(this.id);
-        this.clear_container();
+        this.clearContainer();
 
         // Build DOM element
         this.containers.price = new Element('div', {id: 'priceGraph', style: 'width: 100%; height: 240px;'});
