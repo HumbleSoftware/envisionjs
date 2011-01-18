@@ -523,11 +523,11 @@ var HumbleFinance = {
         // Display hit on volume graph
         var point = this.volumeData[e.memo[0].x];
         Event.stopObserving(this.containers.price, 'flotr:hit');
-        this.doHit(this.graphs.volume, point, this.containers.price);
+        if( point ) this.doHit(this.graphs.volume, point, this.containers.price);
         Event.observe(this.containers.price, 'flotr:hit', this.priceHitObserver.bind(this));
 
         // Hide mouse track on volume graph
-        this.graphs.volume.mouseTrack.hide();
+        if( this.graphs.volume.mouseTrack ) this.graphs.volume.mouseTrack.hide();
     },
 
     /**
