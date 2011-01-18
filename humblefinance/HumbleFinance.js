@@ -595,7 +595,7 @@ var HumbleFinance = {
 
             if (x < min) {
                 continue;
-            } else if (x >= min && x <= xmax) {
+            } else if (x >= min && x <= max) {
 
                 // Draw the flag
                 var point       = this.priceData[x],
