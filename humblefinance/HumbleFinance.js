@@ -220,11 +220,10 @@ var HumbleFinance = {
      */
     selectObserver: function (e) {
 
-        var area = e.memo[0];
-        xmin = Math.floor(area.x1);
-        xmax = Math.ceil(area.x2);
-
-        var newBounds = {'xmin': xmin, 'xmax': xmax, 'ymin': null, 'ymax': null};
+        var area = e.memo[0],
+            xmin = Math.floor(area.x1),
+            xmax = Math.ceil(area.x2),
+            newBounds = {'xmin': xmin, 'xmax': xmax, 'ymin': null, 'ymax': null};
 
         this.graphs.price = this.priceGraph(this.priceData.slice(xmin, xmax+1), newBounds);
         this.graphs.volume = this.volumeGraph(this.volumeData.slice(xmin, xmax+1), newBounds);
@@ -266,21 +265,22 @@ var HumbleFinance = {
      */
     positionScrollHandle: function (e) {
 
-        var x1 = e.memo[0].x1;
-        var x2 = e.memo[0].x2;
-        var xaxis = e.memo[1].axes.x;
-        var plotOffset = e.memo[1].plotOffset;
-        var graphOffset = this.containers.summary.positionedOffset();
-        var graphHeight = this.containers.summary.getHeight();
-        var height = this.handles.scroll.getHeight();
+        var x1          = e.memo[0].x1,
+            x2          = e.memo[0].x2,
+            xaxis       = e.memo[1].axes.x,
+            plotOffset  = e.memo[1].plotOffset,
+            graphOffset = this.containers.summary.positionedOffset(),
+            graphHeight = this.containers.summary.getHeight(),
+            height      = this.handles.scroll.getHeight(),
+            width, xPosLeft, yPos;
 
         // Set width
-        var width = Math.floor(xaxis.d2p(x2) - xaxis.d2p(x1)) + 8;
+        width = Math.floor(xaxis.d2p(x2) - xaxis.d2p(x1)) + 8;
         width = (width < 10) ? 18 : width;
 
         // Set positions
-        var xPosLeft = Math.floor(graphOffset[0] + plotOffset.left + xaxis.d2p(x1) + (xaxis.d2p(x2) - xaxis.d2p(x1) - width)/2);
-        var yPos = Math.ceil(graphOffset[1] + graphHeight - 2);
+        xPosLeft = Math.floor(graphOffset[0] + plotOffset.left + xaxis.d2p(x1) + (xaxis.d2p(x2) - xaxis.d2p(x1) - width)/2);
+        yPos     = Math.ceil(graphOffset[1] + graphHeight - 2);
 
         this.handles.scroll.setStyle({position: 'absolute', left: xPosLeft+'px', top: yPos+'px', width: width+'px'});
         this.handles.scroll.show();
@@ -293,9 +293,9 @@ var HumbleFinance = {
      */
     scrollObserver: function (e) {
 
-        var x = e.clientX;
-        var offset = this.handles.scroll.cumulativeOffset();
-        var prevSelection = this.graphs.summary.prevSelection;
+        var x             = e.clientX,
+            offset        = this.handles.scroll.cumulativeOffset(),
+            prevSelection = this.graphs.summary.prevSelection;
 
         /**
          * Perform scroll on handle move, observer
@@ -306,11 +306,11 @@ var HumbleFinance = {
 
             Event.stopObserving(document, 'mousemove', handleObserver);
 
-            var deltaX = e.clientX - x;
-            var xAxis = this.graphs.summary.axes.x;
-
-            var x1 = xAxis.p2d(Math.min(prevSelection.first.x, prevSelection.second.x) + deltaX);
-            var x2 = xAxis.p2d(Math.max(prevSelection.first.x, prevSelection.second.x) + deltaX);
+            var deltaX = e.clientX - x,
+                xAxis  = this.graphs.summary.axes.x,
+                x1     = xAxis.p2d(Math.min(prevSelection.first.x, prevSelection.second.x) + deltaX),
+                x2     = xAxis.p2d(Math.max(prevSelection.first.x, prevSelection.second.x) + deltaX),
+                area;
 
             // Check and handle boundary conditions
             if (x1 < this.bounds.xmin) {
@@ -323,7 +323,7 @@ var HumbleFinance = {
             }
 
             // Set selection area object
-            var area = {
+            area = {
                 x1: x1,
                 y1: prevSelection.first.y,
                 x2: x2,
@@ -360,10 +360,10 @@ var HumbleFinance = {
      */
     zoomObserver: function (e) {
 
-        var zoomHandle = e.element();
-        var x = e.clientX;
-        var offset = zoomHandle.cumulativeOffset();
-        var prevSelection = this.graphs.summary.prevSelection;
+        var zoomHandle    = e.element(),
+            x             = e.clientX,
+            offset        = zoomHandle.cumulativeOffset(),
+            prevSelection = this.graphs.summary.prevSelection;
 
         /**
          * Perform zoom on handle move, observer
@@ -374,11 +374,12 @@ var HumbleFinance = {
 
             Event.stopObserving(document, 'mousemove', handleObserver);
 
-            var deltaX = e.clientX - x;
-            var xAxis = this.graphs.summary.axes.x;
+            var deltaX = e.clientX - x,
+                xAxis  = this.graphs.summary.axes.x,
+                x1,
+                x2;
 
             // Set initial new x bounds
-            var x1, x2;
             if (Element.identify(zoomHandle) == 'rightHandle') {
                 x1 = xAxis.p2d(Math.min(prevSelection.first.x, prevSelection.second.x));
                 x2 = xAxis.p2d(Math.max(prevSelection.first.x, prevSelection.second.x) + deltaX);
@@ -442,9 +443,9 @@ var HumbleFinance = {
      */
     zoom: function (x) {
 
-        var prevSelection = this.graphs.summary.prevSelection;
-        var xAxis = this.graphs.summary.axes.x;
-        var x1, x2, y1, y2;
+        var prevSelection = this.graphs.summary.prevSelection,
+            xAxis = this.graphs.summary.axes.x,
+            x1, x2, y1, y2, area;
 
         // Check for previous selection
         if (!prevSelection) {
@@ -459,7 +460,7 @@ var HumbleFinance = {
             y2 = prevSelection.second.y;
         }
 
-        var area = {
+        area = {
             x1: x1,
             y1: y1,
             x2: x2,
@@ -476,21 +477,23 @@ var HumbleFinance = {
      */
     positionZoomHandles: function (e) {
 
-        var x1 = e.memo[0].x1;
-        var x2 = e.memo[0].x2;
-        var xaxis = e.memo[1].axes.x;
-        var plotOffset = e.memo[1].plotOffset;
-        var height = this.containers.summary.getHeight();
-        var offset = this.containers.summary.positionedOffset();
+        var x1         = e.memo[0].x1,
+            x2         = e.memo[0].x2,
+            xaxis      = e.memo[1].axes.x,
+            plotOffset = e.memo[1].plotOffset,
+            height     = this.containers.summary.getHeight(),
+            offset     = this.containers.summary.positionedOffset(),
+            dimensions, xPosOne, xPosTwo, xPosLeft, xPosRight, yPos;
+
         this.handles.left.show();
-        var dimensions = this.handles.left.getDimensions();
+        dimensions = this.handles.left.getDimensions();
 
         // Set positions
-        var xPosOne = Math.floor(offset[0]+plotOffset.left+xaxis.d2p(x1)-dimensions.width/2+1);
-        var xPosTwo = Math.ceil(offset[0]+plotOffset.left+xaxis.d2p(x2)-dimensions.width/2);
-        var xPosLeft = Math.min(xPosOne, xPosTwo);
-        var xPosRight = Math.max(xPosOne, xPosTwo);
-        var yPos = Math.floor(offset[1]+height/2 - dimensions.height/2);
+        xPosOne   = Math.floor(offset[0]+plotOffset.left+xaxis.d2p(x1)-dimensions.width/2+1);
+        xPosTwo   = Math.ceil(offset[0]+plotOffset.left+xaxis.d2p(x2)-dimensions.width/2);
+        xPosLeft  = Math.min(xPosOne, xPosTwo);
+        xPosRight = Math.max(xPosOne, xPosTwo);
+        yPos      = Math.floor(offset[1]+height/2 - dimensions.height/2);
 
         this.handles.left.setStyle({position: 'absolute', left: xPosLeft+'px', top: yPos+'px'});
         this.handles.right.setStyle({position: 'absolute', left: xPosRight+'px', top: yPos+'px'});
@@ -515,11 +518,12 @@ var HumbleFinance = {
      */
     volumeHitObserver: function (e) {
 
+        var point = this.priceData[e.memo[0].x];
+
         // Hide mouse track on volume graph
         this.graphs.volume.mouseTrack.hide();
 
         // Display hit on price graph
-        var point = this.priceData[e.memo[0].x];
         Event.stopObserving(this.containers.volume, 'flotr:hit');
         this.doHit(this.graphs.price, point, this.containers.volume);
         Event.observe(this.containers.volume, 'flotr:hit', this.volumeHitObserver.bind(this));
@@ -551,18 +555,14 @@ var HumbleFinance = {
      */
     doHit: function (graph, point, container) {
 
-        var offset = container.cumulativeOffset();
-
-        var xaxis = graph.axes.x;
-        var yaxis = graph.axes.y;
-
-        var relX = xaxis.d2p(point[0]);
-        var relY = yaxis.d2p(point[1]);
-
-        var absX = offset[0]+relX;
-        var absY = offset[1]+relY;
-
-        var mouse = {'relX': relX, 'relY': relY, 'absX': absX, 'absY': absY};
+        var offset = container.cumulativeOffset(),
+            xaxis  = graph.axes.x,
+            yaxis  = graph.axes.y,
+            relX   = xaxis.d2p(point[0]),
+            relY   = yaxis.d2p(point[1]),
+            absX   = offset[0]+relX,
+            absY   = offset[1]+relY,
+            mouse  = {'relX': relX, 'relY': relY, 'absX': absX, 'absY': absY};
 
         graph.hit(mouse);
     },
@@ -582,10 +582,10 @@ var HumbleFinance = {
      */
     drawFlags: function () {
 
-        var xAxis = this.graphs.price.axes.x;
-        var yAxis = this.graphs.price.axes.y;
-        var min = xAxis.datamin;
-        var max = xAxis.datamax;
+        var xAxis = this.graphs.price.axes.x,
+            yAxis = this.graphs.price.axes.y,
+            min   = xAxis.datamin,
+            max   = xAxis.datamax;
 
         this.containers.flags.update('');
 
@@ -596,15 +596,15 @@ var HumbleFinance = {
             if (x < min) {
                 continue;
             } else if (x >= min && x <= xmax) {
-                // Draw the flag
-                var point = this.priceData[x];
-                var flagContent = this.flagData[i][1];
-                var xPos = xAxis.d2p(point[0]);
-                var yPos = yAxis.d2p(point[1]);
-                var offset = this.containers.price.cumulativeOffset();
 
-                var left = Math.floor(xPos + this.graphs.price.plotOffset.left);
-                var top = Math.floor(yPos - 40 + this.graphs.price.plotOffset.top);
+                // Draw the flag
+                var point       = this.priceData[x],
+                    flagContent = this.flagData[i][1],
+                    xPos        = xAxis.d2p(point[0]),
+                    yPos        = yAxis.d2p(point[1]),
+                    offset      = this.containers.price.cumulativeOffset(),
+                    left        = Math.floor(xPos + this.graphs.price.plotOffset.left),
+                    top         = Math.floor(yPos - 40 + this.graphs.price.plotOffset.top);
 
                 flag = new Element('div', {'class': 'flag', 'style': 'position: absolute; top: '+top+'px; left: '+left+'px; z-index: 10;'});
                 flag.update(flagContent);
@@ -627,12 +627,13 @@ var HumbleFinance = {
      */
     priceGraph: function (data, bounds) {
 
-        var xmin = bounds.xmin;
-        var xmax = bounds.xmax;
-        var ymin = bounds.ymin;
-        var ymax = bounds.ymax;
+        var xmin = bounds.xmin,
+            xmax = bounds.xmax,
+            ymin = bounds.ymin,
+            ymax = bounds.ymax,
+            p;
 
-        var p = Flotr.draw(
+        p = Flotr.draw(
             $$('#' + this.id + ' #priceGraph')[0],
             [data],
             {
@@ -658,12 +659,13 @@ var HumbleFinance = {
      */
     volumeGraph: function (data, bounds) {
 
-        var xmin = bounds.xmin;
-        var xmax = bounds.xmax;
-        var ymin = bounds.ymin;
-        var ymax = bounds.ymax;
+        var xmin = bounds.xmin,
+            xmax = bounds.xmax,
+            ymin = bounds.ymin,
+            ymax = bounds.ymax,
+            v;
 
-        var v = Flotr.draw(
+        v = Flotr.draw(
             $$('#' + this.id + ' #volumeGraph')[0],
             [data],
             {
@@ -689,13 +691,14 @@ var HumbleFinance = {
      */
     summaryGraph: function (data, bounds) {
 
-        var xmin = bounds.xmin;
-        var xmax = bounds.xmax;
-        var ymin = bounds.ymin;
-        var ymax = bounds.ymax;
-        var noticks = xmax > 7 ? 7 : xmax;
+        var xmin = bounds.xmin,
+            xmax = bounds.xmax,
+            ymin = bounds.ymin,
+            ymax = bounds.ymax,
+            noticks = xmax > 7 ? 7 : xmax,
+            p;
 
-        var p = Flotr.draw(
+        p = Flotr.draw(
             $$('#' + this.id + ' #summaryGraph')[0],
             [data],
             {
