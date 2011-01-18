@@ -645,19 +645,19 @@ var HumbleFinance = {
                 HtmlText: true
             }
         );
-        
+
         return p;
     },
 
     /**
      * Draw the volume graph
-     * 
+     *
      * @param Array data
      * @param Array bounds
      * @return Flotr.Graph
      */
     volumeGraph: function (data, bounds) {
-        
+
         var xmin = bounds.xmin;
         var xmax = bounds.xmax;
         var ymin = bounds.ymin;
