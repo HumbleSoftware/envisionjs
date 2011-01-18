@@ -134,9 +134,9 @@ var HumbleFinance = {
 
         // Initialize graphs, setting selection on summary
         var area = {
-            x1: 0, 
-            y1: this.bounds.ymin, 
-            x2: 100, 
+            x1: 0,
+            y1: this.bounds.ymin,
+            x2: this.bounds.xmax,
             y2: this.bounds.ymax
         };
         this.graphs.summary = this.summaryGraph(this.summaryData, this.bounds);
@@ -583,7 +583,7 @@ var HumbleFinance = {
 
             if (x < min) {
                 continue;
-            } else if (x >= min && x <= max) {
+            } else if (x >= min && x <= xmax) {
                 // Draw the flag
                 var point = this.priceData[x];
                 var flagContent = this.flagData[i][1];
@@ -599,8 +599,8 @@ var HumbleFinance = {
                 flagpole = new Element('div', {'class': 'flagpole', 'style': 'position: absolute; top: '+top+'px; left: '+left+'px; z-index: 10; height: 40px;'});
                 this.containers.flags.insert(flag);
                 this.containers.flags.insert(flagpole);
-                
-            } else if (x >= max) {
+
+            } else if (x >= xmax) {
                 break;
             }
         }
@@ -681,15 +681,19 @@ var HumbleFinance = {
         var xmax = bounds.xmax;
         var ymin = bounds.ymin;
         var ymax = bounds.ymax;
-        
+        var noticks = xmax > 7 ? 7 : xmax;
+
         var p = Flotr.draw(
             $('summaryGraph'),
             [data],
             {
                 lines: {show: true, fill: true, fillOpacity: .1, lineWidth: 1},
-                yaxis: {min: ymin, max: ymax, autoscaleMargin: .5, showLabels: false, tickDecimals: 1},
-                xaxis: {min: xmin, max: xmax, noTicks: 5, tickFormatter: this.xTickFormatter, labelsAngle: 60},
-                grid: {verticalLines: false, horizontalLines: false, labelMargin: 0, outlineWidth: 0},
+                yaxis: {min: ymin, max: ymax, autoscaleMargin: .5,
+                        showLabels: false, tickDecimals: 1},
+                xaxis: {min: xmin, max: xmax, noTicks: noticks,
+                        tickFormatter: this.xTickFormatter, labelsAngle: 60},
+                grid: {verticalLines: false, horizontalLines: false,
+                       labelMargin: 0, outlineWidth: 0},
                 selection: {mode: 'x'},
                 shadowSize: false,
                 HtmlText: true
