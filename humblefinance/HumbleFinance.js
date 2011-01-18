@@ -142,13 +142,25 @@ var HumbleFinance = {
         this.graphs.summary = this.summaryGraph(this.summaryData, this.bounds);
         this.graphs.summary.setSelection(area);
     },
-    
+
+    clear_container: function() {
+        var elems = ['priceGraph', 'volumeGraph', 'summaryGraph',
+            'flagContainer', 'leftHandle', 'rightHandle', 'scrollHandle'];
+        var id = this.id;
+        elems.each(function(e) {
+            el = $$("#" + id + " #" + e);
+            if( el[0] && el[0].remove )
+                el[0].remove();
+        });
+    },
+
     /**
      * Build DOM elements and insert into container.
      */
     buildDOM: function () {
 
         var container = $(this.id);
+        this.clear_container();
 
         // Build DOM element
         this.containers.price = new Element('div', {id: 'priceGraph', style: 'width: 100%; height: 240px;'});
@@ -621,7 +633,7 @@ var HumbleFinance = {
         var ymax = bounds.ymax;
 
         var p = Flotr.draw(
-            $('priceGraph'),
+            $$('#' + this.id + ' #priceGraph')[0],
             [data],
             {
                 lines: {show: true, fill: true, fillOpacity: .1, lineWidth: 1},
@@ -652,7 +664,7 @@ var HumbleFinance = {
         var ymax = bounds.ymax;
 
         var v = Flotr.draw(
-            $('volumeGraph'),
+            $$('#' + this.id + ' #volumeGraph')[0],
             [data],
             {
                 bars: {show: true, 'barWidth': .5, 'fill': true, 'lineWidth': 2, 'fillOpacity': 1},
@@ -684,7 +696,7 @@ var HumbleFinance = {
         var noticks = xmax > 7 ? 7 : xmax;
 
         var p = Flotr.draw(
-            $('summaryGraph'),
+            $$('#' + this.id + ' #summaryGraph')[0],
             [data],
             {
                 lines: {show: true, fill: true, fillOpacity: .1, lineWidth: 1},
