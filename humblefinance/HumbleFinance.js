@@ -631,15 +631,30 @@ var HumbleFinance = {
             xmax = bounds.xmax,
             ymin = bounds.ymin,
             ymax = bounds.ymax,
-            p;
+            p, xAxis, yAxis;
+
+        xAxis = {
+            min        : xmin,
+            max        : xmax, 
+            showLabels : false
+        };
+
+        yAxis = {
+            min             : ymin,
+            max             : ymax, 
+            tickFormatter   : this.yTickFormatter, 
+            noTicks         : 3, 
+            autoscaleMargin : .5, 
+            tickDecimals    : 0
+        };
 
         p = Flotr.draw(
             $$('#' + this.id + ' #priceGraph')[0],
             [data],
             {
                 lines: {show: true, fill: true, fillOpacity: .1, lineWidth: 1},
-                yaxis: {min: ymin, max: ymax, tickFormatter: this.yTickFormatter, noTicks: 3, autoscaleMargin: .5,  tickDecimals: 0},
-                xaxis: {min: xmin, max: xmax, showLabels: false},
+                xaxis: xAxis,
+                yaxis: yAxis,
                 grid: {outlineWidth: 0, labelMargin: 0},
                 mouse: {track: true, sensibility: 1, trackDecimals: 4, trackFormatter: this.trackFormatter, position: 'ne'},
                 shadowSize: false,
@@ -663,15 +678,30 @@ var HumbleFinance = {
             xmax = bounds.xmax,
             ymin = bounds.ymin,
             ymax = bounds.ymax,
-            v;
+            v, xAxis, yAxis;
+
+        xAxis = {
+            min         : xmin,
+            max         : xmax,
+            showLabels  : false,
+            labelsAngle : 60
+        };
+
+        yAxis = {
+            min             : ymin, 
+            max             : ymax, 
+            autoscaleMargin : .5, 
+            showLabels      : false, 
+            tickDecimals    : 0
+        };
 
         v = Flotr.draw(
             $$('#' + this.id + ' #volumeGraph')[0],
             [data],
             {
                 bars: {show: true, 'barWidth': .5, 'fill': true, 'lineWidth': 2, 'fillOpacity': 1},
-                yaxis: {min: ymin, max: ymax, autoscaleMargin: .5, showLabels: false, tickDecimals: 0},
-                xaxis: {min: xmin, max: xmax, showLabels: false, labelsAngle: 60},
+                xaxis: xAxis,
+                yaxis: yAxis,
                 grid: {verticalLines: false, horizontalLines: false, outlineWidth: 0, labelMargin: 0},
                 mouse: {track: true, sensibility: .3, position: 'ne', trackDecimals: 0},
                 shadowSize: false,
@@ -696,17 +726,31 @@ var HumbleFinance = {
             ymin = bounds.ymin,
             ymax = bounds.ymax,
             noticks = xmax > 7 ? 7 : xmax,
-            p;
+            p, xAxis, yAxis;
+
+        xAxis = {
+            min: xmin, 
+            max: xmax, 
+            noTicks: noticks,
+            tickFormatter: this.xTickFormatter, 
+            labelsAngle: 60
+        };
+
+        yAxis = {
+            min: ymin, 
+            max: ymax, 
+            autoscaleMargin: .5,
+            showLabels: false, 
+            tickDecimals: 1
+        };
 
         p = Flotr.draw(
             $$('#' + this.id + ' #summaryGraph')[0],
             [data],
             {
                 lines: {show: true, fill: true, fillOpacity: .1, lineWidth: 1},
-                yaxis: {min: ymin, max: ymax, autoscaleMargin: .5,
-                        showLabels: false, tickDecimals: 1},
-                xaxis: {min: xmin, max: xmax, noTicks: noticks,
-                        tickFormatter: this.xTickFormatter, labelsAngle: 60},
+                xaxis: xAxis,
+                yaxis: yAxis,
                 grid: {verticalLines: false, horizontalLines: false,
                        labelMargin: 0, outlineWidth: 0},
                 selection: {mode: 'x'},
