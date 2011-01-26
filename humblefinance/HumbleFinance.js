@@ -658,7 +658,7 @@ var HumbleFinance = {
                 xaxis: xAxis,
                 yaxis: yAxis,
                 grid: {outlineWidth: 0, labelMargin: 0},
-                mouse: {track: true, sensibility: 1, trackDecimals: 4, trackFormatter: this.trackFormatter, position: 'ne'},
+                mouse: {track: true, trackY: false, sensibility: 1, trackDecimals: 4, trackFormatter: this.trackFormatter, position: 'ne'},
                 shadowSize: false,
                 HtmlText: true
             }
@@ -707,7 +707,7 @@ var HumbleFinance = {
                 xaxis: xAxis,
                 yaxis: yAxis,
                 grid: {verticalLines: false, horizontalLines: false, outlineWidth: 0, labelMargin: 0},
-                mouse: {track: true, sensibility: .3, position: 'ne', trackDecimals: 0},
+                mouse: {track: true, trackY: false, sensibility: .3, position: 'ne', trackDecimals: 0},
                 shadowSize: false,
                 HtmlText: true
             }
