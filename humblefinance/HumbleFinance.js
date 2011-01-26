@@ -636,12 +636,14 @@ var HumbleFinance = {
         xAxis = {
             min        : xmin,
             max        : xmax, 
+            margin     : false,
             showLabels : false
         };
 
         yAxis = {
             min             : ymin,
             max             : ymax, 
+            margin          : false,
             tickFormatter   : this.yTickFormatter, 
             noTicks         : 3, 
             autoscaleMargin : .5, 
@@ -683,6 +685,7 @@ var HumbleFinance = {
         xAxis = {
             min         : xmin,
             max         : xmax,
+            margin      : false,
             showLabels  : false,
             labelsAngle : 60
         };
@@ -690,6 +693,7 @@ var HumbleFinance = {
         yAxis = {
             min             : ymin, 
             max             : ymax, 
+            margin          : false,
             autoscaleMargin : .5, 
             showLabels      : false, 
             tickDecimals    : 0
@@ -732,6 +736,7 @@ var HumbleFinance = {
             min: xmin, 
             max: xmax, 
             noTicks: noticks,
+            margin: false,
             tickFormatter: this.xTickFormatter, 
             labelsAngle: 60
         };
@@ -741,6 +746,7 @@ var HumbleFinance = {
             max: ymax, 
             autoscaleMargin: .5,
             showLabels: false, 
+            margin: false,
             tickDecimals: 1
         };
 
