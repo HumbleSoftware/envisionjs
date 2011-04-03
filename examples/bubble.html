@@ -17,9 +17,44 @@
     <script type="text/javascript">
     document.observe('dom:loaded', function () {
 
-        var test = new Humble.Bubble('humblefinance');
-        test.draw();
+        var data, options, test;
 
+        // Sample data
+        //
+        // Consists of a time-series of flotr-bubble data
+        data = [
+
+            // Classic Flotr Bubble Data:
+            [
+                // Series A, one bubble (x, y, r)
+                [[1,1,1]],
+                // Series B, one bubble (x, y, r)
+                [[7.6,9.8,4]]
+            ],
+            [[[1.5,1,1.1]],[[7.8,9.7,4]]],
+            [[[2,1,1.2]],[[8,9.5,4.2]]],
+            [[[2.5,1.5,1.4]],[[8.2,9,4.2]]],
+            [[[3,2.5,1.8]],[[8,8.7,4.4]]],
+            [[[3.25,3.5,2.1]],[[7.5,8.5,4.4]]],
+            [[[3.5,4,2.2]],[[7,8,4.4]]],
+            [[[3.75,4.25,2.2]],[[6.5,6,4.2]]],
+            [[[4,4.35,2.2]],[[6,5,3.6]]],
+            [[[4.1,4.5,2.1]],[[5.0,3.0,2.8]]],
+            [[[4,4.75,2.1]],[[4,2,2.4]]],
+            [[[3.9,4.85,2]],[[3,2,2.2]]],
+            [[[3.8,4.9,2]],[[2,2,2]]]
+        ];
+
+        // Configuration
+        options = {
+            node : 'humblefinance',
+            data : data,
+            animate : true
+        };
+
+        // Graph
+        test = new Humble.Bubble(options);
+        test.draw();
     });
     </script>
 </head>
