@@ -14,22 +14,29 @@ if (typeof(Humble) == 'undefined') {
 
     var Bubble = function (options) {
 
+        this.options = options;
+
         this.node       = $(options.node);
         this.data       = options.data;
-        this.animate    = options.animate;
+        this.timeout    = null;
     }
 
     Bubble.prototype = {
 
         draw : function () {
+            this._flotrDraw(this.data[0]);
+        },
+
+        animate : function () {
 
             var data = this.data,
                 that = this,
                 i    = 0, // Timeseries iterator
-                j    = 0, // Animation iterator
-                timeout;
+                j    = 0; // Animation iterator
 
-            if (this.animate) {
+            if (this.timeout) clearTimeout(this.timeout);
+
+            if (this.options.animate) {
 
                 var localDraw = function () {
 
@@ -59,8 +66,8 @@ if (typeof(Humble) == 'undefined') {
                     }
 
                     if (i < data.length - 1) {
-                        if (timeout) clearTimeout(timeout);
-                        timeout = setTimeout(localDraw, 10);
+                        if (that.timeout) clearTimeout(that.timeout);
+                        that.timeout = setTimeout(localDraw, 10);
                     }
                 }
 
@@ -72,8 +79,8 @@ if (typeof(Humble) == 'undefined') {
                     i++;
 
                     if (i < data.length) {
-                        if (timeout) clearTimeout(timeout);
-                        timeout = setTimeout(localDraw, 100);
+                        if (that.timeout) clearTimeout(that.timeout);
+                        that.timeout = setTimeout(localDraw, 100);
                     }
                 }
             }
