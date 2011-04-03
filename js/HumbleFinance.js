@@ -707,7 +707,7 @@ var HumbleFinance = {
                 xaxis: xAxis,
                 yaxis: yAxis,
                 grid: {verticalLines: false, horizontalLines: false, outlineWidth: 0, labelMargin: 0},
-                mouse: {track: true, trackY: false, sensibility: .3, position: 'ne', trackDecimals: 0},
+                mouse: {track: true, trackY: false, position: 'ne', trackDecimals: 0},
                 shadowSize: false,
                 HtmlText: true
             }
