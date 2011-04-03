@@ -25,21 +25,76 @@ if (typeof(Humble) == 'undefined') {
 
             var data = this.data,
                 that = this,
-                i    = 0,
+                i    = 0, // Timeseries iterator
+                j    = 0, // Animation iterator
                 timeout;
 
-            var localDraw = function () {
+            if (this.animate) {
 
-                that._flotrDraw(data[i]);
-                i++;
+                var localDraw = function () {
 
-                if (i < data.length) {
-                    if (timeout) clearTimeout(timeout);
-                    timeout = setTimeout(localDraw, 100);
+                    var d = [];
+
+                    // Series iteration
+                    for (var k = 0; k < data[i].length; k++) {
+
+                        var point;
+
+                        point = that._midPoint(
+                            data[i][k][0],
+                            data[i+1][k][0],
+                            j / 15
+                        );
+
+                        d.push([point]);
+                    }
+
+                    that._flotrDraw(d);
+
+                    if (j < 15) {
+                        j++;
+                    } else {
+                        j = 0;
+                        i++;
+                    }
+
+                    if (i < data.length - 1) {
+                        if (timeout) clearTimeout(timeout);
+                        timeout = setTimeout(localDraw, 10);
+                    }
+                }
+
+            } else {
+
+                var localDraw = function () {
+
+                    that._flotrDraw(data[i]);
+                    i++;
+
+                    if (i < data.length) {
+                        if (timeout) clearTimeout(timeout);
+                        timeout = setTimeout(localDraw, 100);
+                    }
                 }
             }
 
             localDraw();
+        },
+
+        _mid : function (a, b, ratio) {
+            if (ratio === null || typeof (ratio) === 'undefined') ratio = .5;
+            return (a + (b - a) * ratio);
+        },
+
+        _midPoint : function (a, b, ratio) {
+
+            var point = [];
+
+            for (var i = 0; i < a.length; i++) {
+                point[i] = this._mid(a[i], b[i], ratio);
+            }
+
+            return point;
         },
 
         _flotrDraw : function (data) {
