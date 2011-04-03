@@ -55,6 +55,10 @@
         // Graph
         test = new Humble.Bubble(options);
         test.draw();
+
+        $('play').observe('click', function (e) {
+            test.animate();
+        });
     });
     </script>
 </head>
@@ -64,7 +68,8 @@
     <div id="links-container"><div id="links"></div></div>
     <div id="content-container"><div id="content">
 <h3>Demo:</h3>
-<div id="humblefinance" style="position: relative; margin: 40px 0px; width: 600px; height : 400px; border: 1px solid #99CCFF;";></div>
+<button id="play">Play</button>
+<div id="humblefinance" style="position: relative; margin: 4px 0px; width: 600px; height : 400px; border: 1px solid #99CCFF;";></div>
     </div></div>
     <div id="footer-container"><div id="footer"></div></div>
 </div>
