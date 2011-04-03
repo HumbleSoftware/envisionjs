@@ -1,0 +1,44 @@
+@@ -3459,29 +3494,32 @@
+           drawTop = false;
+       }
+       
++      // Cache d2p values
++      var xaLeft   = xa.d2p(left),
++          xaRight  = xa.d2p(right),
++          yaTop    = ya.d2p(top), 
++          yaBottom = ya.d2p(bottom);
++
+       /**
+        * Fill the bar.
+        */
+       if(fill){
+-        ctx.beginPath();
+-        ctx.moveTo(xa.d2p(left), ya.d2p(bottom) + offset);
+-        ctx.lineTo(xa.d2p(left), ya.d2p(top) + offset);
+-        ctx.lineTo(xa.d2p(right), ya.d2p(top) + offset);
+-        ctx.lineTo(xa.d2p(right), ya.d2p(bottom) + offset);
+-        ctx.fill();
+-        ctx.closePath();
++        ctx.fillRect(xaLeft, yaTop, xaRight - xaLeft, yaBottom - yaTop);
+       }
+ 
+       /**
+        * Draw bar outline/border.
++       * @todo  Optimize this with rect method ?
++       * @todo  Can we move stroke, beginPath, closePath out of the main loop?
++       *        Not sure if rect screws this up.
+        */
+       if(series.bars.lineWidth != 0 && (drawLeft || drawRight || drawTop)){
+         ctx.beginPath();
+-        ctx.moveTo(xa.d2p(left), ya.d2p(bottom) + offset);
++        ctx.moveTo(xaLeft, yaBottom + offset);
+         
+-        ctx[drawLeft ?'lineTo':'moveTo'](xa.d2p(left), ya.d2p(top) + offset);
+-        ctx[drawTop  ?'lineTo':'moveTo'](xa.d2p(right), ya.d2p(top) + offset);
+-        ctx[drawRight?'lineTo':'moveTo'](xa.d2p(right), ya.d2p(bottom) + offset);
++        ctx[drawLeft ?'lineTo':'moveTo'](xaLeft, yaTop + offset);
++        ctx[drawTop  ?'lineTo':'moveTo'](xaRight, yaTop + offset);
++        ctx[drawRight?'lineTo':'moveTo'](xaRight, yaBottom + offset);
+                  
+         ctx.stroke();
+         ctx.closePath();

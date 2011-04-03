@@ -1,0 +1,182 @@
+--- flotr.prototype.js	2011-01-03 09:49:31.637902007 -0500
++++ flotr.js	2010-12-31 14:08:37.310034001 -0500
+@@ -581,25 +581,43 @@
+     y.scale  = ph / (d2p(y.max, y.options) - d2p(y.min, y.options));
+     y2.scale = ph / (d2p(y2.max, y2.options) - d2p(y2.min, y2.options));
+ 
+-    x.d2p = x2.d2p = function(xval){
+-      var o = this.options;
+-      return (d2p(xval, o) - d2p(this.min, o)) * this.scale;
+-    };
++    if (this.options.scaling === 'logarithmic') {
++        x.d2p = x2.d2p = function(xval){
++          var o = this.options;
++          return (d2p(xval, o) - d2p(this.min, o)) * this.scale;
++        };
+ 
+-    x.p2d = this.axes.x2.p2d = function(xval){
+-      var o = this.options;
+-      return p2d(xval / this.scale + d2p(this.min, o), o);
+-    };
++        x.p2d = this.axes.x2.p2d = function(xval){
++          var o = this.options;
++          return p2d(xval / this.scale + d2p(this.min, o), o);
++        };
+ 
+-    y.d2p = y2.d2p = function(yval){
+-      var o = this.options;
+-      return ph - (d2p(yval, o) - d2p(this.min, o)) * this.scale;
+-    };
++        y.d2p = y2.d2p = function(yval){
++          var o = this.options;
++          return ph - (d2p(yval, o) - d2p(this.min, o)) * this.scale;
++        };
+ 
+-    y.p2d = y2.p2d = function(yval){
+-      var o = this.options;
+-      return p2d((ph - yval) / this.scale + d2p(this.min, o), o);
+-    };
++        y.p2d = y2.p2d = function(yval){
++          var o = this.options;
++          return p2d((ph - yval) / this.scale + d2p(this.min, o), o);
++        };
++    } else {
++        x.d2p = x2.d2p = function(xval){
++          return (xval - this.min) * this.scale;
++        };
++
++        x.p2d = this.axes.x2.p2d = function(xval){
++          return xval / this.scale + this.min;
++        };
++
++        y.d2p = y2.d2p = function(yval){
++          return ph - (yval - this.min) * this.scale;
++        };
++
++        y.p2d = y2.p2d = function(yval){
++          return (ph - yval) / this.scale + this.min;
++        };
++    }
+   },
+   /**
+    * Initializes the canvas and it's overlay canvas element. When the browser is IE, this makes use 
+@@ -1145,10 +1163,23 @@
+                 (y2.options.title ? (y2.titleSize.width + margin) : 0) + maxOutset;
+     
+     p.top = Math.floor(p.top); // In order the outline not to be blured
+-    
+-    this.plotWidth  = this.canvasWidth - p.left - p.right;
+-    this.plotHeight = this.canvasHeight - p.bottom - p.top;
+-  },
++        // HACK
++        if (margin == 0) {
++            p.bottom = 0;
++            p.top = 0;
++            p.left = 0;
++            p.right = 0;
++        }
++        // ENDHACK
++		this.plotWidth  = this.canvasWidth - p.left - p.right;
++		this.plotHeight = this.canvasHeight - p.bottom - p.top;
++	// HACK
++		x.scale  = this.plotWidth / (x.max - x.min);
++		x2.scale = this.plotWidth / (x2.max - x2.min);
++		y.scale  = this.plotHeight / (y.max - y.min);
++		y2.scale = this.plotHeight / (y2.max - y2.min);
++	// ENDHACK
++	},
+   /**
+    * Draws grid, labels, series and outline.
+    */
+@@ -2568,8 +2599,10 @@
+             
+             // we use a different set of criteria to determin if there has been a hit
+             // depending on what type of graph we have
+-            if(((!s.bars.show) && xdiff < xsens && ydiff < ysens) || 
+-                (s.bars.show && xdiff < s.bars.barWidth/2 && ((y > 0 && my > 0 && my < y) || (y < 0 && my < 0 && my > y)))){
++            if(((!s.bars.show) && xdiff < xsens /*&& ydiff < ysens*/) || // Hacked to enable mouseover sensitivity, following mouse in the xaxis
++                (s.bars.show && xdiff < s.bars.barWidth/2 + xsens /*&& ((y > 0 && my > 0 && my < y + ysens) || (y < 0 && my < 0 && my > y - ysens))*/)){  // Hacked for more sensible bar sensitivity
++            //if(((!s.bars.show) && xdiff < xsens && ydiff < ysens) || 
++            //    (s.bars.show && xdiff < s.bars.barWidth/2 && ((y > 0 && my > 0 && my < y) || (y < 0 && my < 0 && my > y)))){
+               var distance = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+               if(distance < n.dist){
+                 n.dist = distance;
+@@ -3148,9 +3181,9 @@
+       // To allow empty values
+       if (data[i][1] === null || data[i+1][1] === null) continue;
+             
+-            // Zero is infinity for log scales
+-            if (xa.options.scaling === 'logarithmic' && (data[i][0] <= 0 || data[i+1][0] <= 0)) continue;
+-            if (ya.options.scaling == 'logarithmic' && (data[i][1] <= 0 || data[i+1][1] <= 0)) continue;
++      // Zero is infinity for log scales
++      if (xa.options.scaling === 'logarithmic' && (data[i][0] <= 0 || data[i+1][0] <= 0)) continue;
++      if (ya.options.scaling == 'logarithmic' && (data[i][1] <= 0 || data[i+1][1] <= 0)) continue;
+       
+       var x1 = xa.d2p(data[i][0]),   y1 = ya.d2p(data[i][1]),
+           x2 = xa.d2p(data[i+1][0]), y2 = ya.d2p(data[i+1][1]);
+@@ -3391,9 +3424,11 @@
+     ctx.lineWidth = lw;
+     ctx.strokeStyle = series.color;
+     
+-    ctx.save();
+-    this.bars.plotShadows(series, bw, 0, series.bars.fill);
+-    ctx.restore();
++    if (this.options.shadowSize) {
++      ctx.save();
++      this.bars.plotShadows(series, bw, 0, series.bars.fill);
++      ctx.restore();
++    }
+     
+     if(series.bars.fill){
+       var color = series.bars.fillColor || series.color;
+@@ -3459,29 +3494,32 @@
+           drawTop = false;
+       }
+       
++      // Cache d2p values
++      var xaLeft   = xa.d2p(left),
++          xaRight  = xa.d2p(right),
++          yaTop    = ya.d2p(top), 
++          yaBottom = ya.d2p(bottom);
++
+       /**
+        * Fill the bar.
+        */
+       if(fill){
+-        ctx.beginPath();
+-        ctx.moveTo(xa.d2p(left), ya.d2p(bottom) + offset);
+-        ctx.lineTo(xa.d2p(left), ya.d2p(top) + offset);
+-        ctx.lineTo(xa.d2p(right), ya.d2p(top) + offset);
+-        ctx.lineTo(xa.d2p(right), ya.d2p(bottom) + offset);
+-        ctx.fill();
+-        ctx.closePath();
++        ctx.fillRect(xaLeft, yaTop, xaRight - xaLeft, yaBottom - yaTop);
+       }
+ 
+       /**
+        * Draw bar outline/border.
++       * @todo  Optimize this with rect method ?
++       * @todo  Can we move stroke, beginPath, closePath out of the main loop?
++       *        Not sure if rect screws this up.
+        */
+       if(series.bars.lineWidth != 0 && (drawLeft || drawRight || drawTop)){
+         ctx.beginPath();
+-        ctx.moveTo(xa.d2p(left), ya.d2p(bottom) + offset);
++        ctx.moveTo(xaLeft, yaBottom + offset);
+         
+-        ctx[drawLeft ?'lineTo':'moveTo'](xa.d2p(left), ya.d2p(top) + offset);
+-        ctx[drawTop  ?'lineTo':'moveTo'](xa.d2p(right), ya.d2p(top) + offset);
+-        ctx[drawRight?'lineTo':'moveTo'](xa.d2p(right), ya.d2p(bottom) + offset);
++        ctx[drawLeft ?'lineTo':'moveTo'](xaLeft, yaTop + offset);
++        ctx[drawTop  ?'lineTo':'moveTo'](xaRight, yaTop + offset);
++        ctx[drawRight?'lineTo':'moveTo'](xaRight, yaBottom + offset);
+                  
+         ctx.stroke();
+         ctx.closePath();
+@@ -4767,4 +4805,4 @@
+       axis.tickSize = Flotr.getTickSize(axis.options.noTicks, newmin, newmax, axis.options.tickDecimals);
+     }
+   }
+-});
+\ No newline at end of file
++});
