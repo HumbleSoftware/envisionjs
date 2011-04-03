@@ -12,7 +12,7 @@ Event.observe(document, 'dom:loaded', function() {
     
     HumbleFinance.yTickFormatter = function (n) {
         
-        if (n == this.axes.y.max) {
+        if (n == this.max) {
             return false;
         }
         
