@@ -80,7 +80,7 @@ if (typeof(Humble) == 'undefined') {
 
                     if (i < data.length) {
                         if (that.timeout) clearTimeout(that.timeout);
-                        that.timeout = setTimeout(localDraw, 100);
+                        that.timeout = setTimeout(localDraw, 50);
                     }
                 }
             }
@@ -110,10 +110,10 @@ if (typeof(Humble) == 'undefined') {
                 this.node,
                 data,
                 {
-                    bubbles : { show : true, baseRadius : 5 },
+                    bubbles : { show : true, baseRadius : .000001 },
                     grid: {outlineWidth: 0, labelMargin: 0},
-                    xaxis   : { min : 0, max : 10, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } },
-                    yaxis   : { min : 0, max : 10, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } }
+                    xaxis   : { min : 0, max : 25000, scaling : 'linear', ticks : null, noTicks : 10, tickFormatter : function () { return ''; } },
+                    yaxis   : { min : 0, max : 80, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } }
                 }
             );
         }
