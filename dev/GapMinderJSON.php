@@ -98,7 +98,7 @@ function getJSON() {
 
             $point = array();
             foreach ($pointMap as $indicator => $field) {
-                $point[] = (int) $this->data[$indicator][$j][$i];
+                $point[] = $this->getPoint($indicator, $j, $i);
             }
 
             $yearData[] = array($point);
@@ -108,6 +108,25 @@ function getJSON() {
     }
 
     return json_encode($jsonData);
+}
+
+function getPoint($indicator, $countryIndex, $yearIndex) {
+
+    $value = (int) $this->data[$indicator][$countryIndex][$yearIndex];
+
+    if ($indicator == 'population') {
+//        echo "$value\t";
+        $value = pow(log($value, 10), 2);
+//        echo $value."\n";
+    }
+
+    if ($indicator == 'gdp') {
+        if ($value !== 0) {
+            $value = log($value);
+        }
+    }
+
+    return $value;
 }
 
 function doLine ($line) {
@@ -142,15 +161,4 @@ $gap = new GapMinderJSON();
 echo 'var bubble_data = ';
 echo $gap->getJSON();
 echo ';';
-
-/**
-print_r($gap->incomplete);
-/*
-print_r($gap->data);
-/*
-print_r($countries);
-/*
-print_r($data);
-/*
-*/
 ?>
