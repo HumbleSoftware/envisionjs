@@ -110,10 +110,11 @@ if (typeof(Humble) == 'undefined') {
                 this.node,
                 data,
                 {
-                    bubbles : { show : true, baseRadius : .000001 },
+                    shadowSize : false,
+                    bubbles : { show : true, baseRadius : .2, lineWidth : 1, fillOpacity : .7 },
                     grid: {outlineWidth: 0, labelMargin: 0},
-                    xaxis   : { min : 0, max : 25000, scaling : 'linear', ticks : null, noTicks : 10, tickFormatter : function () { return ''; } },
-                    yaxis   : { min : 0, max : 80, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } }
+                    xaxis   : { min : 5, max : 11, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } },
+                    yaxis   : { min : 20, max : 80, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } }
                 }
             );
         }
