@@ -25,6 +25,10 @@ if (typeof(Humble) == 'undefined') {
 
         draw : function () {
             this._flotrDraw(this.data[0]);
+            /*
+            Event.observe(this.node, 'flotr:hit', function (e) {
+            }.bind(this));
+            */
         },
 
         animate : function () {
@@ -111,8 +115,9 @@ if (typeof(Humble) == 'undefined') {
                 data,
                 {
                     shadowSize : false,
+                    mouse   : { track: true, position: 'ne', trackDecimals: 0},
                     bubbles : { show : true, baseRadius : .2, lineWidth : 1, fillOpacity : .7 },
-                    grid: {outlineWidth: 0, labelMargin: 0},
+                    grid    : { outlineWidth: 0, labelMargin: 0},
                     xaxis   : { min : 5, max : 11, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } },
                     yaxis   : { min : 20, max : 80, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } }
                 }
