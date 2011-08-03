@@ -71,9 +71,36 @@ Child.prototype = {
     flotr = o.flotr;
     o.data = data;
 
+    data = this._processData();
+
     if (!flotr) throw 'No graph submitted.'
 
     this.flotr = Flotr.draw(container, [data], flotr);
+  },
+
+  _processData : function () {
+
+    var o = this.options.flotr,
+      fData = [],
+      data = this.getData(),
+      length = data.length,
+      x1 = o.xaxis.x1,
+      x2 = o.xaxis.x2;
+
+    // Bound Data
+    if (x1 && x2) {
+      for (i = 0; i < length; i++) {
+        if (data[i][0] >= x1) break;
+      }
+      for (i--; i < length; i++) {
+        if (data[i][0] > x2) break;
+        fData.push(data[i]);
+      }
+    } else {
+      fData = data;
+    }
+
+    return fData;
   },
 
   _flotrDefaultOptions : function (options) {
