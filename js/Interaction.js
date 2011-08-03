@@ -41,9 +41,7 @@ Interaction.prototype = {
     var data = leader.getData(),
       x1 = selection.x1,
       x2 = selection.x2,
-      length = data.length,
-      newData = [],
-      o, i;
+      o;
 
     o = {
       xaxis : {
@@ -52,16 +50,8 @@ Interaction.prototype = {
       }
     };
 
-    for (i = 0; i < length; i++) {
-      if (data[i][0] >= x1) break;
-    }
-    for (i--; i < length; i++) {
-      if (data[i][0] > x2) break;
-      newData.push(data[i]);
-    }
-
     _.each(this.followers, function (follower) {
-      follower.draw(newData, o);
+      follower.draw(null, o);
     }, this);
   }
 
