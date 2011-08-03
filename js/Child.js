@@ -4,8 +4,8 @@
  * Defines a visualization child.
  *
  * Options:
- *  height
- *  width
+ *  height - Integer
+ *  width - Integer
  *  flotr - A set of flotr options
  *
  */
@@ -53,7 +53,7 @@ Child.prototype = {
 
     this.container = D.node('<div class="humble-vis-child"></div>');
     D.insert(element, this.container);
-    D.setStyles(this.container, {width : o.width, height : o.height});
+    D.setStyles(this.container, {width : o.width+'px', height : o.height+'px'});
 
     this.draw(o.data, o.flotr);
   },
@@ -84,16 +84,16 @@ Child.prototype = {
       fData = [],
       data = this.getData(),
       length = data.length,
-      x1 = o.xaxis.x1,
-      x2 = o.xaxis.x2;
+      min = o.xaxis.min,
+      max = o.xaxis.max;
 
     // Bound Data
-    if (x1 && x2) {
+    if (min && max) {
       for (i = 0; i < length; i++) {
-        if (data[i][0] >= x1) break;
+        if (data[i][0] >= min) break;
       }
       for (i--; i < length; i++) {
-        if (data[i][0] > x2) break;
+        if (data[i][0] > max) break;
         fData.push(data[i]);
       }
     } else {
