@@ -26,6 +26,7 @@ function Interaction(options) {
 
   _.each(this.leaders, function (leader) {
     E.observe(leader.container, 'flotr:select', _.bind(this._zoom, this, leader));
+    E.observe(leader.container, 'flotr:click', _.bind(this._reset, this));
   }, this);
 }
 
@@ -47,6 +48,20 @@ Interaction.prototype = {
       xaxis : {
         min : x1,
         max : x2
+      }
+    };
+
+    _.each(this.followers, function (follower) {
+      follower.draw(null, o);
+    }, this);
+  },
+
+  _reset : function () {
+
+    var o = {
+      xaxis : {
+        min : null,
+        max : null
       }
     };
 
