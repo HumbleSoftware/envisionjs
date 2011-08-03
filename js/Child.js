@@ -60,8 +60,10 @@ Child.prototype = {
         data = data || o.data,
         container = this.container;
 
-    _.extend(o.flotr, (flotr || {})),
-
+    if (flotr) {
+      this._flotrDefaultOptions(flotr);
+      _.extend(o.flotr, flotr);
+    }
     flotr = o.flotr;
     o.data = data;
 
@@ -70,9 +72,19 @@ Child.prototype = {
     this.flotr = Flotr.draw(container, [data], flotr);
   },
 
-  _flotrDefaultOptions : function (flotr) {
-    var o = this.options;
-    _.extend(o.flotr, flotrDefaultOptions);
+  _flotrDefaultOptions : function (options) {
+
+    var o = options || this.options.flotr,
+      defaults = flotrDefaultOptions,
+      i;
+
+    for (i in defaults) {
+      if (_.isUndefined(o[i])) {
+        o[i] = defaults[i];
+      } else {
+        _.defaults(o[i], defaults[i]);
+      }
+    }
   }
 };
 
