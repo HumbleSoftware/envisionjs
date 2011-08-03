@@ -37,16 +37,10 @@ Visualization.prototype = {
   },
 
   add : function (child) {
-    var index = this.children.length;
-    this.children[index] = child;
+    this.children.push(child);
     if (this.rendered) child.render(this.container);
-    return index;
-  },
-
-  get : function (index) {
-    return this.children[index];
+    return child;
   }
-
 };
 
 Humble.Vis.Visualization = Visualization;
