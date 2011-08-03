@@ -100,6 +100,27 @@ Child.prototype = {
       fData = data;
     }
 
+    data = fData;
+    fData = [];
+    length = data.length;
+
+    // Subsample Data
+    // TODO simple subsampling, fine for homogeneous data.  Implement complex strategies.
+    var width = this.options.width,
+      unit;
+
+    if (length > width * 3) {
+      unit = Math.round(length / width);
+      for(i = 0; i < width*3-1; i++) {
+        if (i*unit >= length)
+          break;
+        fData.push(data[i*unit]);
+      }
+      fData.push(data[length-1]);
+    } else {
+      fData = data;
+    }
+
     return fData;
   },
 
