@@ -17,6 +17,9 @@ var D = Flotr.DOM,
       outlineWidth : 0,
       labelMargin : 0
     },
+    lines : {
+      lineWidth : 1
+    },
     xaxis : {
       margin : false,
       showLabels  : false
@@ -24,7 +27,8 @@ var D = Flotr.DOM,
     yaxis : {
       margin : false,
       showLabels  : false
-    }
+    },
+    shadowSize : false
 };
 
 function Child(options) {
