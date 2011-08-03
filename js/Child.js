@@ -1,10 +1,15 @@
-(function () { 
 /**
- * Options:
+ * Child Class
  *
- * flotr - A set of flotr options
+ * Defines a visualization child.
+ *
+ * Options:
+ *  height
+ *  width
+ *  flotr - A set of flotr options
  *
  */
+(function () { 
 
 var D = Flotr.DOM,
   flotrDefaultOptions = {
@@ -25,10 +30,14 @@ var D = Flotr.DOM,
 function Child(options) {
   this.options = options || {};
   this.container = null;
+  this.flotr = null;
   this._flotrDefaultOptions();
 }
 
 Child.prototype = {
+
+  getFlotr : function () { return this.flotr; },
+  getData : function () { return this.options.data; },
 
   render : function (element) {
 
@@ -42,24 +51,28 @@ Child.prototype = {
     D.insert(element, this.container);
     D.setStyles(this.container, {width : o.width, height : o.height});
 
-    this._flotrRender();
+    this.draw(o.data, o.flotr);
   },
 
-  _flotrRender : function () {
+  draw : function (data, flotr) {
 
     var o = this.options,
-        flotr = o.flotr,
+        data = data || o.data,
         container = this.container;
+
+    _.extend(o.flotr, (flotr || {})),
+
+    flotr = o.flotr;
+    o.data = data;
 
     if (!flotr) throw 'No graph submitted.'
 
-    this.flotr = Flotr.draw(container, [o.data], flotr);
+    this.flotr = Flotr.draw(container, [data], flotr);
   },
 
-  _flotrDefaultOptions : function () {
+  _flotrDefaultOptions : function (flotr) {
     var o = this.options;
     _.extend(o.flotr, flotrDefaultOptions);
-    console.log(o.flotr, flotrDefaultOptions);
   }
 };
 
