@@ -69,6 +69,7 @@ Child.prototype = {
   draw : function (data, flotr) {
 
     var o = this.options,
+      flotr = _.clone(flotr),
       data = data || o.data,
       container = this.container;
 
