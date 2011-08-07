@@ -35,7 +35,7 @@ var D = Flotr.DOM,
 
 function Child(options) {
   this.options = options || {};
-  this.container = null;
+  this.container = D.node('<div class="humble-vis-child"></div>');
   this.flotr = null;
   this._flotrDefaultOptions();
 }
@@ -53,7 +53,6 @@ Child.prototype = {
     if (!o.width) throw 'No width.';
     if (!o.height) throw 'No height.';
 
-    this.container = D.node('<div class="humble-vis-child"></div>');
     D.insert(element, this.container);
     D.setStyles(this.container, {width : o.width+'px', height : o.height+'px'});
 
