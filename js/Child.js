@@ -74,8 +74,8 @@ Child.prototype = {
       container = this.container;
 
     if (flotr) {
-      this._flotrDefaultOptions(flotr);
       _.extend(o.flotr, flotr);
+      this._flotrDefaultOptions(flotr);
     }
     flotr = o.flotr;
     o.data = data;
