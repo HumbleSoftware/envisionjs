@@ -62,8 +62,8 @@ Child.prototype = {
   draw : function (data, flotr) {
 
     var o = this.options,
-        data = data || o.data,
-        container = this.container;
+      data = data || o.data,
+      container = this.container;
 
     if (flotr) {
       this._flotrDefaultOptions(flotr);
