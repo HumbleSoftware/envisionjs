@@ -22,10 +22,12 @@ var D = Flotr.DOM,
     },
     xaxis : {
       margin : false,
+      noTicks : 0,
       showLabels  : false
     },
     yaxis : {
       margin : false,
+      noTicks : 0,
       showLabels  : false
     },
     shadowSize : false
