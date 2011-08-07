@@ -93,7 +93,7 @@ Child.prototype = {
       for (i = 0; i < length; i++) {
         if (data[i][0] >= min) break;
       }
-      for (i--; i < length; i++) {
+      for (i; i < length; i++) {
         if (data[i][0] > max) break;
         fData.push(data[i]);
       }
