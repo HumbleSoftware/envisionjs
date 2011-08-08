@@ -16,6 +16,9 @@
   border: 1px solid blue;
   position: absolute;
   cursor: pointer;
+}
+.flotr-handles-handle,
+.flotr-grid-label {
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
