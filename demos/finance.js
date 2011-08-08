@@ -9,7 +9,16 @@ function example () {
       height  : 240,
       width   : 600,
       data    : priceData,
-      flotr   : {}
+      flotr   : {
+        yaxis : { 
+          noTicks : 3,
+          showLabels : true,
+          min : 0,
+          tickFormatter : function (n) {
+            return (n == this.max ? false : '$'+n);
+          }
+        }
+      }
     },
 
     volumeOptions = {
@@ -26,8 +35,18 @@ function example () {
       width   : 600,
       data    : priceData,
       flotr   : {
+        xaxis : {
+          noTicks: 5,
+          showLabels : true,
+          tickFormatter : function (n) {
+            return (parseInt(n) === 0 ? false : jsonData[n].date.split(' ')[2]);
+          }
+        },
         handles   : { show : true },
-        selection : { mode : 'x'}
+        selection : { mode : 'x'},
+        grid : {
+          verticalLines : false
+        }
       }
     },
 
