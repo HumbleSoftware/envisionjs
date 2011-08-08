@@ -101,9 +101,10 @@ Child.prototype = {
       for (i = 0; i < length; i++) {
         if (data[i][0] >= min) break;
       }
+      if (i > 0) i--;
       for (i; i < length; i++) {
-        if (data[i][0] > max) break;
         fData.push(data[i]);
+        if (data[i][0] > max) break;
       }
     } else {
       fData = data;
