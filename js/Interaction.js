@@ -3,73 +3,81 @@
  *
  * Defines an interaction between visualization children.
  *
+ * An interaction has leaders, followers, and actions.  Leaders fire events which
+ * are reacted to by followers as defined by actions.
+ *
  * Options:
  *  leader - Child or children to lead the interaction
  *  event - Event to interact with
  *
- *
- *
  */
 (function () {
 
-
 var E = Flotr.EventAdapter;
 
-
 function Interaction(options) {
-  this.options = options;
+  this.options = options = options || {};
+  this.actions = [];
   this.followers = [];
+  this.leaders = [];
 
-  if (!options.leader) throw 'No leader.';
+  //this._initOptions();
+  //if (!options.leader) throw 'No leader.';
 
-  this.leaders = (_.isArray(options.leader) ? options.leader : [options.leader]);
+  if (options.leader) {
+    this.lead(options.leader);
+  }
 
-  _.each(this.leaders, function (leader) {
-    E.observe(leader.container, 'flotr:select', _.bind(this._zoom, this, leader));
-    E.observe(leader.container, 'flotr:click', _.bind(this._reset, this));
-  }, this);
+  //this.leaders = (_.isArray(options.leader) ? options.leader : [options.leader]);
 }
 
-
 Interaction.prototype = {
+
+  getLeaders : function () {
+    return this.leaders; 
+  },
+
+  getFollowers : function () {
+    return this.followers; 
+  },
+
+  getActions : function () {
+    return this.actions;
+  },
+
+  lead : function (child) {
+
+    this.leaders.push(child);
+
+    _.each(this.actions, function (action) {
+      this._bindLeader(child, action);
+    }, this);
+  },
 
   follow : function (child) {
     this.followers.push(child);
   },
 
-  _zoom : function (leader, selection) {
-
-    var data = leader.getData(),
-      x1 = selection.x1,
-      x2 = selection.x2,
-      o;
-
-    o = {
-      xaxis : {
-        min : x1,
-        max : x2
-      }
-    };
-
-    _.each(this.followers, function (follower) {
-      follower.draw(null, o);
+  group : function (children) {
+    if (!_.isArray(children)) children = [children];
+    _.each(children, function (child) {
+      this.lead(child);
+      this.follow(child);
     }, this);
   },
 
-  _reset : function () {
+  add : function (action) {
+    this.actions.push(action);
+    _.each(this.leaders, function (leader) {
+      this._bindLeader(leader, action);
+    }, this);
+  },
 
-    var o = {
-      xaxis : {
-        min : null,
-        max : null
-      }
-    };
-
-    _.each(this.followers, function (follower) {
-      follower.draw(null, o);
+  _bindLeader : function (leader, action) {
+    _.each(action.events, function (method, name) {
+      E.observe(leader.container, name, _.bind(action[method], this, leader));
     }, this);
   }
-
 };
 
 Humble.Vis.Interaction = Interaction;
