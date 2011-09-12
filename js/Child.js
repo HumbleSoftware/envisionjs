@@ -12,6 +12,7 @@
 (function () { 
 
 var D = Flotr.DOM,
+  className = 'humble-vis-child',
   flotrDefaultOptions = {
     grid : {
       outlineWidth : 0,
@@ -42,7 +43,9 @@ var D = Flotr.DOM,
 
 function Child(options) {
   this.options = options || {};
-  this.container = D.node('<div class="humble-vis-child"></div>');
+  this.container = D.node('<div class="'+className+
+    (options.name ? ' ' + className + '-' + options.name : '') +
+    '"></div>');
   this.flotr = null;
   this._flotrDefaultOptions();
 }
