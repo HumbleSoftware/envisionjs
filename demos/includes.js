@@ -15,24 +15,35 @@ yepnope([
 
   // Flotr
   '../flotr2/js/Flotr.js',
-  '../flotr2/js/Flotr.defaultOptions.js',
-  '../flotr2/js/Flotr.Color.js',
-  '../flotr2/js/Flotr.Date.js',
-  '../flotr2/js/Flotr.DOM.js',
-  '../flotr2/js/Flotr.EventAdapter.js',
-  '../flotr2/js/Flotr.Graph.js',
+  '../flotr2/js/DefaultOptions.js',
+  '../flotr2/js/Color.js',
+  '../flotr2/js/Date.js',
+  '../flotr2/js/DOM.js',
+  '../flotr2/js/EventAdapter.js',
+  '../flotr2/js/Graph.js',
+  '../flotr2/js/Axis.js',
+  '../flotr2/js/Series.js',
+  '../flotr2/js/Text.js',
   '../flotr2/js/types/lines.js',
   '../flotr2/js/types/bars.js',
   '../flotr2/js/types/points.js',
   '../flotr2/js/plugins/selection.js',
   '../flotr2/js/plugins/legend.js',
   '../flotr2/js/plugins/handles.js',
+  '../flotr2/js/plugins/hit.js',
+  '../flotr2/js/plugins/crosshair.js',
+  '../flotr2/js/plugins/labels.js',
+  '../flotr2/js/plugins/legend.js',
+  '../flotr2/js/plugins/titles.js',
+  '../flotr2/js/types/gantt.js',
 
   // Visualization
   '../js/Vis.js',
   '../js/Visualization.js',
   '../js/Child.js',
   '../js/Interaction.js',
+  '../js/Action.Selection.js',
+  '../js/Action.Hit.js',
 
   { complete : example }
 ]);
