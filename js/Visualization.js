@@ -45,7 +45,7 @@ Visualization.prototype = {
     var
       children  = this.children,
       index     = this.indexOf(child);
-    if (index) {
+    if (index !== -1) {
       children.splice(index, 1);
       bonzo(child.node).remove();
     }
