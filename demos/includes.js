@@ -12,6 +12,7 @@ yepnope([
   },
   '../flotr2/lib/canvas2image.js',
   '../flotr2/lib/canvastext.js',
+  '../lib/bonzo/bonzo.min.js',
 
   // Flotr
   '../flotr2/js/Flotr.js',
