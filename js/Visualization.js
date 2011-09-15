@@ -48,6 +48,20 @@ Visualization.prototype = {
     if (index !== -1) {
       children.splice(index, 1);
       bonzo(child.node).remove();
+      return true;
+    }
+  },
+
+  setPosition : function (child, newIndex) {
+    var
+      children  = this.children;
+    if (newIndex >= 0 && newIndex < children.length && this.remove(child)) {
+      this.children.splice(newIndex, 0, [child]);
+      if (newIndex === 0)
+        bonzo(this.container).prepend(child.node);
+      else
+        bonzo(child.node).insertAfter(children[newIndex-1].node);
+      return true;
     }
   },
 
