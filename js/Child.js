@@ -13,6 +13,7 @@
 
 var D = Flotr.DOM,
   className = 'humble-vis-child',
+  CONTAINER = 'container',
   flotrDefaultOptions = {
     grid : {
       outlineWidth : 0,
@@ -43,9 +44,13 @@ var D = Flotr.DOM,
 
 function Child(options) {
   this.options = options || {};
-  this.container = D.node('<div class="'+className+
-    (options.name ? ' ' + className + '-' + options.name : '') +
-    '"></div>');
+  this.container = D.node('<div class="' + className + '-' + CONTAINER + '"></div>');
+  this.node = D.node('' +
+    '<div class="' + className + (options.name ? ' ' + className + '-' + options.name : '') +'">' +
+    '</div>'
+  );
+  D.insert(this.node, this.container);
+
   this.flotr = null;
   this._flotrDefaultOptions();
 }
@@ -63,7 +68,7 @@ Child.prototype = {
     if (!o.width) throw 'No width.';
     if (!o.height) throw 'No height.';
 
-    D.insert(element, this.container);
+    D.insert(element, this.node);
     D.setStyles(this.container, {width : o.width+'px', height : o.height+'px'});
 
     this.draw(o.data, o.flotr);
