@@ -40,7 +40,18 @@ Visualization.prototype = {
     this.children.push(child);
     if (this.rendered) child.render(this.container);
     return child;
+  },
+
+  remove : function (child) {
+    var
+      children = this.children,
+      index = _.indexOf(children, child);
+    if (index) {
+      children.splice(index, 1);
+      bonzo(child.node).remove();
+    }
   }
+
 };
 
 Humble.Vis.Visualization = Visualization;
