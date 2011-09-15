@@ -43,12 +43,16 @@ Visualization.prototype = {
 
   remove : function (child) {
     var
-      children = this.children,
-      index = _.indexOf(children, child);
+      children  = this.children,
+      index     = this.indexOf(child);
     if (index) {
       children.splice(index, 1);
       bonzo(child.node).remove();
     }
+  },
+
+  indexOf : function (child) {
+    return _.indexOf(children, child);
   }
 
 };
