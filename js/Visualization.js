@@ -6,7 +6,8 @@
  *
  */
 
-var D = Flotr.DOM;
+var
+  TEMPLATE = '<div class="humble-vis-visualization"></div>';
 
 function Visualization (options) {
   this.options = options || {};
@@ -21,13 +22,11 @@ Visualization.prototype = {
 
     var o = this.options;
 
-    if (!o.element) o.element = element;
-    element = o.element;
+    element = element || o.element;
+    if (!element) throw 'No element to render within.';
 
-    if (!element) throw 'No element to render within.'
-
-    this.container = D.node('<div class="humble-vis-visualization"></div>');
-    D.insert(element, this.container);
+    this.container = bonzo.create(TEMPLATE);
+    bonzo(element).append(this.container);
 
     _.each(this.children, function (child) {
       child.render(this.container);
