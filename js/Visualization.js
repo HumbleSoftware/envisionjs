@@ -52,7 +52,7 @@ Visualization.prototype = {
   },
 
   indexOf : function (child) {
-    return _.indexOf(children, child);
+    return _.indexOf(this.children, child);
   }
 
 };
