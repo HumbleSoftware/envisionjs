@@ -99,6 +99,10 @@ Child.prototype = {
     this.flotr = Flotr.draw(container, [data], flotr);
   },
 
+  getNode : function () {
+    return this.node;
+  },
+
   _processData : function () {
 
     var o = this.options.flotr,
