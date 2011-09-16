@@ -83,6 +83,14 @@ Visualization.prototype = {
     if (index < children.length) return children[index];
   },
 
+  isFirst : function (child) {
+    return (this.indexOf(child) === 0 ? true : false);
+  },
+
+  isLast : function (child) {
+    return (this.indexOf(child) === this.children.length - 1 ? true : false);
+  },
+
   _updateClasses : function () {
 
     var
