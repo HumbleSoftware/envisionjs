@@ -64,7 +64,7 @@ Visualization.prototype = {
     var
       children  = this.children;
     if (newIndex >= 0 && newIndex < children.length && this.remove(child)) {
-      this.children.splice(newIndex, 0, [child]);
+      this.children.splice(newIndex, 0, child);
       if (newIndex === 0)
         bonzo(this.container).prepend(child.node);
       else
