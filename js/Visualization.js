@@ -7,7 +7,10 @@
  */
 
 var
-  TEMPLATE = '<div class="humble-vis-visualization"></div>';
+  CN_FIRST  = 'humble-vis-first',
+  CN_LAST   = 'humble-vis-last',
+
+  TEMPLATE  = '<div class="humble-vis-visualization"></div>';
 
 function Visualization (options) {
   this.options = options || {};
@@ -31,13 +34,17 @@ Visualization.prototype = {
     _.each(this.children, function (child) {
       child.render(this.container);
     }, this);
+    this._updateClasses();
 
     this.rendered = true;
   },
 
   add : function (child) {
     this.children.push(child);
-    if (this.rendered) child.render(this.container);
+    if (this.rendered) {
+      child.render(this.container);
+      this._updateClasses();
+    }
     return child;
   },
 
@@ -48,6 +55,7 @@ Visualization.prototype = {
     if (index !== -1) {
       children.splice(index, 1);
       bonzo(child.node).remove();
+      this._updateClasses();
       return true;
     }
   },
@@ -61,6 +69,7 @@ Visualization.prototype = {
         bonzo(this.container).prepend(child.node);
       else
         bonzo(child.node).insertAfter(children[newIndex-1].node);
+      this._updateClasses();
       return true;
     }
   },
@@ -72,6 +81,29 @@ Visualization.prototype = {
   getChild : function (index) {
     var children = this.children;
     if (index < children.length) return children[index];
+  },
+
+  _updateClasses : function () {
+
+    var
+      children  = this.children,
+      first     = 0,
+      last      = children.length -1,
+      node;
+
+    _.each(children, function (child, index) {
+      node = bonzo(child.node);
+
+      if (index === first)
+        node.addClass(CN_FIRST);
+      else
+        node.removeClass(CN_FIRST);
+
+      if (index === last)
+        node.addClass(CN_LAST);
+      else
+        node.removeClass(CN_LAST);
+    });
   }
 };
 
