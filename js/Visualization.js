@@ -64,11 +64,11 @@ Visualization.prototype = {
     var
       children  = this.children;
     if (newIndex >= 0 && newIndex < children.length && this.remove(child)) {
-      this.children.splice(newIndex, 0, child);
-      if (newIndex === 0)
-        bonzo(this.container).prepend(child.node);
+      if (newIndex === children.length)
+        bonzo(this.container).append(child.node);
       else
-        bonzo(child.node).insertAfter(children[newIndex-1].node);
+        this.container[0].insertBefore(child.node[0], children[newIndex].node[0]);
+      children.splice(newIndex, 0, child);
       this._updateClasses();
       return true;
     }
