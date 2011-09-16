@@ -67,8 +67,12 @@ Visualization.prototype = {
 
   indexOf : function (child) {
     return _.indexOf(this.children, child);
-  }
+  },
 
+  getChild : function (index) {
+    var children = this.children;
+    if (index < children.length) return children[index];
+  }
 };
 
 Humble.Vis.Visualization = Visualization;
