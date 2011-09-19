@@ -92,11 +92,14 @@ Child.prototype = {
     flotr = o.flotr;
     o.data = data;
 
-    data = this._processData();
+    data = this._getDataArray(data);
+    _.each(data, function (d, index) {
+      data[index] = this._processData(d);
+    }, this);
 
     if (!flotr) throw 'No graph submitted.'
 
-    this.flotr = Flotr.draw(container, [data], flotr);
+    this.flotr = Flotr.draw(container, data, flotr);
   },
 
   getNode : function () {
@@ -108,11 +111,10 @@ Child.prototype = {
       data : [data];
   },
 
-  _processData : function () {
+  _processData : function (data) {
 
     var o = this.options.flotr,
       fData = [],
-      data = this.getData(),
       length = data.length,
       min = o.xaxis.min,
       max = o.xaxis.max;
