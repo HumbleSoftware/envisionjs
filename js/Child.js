@@ -94,7 +94,9 @@ Child.prototype = {
     o.data = data;
 
     data = this._getDataArray(data);
-    if (!o.skipPreprocess) {
+    if (o.skipPreprocess) {
+      fData = data;
+    } else {
       _.each(data, function (d, index) {
         fData[index] = this._processData(d);
       }, this);
