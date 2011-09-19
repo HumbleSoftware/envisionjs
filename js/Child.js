@@ -112,8 +112,12 @@ Child.prototype = {
   },
 
   _getDataArray : function (data) {
-    return (data[0] && data[0][0] && _.isArray(data[0][0])) ?
-      data : [data];
+
+    if (data[0] && (!_.isArray(data[0]) || (data[0][0] && _.isArray(data[0][0]))))
+      return data;
+    else
+      return [data];
+
   },
 
   _processData : function (data) {
