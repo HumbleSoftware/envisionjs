@@ -83,6 +83,7 @@ Child.prototype = {
     var o = this.options,
       flotr = _.clone(flotr),
       data = data || o.data,
+      fData = [],
       container = this.container;
 
     if (flotr) {
@@ -95,13 +96,13 @@ Child.prototype = {
     data = this._getDataArray(data);
     if (!o.skipPreprocess) {
       _.each(data, function (d, index) {
-        data[index] = this._processData(d);
+        fData[index] = this._processData(d);
       }, this);
     }
 
     if (!flotr) throw 'No graph submitted.'
 
-    this.flotr = Flotr.draw(container, data, flotr);
+    this.flotr = Flotr.draw(container, fData, flotr);
   },
 
   getNode : function () {
