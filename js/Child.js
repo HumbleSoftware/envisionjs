@@ -98,7 +98,12 @@ Child.prototype = {
       fData = data;
     } else {
       _.each(data, function (d, index) {
-        fData[index] = this._processData(d);
+        if (!_.isArray(d)) {
+          fData[index] = _.clone(d);
+          fData[index].data = this._processData(d.data);
+        } else {
+          fData[index] = this._processData(d);
+        }
       }, this);
     }
 
