@@ -93,9 +93,11 @@ Child.prototype = {
     o.data = data;
 
     data = this._getDataArray(data);
-    _.each(data, function (d, index) {
-      data[index] = this._processData(d);
-    }, this);
+    if (!o.skipPreprocess) {
+      _.each(data, function (d, index) {
+        data[index] = this._processData(d);
+      }, this);
+    }
 
     if (!flotr) throw 'No graph submitted.'
 
