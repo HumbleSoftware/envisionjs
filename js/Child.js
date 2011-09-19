@@ -21,7 +21,9 @@ var
   flotrDefaultOptions = {
     grid : {
       outlineWidth : 0,
-      labelMargin : 0
+      labelMargin : 0,
+      horizontalLines : false,
+      verticalLines : false
     },
     bars : {
       show        : false,
@@ -35,12 +37,10 @@ var
     },
     xaxis : {
       margin      : false,
-      noTicks     : 0,
       showLabels  : false
     },
     yaxis : {
       margin      : false,
-      noTicks     : 0,
       showLabels  : false
     },
     shadowSize    : false
