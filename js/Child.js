@@ -103,6 +103,11 @@ Child.prototype = {
     return this.node;
   },
 
+  _getDataArray : function (data) {
+    return (data[0] && data[0][0] && _.isArray(data[0][0])) ?
+      data : [data];
+  },
+
   _processData : function () {
 
     var o = this.options.flotr,
