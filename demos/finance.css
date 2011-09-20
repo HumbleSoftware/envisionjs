@@ -6,7 +6,7 @@
 .humble-vis-child+.humble-vis-child {
   margin-top: 1px;
 }
-.humble-vis-child-volume .flotr-mouse-value {
+.humble-vis-child.volume .flotr-mouse-value {
   display: none;
 }
 #demo {
