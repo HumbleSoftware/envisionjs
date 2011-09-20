@@ -1,6 +1,5 @@
 function example () {
 
-
   // Configuraiton
 
   var container = document.getElementById('demo'),
@@ -94,8 +93,8 @@ function example () {
   hit = new H.Interaction();
 
   vis.add(price);
-  vis.add(summary);
   vis.add(volume);
+  vis.add(summary);
   vis.render(container);
 
   selection.add(H.Action.Selection);
