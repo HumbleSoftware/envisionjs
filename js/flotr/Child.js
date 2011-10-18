@@ -7,7 +7,6 @@
  *  height - Integer
  *  width - Integer
  *  flotr - A set of flotr options
- *
  */
 (function () { 
 
@@ -18,34 +17,7 @@ var
   T_CHILD       = '<div class="' + CN_CHILD + '"></div>',
   T_CONTAINER   = '<div class="' + CN_CHILD + '-container"></div>',
 
-  flotrDefaultOptions = {
-    grid : {
-      outlineWidth : 0,
-      labelMargin : 0,
-      horizontalLines : false,
-      verticalLines : false
-    },
-    bars : {
-      show        : false,
-      barWidth    : .5,
-      fill        : true,
-      lineWidth   : 2,
-      fillOpacity : 1
-    },
-    lines : {
-      lineWidth   : 1
-    },
-    xaxis : {
-      margin      : false,
-      tickDecimals: 0,
-      showLabels  : false
-    },
-    yaxis : {
-      margin      : false,
-      showLabels  : false
-    },
-    shadowSize    : false
-};
+  DEFAULTS = Humble.Vis.flotr.defaultOptions;
 
 function Child(options) {
 
@@ -175,14 +147,13 @@ Child.prototype = {
   _flotrDefaultOptions : function (options) {
 
     var o = options || this.options.flotr,
-      defaults = flotrDefaultOptions,
       i;
 
-    for (i in defaults) {
+    for (i in DEFAULTS) {
       if (_.isUndefined(o[i])) {
-        o[i] = defaults[i];
+        o[i] = DEFAULTS[i];
       } else {
-        _.defaults(o[i], defaults[i]);
+        _.defaults(o[i], DEFAULTS[i]);
       }
     }
   }
