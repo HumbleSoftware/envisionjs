@@ -81,7 +81,6 @@ Child.prototype = {
           fData[index] = this._processData(d.data);
         } else {
           fData[index] = this._processData(d);
-          console.log(fData[index].length);
         }
       }, this);
     }
@@ -106,7 +105,7 @@ Child.prototype = {
 
     datum
       .bound(min, max)
-      .subsample(resolution);
+      .subsampleMinMax(resolution);
 
     return datum.data;
   },
