@@ -37,6 +37,7 @@ var
     },
     xaxis : {
       margin      : false,
+      tickDecimals: 0,
       showLabels  : false
     },
     yaxis : {
