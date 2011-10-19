@@ -1,3 +1,19 @@
+/* Demo */
+h3 {
+  color: #333;
+  font-family: "Droid Sans",sans-serif;
+  text-align: center;
+  margin: 40px 0px;
+  font-size: 36px;
+  text-shadow: 2px 2px 0 #CCC;
+}
+#demo {
+  margin: 0px auto;
+  width: 600px;
+  border: 1px solid #99CCFF;
+}
+
+/* Vis */
 .humble-vis-child {
   background: #fff;
   border-bottom: 4px solid white;
@@ -6,19 +22,14 @@
 .humble-vis-child+.humble-vis-child {
   margin-top: 1px;
 }
-#demo {
-  width: 600px;
-  /*
-  background: #eee;
-  background: #b3d9ff;
-  */
-}
 
+/* Flotr */
 .flotr-handles-handle {
   background: #eee;
-  border: 1px solid blue;
+  border: 1px solid #333;
   position: absolute;
   cursor: pointer;
+  border-radius: 3px;
 }
 .flotr-handles-handle,
 .flotr-grid-label {
@@ -28,7 +39,6 @@
   -o-user-select: none;
   user-select: none;
 }
-
 .flotr-handles-drag {
   height: 12px;
   width: 6px;
