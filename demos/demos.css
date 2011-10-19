@@ -7,17 +7,26 @@ h3 {
   font-size: 36px;
   text-shadow: 2px 2px 0 #CCC;
 }
+p {
+  width: 600px;
+  margin: 0px auto;
+}
 #demo {
   margin: 0px auto;
   width: 600px;
   border: 1px solid #99CCFF;
+  height: 417px;
+  background: url('ajax-loader.gif') #fff center center no-repeat;
 }
 
 /* Vis */
+.humble-vis-visualization {
+  background: #eee;
+}
 .humble-vis-child {
-  background: #fff;
   border-bottom: 4px solid white;
   border-top: 4px solid white;
+  background: #fff;
 }
 .humble-vis-child+.humble-vis-child {
   margin-top: 1px;

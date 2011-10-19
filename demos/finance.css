@@ -1,4 +1,10 @@
 /* Vis */
+#demo {
+  height: 416px;
+}
+.humble-vis-visualization {
+  background: #99CCFF;
+}
 .humble-vis-child {
   border-top: 8px solid white;
   border-bottom: 0px;
