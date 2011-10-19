@@ -1,19 +1,26 @@
 /* Demo */
-h3 {
-  color: #333;
+body {
   font-family: "Droid Sans",sans-serif;
+}
+body,
+a,
+a:visited {
+  color: #333;
+}
+h3 {
   text-align: center;
   margin: 40px 0px;
   font-size: 36px;
   text-shadow: 2px 2px 0 #CCC;
 }
-p {
-  width: 600px;
-  margin: 0px auto;
+ul {
+  list-style: none;
 }
-#demo {
+div#content {
   margin: 0px auto;
   width: 600px;
+}
+div#demo {
   border: 1px solid #99CCFF;
   height: 417px;
   background: url('ajax-loader.gif') #fff center center no-repeat;
