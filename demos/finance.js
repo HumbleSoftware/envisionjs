@@ -1,11 +1,11 @@
 function example () {
 
   // Configuraiton
-
-  var container = document.getElementById('demo'),
+  var
     H = Humble.Vis,
     E = Flotr.EventAdapter,
-    data = [],
+
+    container = document.getElementById('demo'),
 
     priceOptions = {
       name    : 'price',
@@ -57,7 +57,7 @@ function example () {
 
     summaryOptions = {
       name    : 'summary',
-      height  : 80,
+      height  : 70,
       width   : 600,
       data    : priceData,
       flotr   : {
@@ -69,6 +69,7 @@ function example () {
           noTicks: 5,
           showLabels : true,
           tickFormatter : function (n) {
+            return jsonData[n].date.split(' ')[2];
             return (parseInt(n) === 0 ? false : jsonData[n].date.split(' ')[2]);
           }
         },
