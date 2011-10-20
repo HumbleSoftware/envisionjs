@@ -6,6 +6,7 @@ demo:
 	rm -rf build
 	mkdir build
 	cp flotr2/flotr2.min.js build/
+	cp flotr2/js/plugins/handles.js build/
 	cp vis.min.js build/
 	cp demos/index.html build/
 	cp demos/demos.css build/
