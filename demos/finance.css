@@ -1,53 +1,27 @@
-.humble-vis-child {
-  background: #fff;
-/*  border-bottom: 4px solid white;*/
-  border-top: 8px solid white;
+/* Vis */
+#demo {
+  height: 416px;
 }
-.humble-vis-child+.humble-vis-child {
-  margin-top: 1px;
+.humble-vis-visualization {
+  background: #99CCFF;
+}
+.humble-vis-child {
+  border-top: 8px solid white;
+  border-bottom: 0px;
 }
 .humble-vis-child.volume .flotr-mouse-value {
   display: none;
 }
-#demo {
-  width: 600px;
-  /*
-  background: #eee;
-  background: #b3d9ff;
-  */
+.humble-vis-child.summary .flotr-grid-label {
+  margin-top: 6px;
 }
 
-.flotr-handles-handle {
-  background: #eee;
-  border: 1px solid blue;
-  position: absolute;
-  cursor: pointer;
-}
-.flotr-handles-handle,
-.flotr-grid-label {
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-
-.flotr-handles-drag {
-  height: 12px;
-  width: 6px;
-}
-.flotr-handles-scroll {
-  height: 6px;
-  cursor: move;
-}
-.flotr-handles-left {
-  cursor: w-resize;
-}
-.flotr-handles-right {
-  cursor: e-resize;
-}
+/* Finance */
 .flotr-grid-label-y {
   z-index: 8;
+  text-align: right;
+  width: 50px !important;
+  margin-left: -53px;
 }
 .flotr-mouse-value {
 	font-size: 12px;

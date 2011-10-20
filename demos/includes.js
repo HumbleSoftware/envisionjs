@@ -1,6 +1,6 @@
 yepnope([
   // Libs
-  '../flotr2/lib/bean-min.js',
+  '../flotr2/lib/bean.js',
   '../flotr2/lib/underscore-min.js',
   {
   test : (navigator.appVersion.indexOf("MSIE") != -1  && parseFloat(navigator.appVersion.split("MSIE")[1]) < 9),
@@ -41,10 +41,13 @@ yepnope([
   // Visualization
   '../js/Vis.js',
   '../js/Visualization.js',
-  '../js/Child.js',
   '../js/Interaction.js',
   '../js/Action.Selection.js',
   '../js/Action.Hit.js',
+  '../js/Data.js',
+  '../js/flotr/namespace.js',
+  '../js/flotr/defaultOptions.js',
+  '../js/flotr/Child.js',
 
   { complete : example }
 ]);

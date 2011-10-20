@@ -7,44 +7,19 @@
  *  height - Integer
  *  width - Integer
  *  flotr - A set of flotr options
- *
  */
 (function () { 
 
 var
+
+  V = Humble.Vis,
 
   CN_CHILD = 'humble-vis-child',
 
   T_CHILD       = '<div class="' + CN_CHILD + '"></div>',
   T_CONTAINER   = '<div class="' + CN_CHILD + '-container"></div>',
 
-  flotrDefaultOptions = {
-    grid : {
-      outlineWidth : 0,
-      labelMargin : 0,
-      horizontalLines : false,
-      verticalLines : false
-    },
-    bars : {
-      show        : false,
-      barWidth    : .5,
-      fill        : true,
-      lineWidth   : 2,
-      fillOpacity : 1
-    },
-    lines : {
-      lineWidth   : 1
-    },
-    xaxis : {
-      margin      : false,
-      showLabels  : false
-    },
-    yaxis : {
-      margin      : false,
-      showLabels  : false
-    },
-    shadowSize    : false
-};
+  DEFAULTS = Humble.Vis.flotr.defaultOptions;
 
 function Child(options) {
 
@@ -80,11 +55,12 @@ Child.prototype = {
 
   draw : function (data, flotr) {
 
-    var o = this.options,
-      flotr = _.clone(flotr),
-      data = data || o.data,
-      fData = [],
-      container = this.container;
+    var
+      o           = this.options,
+      flotr       = _.clone(flotr),
+      data        = data || o.data,
+      fData       = [],
+      container   = this.container;
 
     if (flotr) {
       _.extend(o.flotr, flotr);
@@ -92,6 +68,8 @@ Child.prototype = {
     }
     flotr = o.flotr;
     o.data = data;
+    min = flotr.xaxis.min;
+    max = flotr.xaxis.max;
 
     data = this._getDataArray(data);
     if (o.skipPreprocess) {
@@ -100,7 +78,7 @@ Child.prototype = {
       _.each(data, function (d, index) {
         if (!_.isArray(d)) {
           fData[index] = _.clone(d);
-          fData[index].data = this._processData(d.data);
+          fData[index] = this._processData(d.data);
         } else {
           fData[index] = this._processData(d);
         }
@@ -116,72 +94,40 @@ Child.prototype = {
     return this.node;
   },
 
+  _processData : function (data) {
+
+    var
+      resolution  = this.options.width,
+      axis        = this.options.flotr.xaxis,
+      min         = axis.min,
+      max         = axis.max,
+      datum       = new V.Data(data);
+
+    datum
+      .bound(min, max)
+      .subsampleMinMax(resolution);
+
+    return datum.data;
+  },
+
   _getDataArray : function (data) {
 
     if (data[0] && (!_.isArray(data[0]) || (data[0][0] && _.isArray(data[0][0]))))
       return data;
     else
       return [data];
-
-  },
-
-  _processData : function (data) {
-
-    var o = this.options.flotr,
-      fData = [],
-      length = data.length,
-      min = o.xaxis.min,
-      max = o.xaxis.max;
-
-    // Bound Data
-    if (min && max) {
-      for (i = 0; i < length; i++) {
-        if (data[i][0] >= min) break;
-      }
-      if (i > 0) i--;
-      for (i; i < length; i++) {
-        fData.push(data[i]);
-        if (data[i][0] > max) break;
-      }
-    } else {
-      fData = data;
-    }
-
-    data = fData;
-    fData = [];
-    length = data.length;
-
-    // Subsample Data
-    // TODO simple subsampling, fine for homogeneous data.  Implement complex strategies.
-    var width = this.options.width,
-      unit;
-
-    if (length > width * 3) {
-      unit = Math.round(length / width);
-      for(i = 0; i < width*3-1; i++) {
-        if (i*unit >= length)
-          break;
-        fData.push(data[i*unit]);
-      }
-      fData.push(data[length-1]);
-    } else {
-      fData = data;
-    }
-
-    return fData;
   },
 
   _flotrDefaultOptions : function (options) {
 
     var o = options || this.options.flotr,
-      defaults = flotrDefaultOptions,
       i;
 
-    for (i in defaults) {
+    for (i in DEFAULTS) {
       if (_.isUndefined(o[i])) {
-        o[i] = defaults[i];
+        o[i] = DEFAULTS[i];
       } else {
-        _.defaults(o[i], defaults[i]);
+        _.defaults(o[i], DEFAULTS[i]);
       }
     }
   }

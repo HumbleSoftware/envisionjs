@@ -1,24 +1,51 @@
+/* Demo */
+body {
+  font-family: "Droid Sans",sans-serif;
+}
+body,
+a,
+a:visited {
+  color: #333;
+}
+h3 {
+  text-align: center;
+  margin: 40px 0px;
+  font-size: 36px;
+  text-shadow: 2px 2px 0 #CCC;
+}
+ul {
+  list-style: none;
+}
+div#content {
+  margin: 0px auto;
+  width: 600px;
+}
+div#demo {
+  border: 1px solid #99CCFF;
+  height: 417px;
+  background: url('ajax-loader.gif') #fff center center no-repeat;
+}
+
+/* Vis */
+.humble-vis-visualization {
+  background: #eee;
+}
 .humble-vis-child {
-  background: #fff;
   border-bottom: 4px solid white;
   border-top: 4px solid white;
+  background: #fff;
 }
 .humble-vis-child+.humble-vis-child {
   margin-top: 1px;
 }
-#demo {
-  width: 600px;
-  /*
-  background: #eee;
-  background: #b3d9ff;
-  */
-}
 
+/* Flotr */
 .flotr-handles-handle {
   background: #eee;
-  border: 1px solid blue;
+  border: 1px solid #333;
   position: absolute;
   cursor: pointer;
+  border-radius: 3px;
 }
 .flotr-handles-handle,
 .flotr-grid-label {
@@ -28,7 +55,6 @@
   -o-user-select: none;
   user-select: none;
 }
-
 .flotr-handles-drag {
   height: 12px;
   width: 6px;
