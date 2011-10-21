@@ -25,6 +25,14 @@ div#demo {
   height: 417px;
   background: url('ajax-loader.gif') #fff center center no-repeat;
 }
+div.controls {
+    margin: 0px 0px 8px 0px;
+    padding-right: 2px;
+    text-align: right;
+}
+div.controls>span {
+    padding-left: 16px;
+}
 
 /* Vis */
 .humble-vis-visualization {
