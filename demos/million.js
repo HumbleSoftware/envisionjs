@@ -32,7 +32,7 @@ function example () {
   }
 
   if (hash !== '#minmax') {
-    mainOptions.processData = function (o) {
+    mainOptions.processData = summaryOptions.processData = function (o) {
 
       var
         datum = o.datum;
