@@ -9,7 +9,13 @@
 <body>
   <div id="content">
     <h3>Weierstrass Demo:</h3>
-    <p>Data generation: <span id="progress"></span>%</p>
+    <div style="position: absolute;">
+      <span>Data generation: <span id="progress"></span>%</span>
+    </div>
+    <div class="controls">
+        <span><a href="">Basic</a></span>
+        <span><a href="#generator" onclick="window.location.hash = 'generator'; window.location.reload();">Generator</a></span>
+    </div>
     <div id="demo"><div>
   </div>
 </body>
