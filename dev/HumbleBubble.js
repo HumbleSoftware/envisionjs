@@ -115,7 +115,7 @@ if (typeof(Humble) == 'undefined') {
                 data,
                 {
                     shadowSize : false,
-                    mouse   : { track: true, position: 'ne', trackDecimals: 0},
+                    mouse   : { track: true, position: 'ne', trackDecimals: 0, fillOpacity : 0 },
                     bubbles : { show : true, baseRadius : .2, lineWidth : 1, fillOpacity : .7 },
                     grid    : { outlineWidth: 0, labelMargin: 0},
                     xaxis   : { min : 5, max : 11, ticks : null, noTicks : 10, tickFormatter : function () { return ''; } },
