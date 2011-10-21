@@ -13,11 +13,12 @@ function example () {
         d     = [],
         step  = (max - min) / resolution,
         x     = min,
+        it    = (max - min < .05 ? 250 : 50),
         i, j;
 
       for (i = 0; i <= resolution; i++, x += step) {
         y = 0;
-        for (j = 1; j < 100; j++) {
+        for (j = 1; j < it; j++) {
           t = Math.PI * Math.pow(j, a);
           y += Math.sin(t * x) / t; 
         }
