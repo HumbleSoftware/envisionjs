@@ -28,12 +28,16 @@ var Selection = {
 
   reset : function () {
 
-    var o = {
-      xaxis : {
-        min : null,
-        max : null
-      }
-    };
+    var
+      leader = this.leaders[0], // Hack
+      min = leader.flotr.axes.x.min,
+      max = leader.flotr.axes.x.max,
+      o = {
+        xaxis : {
+          min : min,
+          max : max 
+        }
+      };
 
     _.each(this.followers, function (follower) {
       follower.draw(null, o);
