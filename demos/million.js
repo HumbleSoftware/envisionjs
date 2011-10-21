@@ -9,14 +9,14 @@ function example () {
     amplitude = (hash ? .05 : .001),
 
     mainOptions = {
-      height  : 260,
+      height  : 200,
       width   : 600,
       data    : data,
       flotr   : {}
     },
 
     summaryOptions = {
-      height  : 140,
+      height  : 200,
       width   : 600,
       data    : data,
       flotr   : {
