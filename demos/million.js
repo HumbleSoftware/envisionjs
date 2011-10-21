@@ -31,7 +31,7 @@ function example () {
     data.push([i/10000, .2*Math.sin(i/10000) + i/100000 + amplitude * Math.sin(i/50)]);
   }
 
-  if (hash === '#crazy') {
+  if (hash !== '#minmax') {
     mainOptions.processData = function (o) {
 
       var
