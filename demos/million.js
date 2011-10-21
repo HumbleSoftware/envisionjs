@@ -1,9 +1,12 @@
 function example () {
 
-  var container = document.getElementById('demo'),
+  var
+    container = document.getElementById('demo'),
     H = Humble.Vis,
     E = Flotr.EventAdapter,
     data = [],
+    hash = window.location.hash,
+    amplitude = (hash ? .05 : .001),
 
     mainOptions = {
       height  : 260,
@@ -24,15 +27,21 @@ function example () {
 
     vis, main, summary, interaction, i;
 
-  console.time('data generation');
   for (i = 0; i < 1e6; i++) {
-    data.push([i/10000, .2*Math.sin(i/10000) + i/100000 + .05*Math.sin(i/50)]);
-    /*
-    data.push(i/10000);
-    data.push(.2*Math.sin(i/10000) + i/100000 + .05*Math.sin(i/50));
-    */
+    data.push([i/10000, .2*Math.sin(i/10000) + i/100000 + amplitude * Math.sin(i/50)]);
   }
-  console.timeEnd('data generation');
+
+  if (hash === '#crazy') {
+    mainOptions.processData = function (o) {
+
+      var
+        datum = o.datum;
+
+      datum
+        .bound(o.min, o.max)
+        .subsample(o.resolution);
+    }
+  }
 
   vis = new H.Visualization();
   main = new H.Child(mainOptions);
