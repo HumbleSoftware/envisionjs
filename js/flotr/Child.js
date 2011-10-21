@@ -76,7 +76,7 @@ Child.prototype = {
       fData = data;
     } else {
       _.each(data, function (d, index) {
-        if (!_.isArray(d)) {
+        if (!_.isArray(d) && !_.isFunction(d)) {
           fData[index] = _.clone(d);
           fData[index] = this._processData(d.data);
         } else {
@@ -105,7 +105,9 @@ Child.prototype = {
       max         = axis.max,
       datum       = new V.Data(data);
 
-    if (process) {
+    if (_.isFunction(data)) {
+      return data(min, max, resolution);
+    } else if (process) {
       process.apply(this, [{
         datum : datum,
         min : min,
