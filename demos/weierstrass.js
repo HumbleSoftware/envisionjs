@@ -13,8 +13,16 @@ function example () {
         d     = [],
         step  = (max - min) / resolution,
         x     = min,
-        it    = (max - min < .05 ? 250 : 50),
+        it,
         i, j;
+
+      if (max - min < .05) {
+        it = 250;
+      } else if (max - min < .5) {
+        it = 125;
+      } else {
+        it = 50;
+      }
 
       for (i = 0; i <= resolution; i++, x += step) {
         y = 0;
