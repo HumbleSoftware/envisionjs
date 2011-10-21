@@ -97,15 +97,26 @@ Child.prototype = {
   _processData : function (data) {
 
     var
-      resolution  = this.options.width,
-      axis        = this.options.flotr.xaxis,
+      options     = this.options,
+      process     = options.processData,
+      resolution  = options.width,
+      axis        = options.flotr.xaxis,
       min         = axis.min,
       max         = axis.max,
       datum       = new V.Data(data);
 
-    datum
-      .bound(min, max)
-      .subsampleMinMax(resolution);
+    if (process) {
+      process.apply(this, [{
+        datum : datum,
+        min : min,
+        max : max,
+        resolution : resolution
+      }]);
+    } else {
+      datum
+        .bound(min, max)
+        .subsampleMinMax(resolution);
+    }
 
     return datum.data;
   },
