@@ -9,8 +9,6 @@ function example () {
 
     priceOptions = {
       name    : 'price',
-      height  : 240,
-      width   : 600,
       data    : priceData,
       flotr   : {
         lines : {
@@ -41,8 +39,6 @@ function example () {
 
     volumeOptions = {
       name    : 'volume',
-      height  : 80,
-      width   : 600,
       data    : volumeData,
       flotr   : {
         bars : { show : true },
@@ -57,8 +53,6 @@ function example () {
 
     summaryOptions = {
       name    : 'summary',
-      height  : 70,
-      width   : 600,
       data    : priceData,
       flotr   : {
         lines : {
