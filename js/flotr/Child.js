@@ -44,8 +44,6 @@ Child.prototype = {
     var o = this.options;
 
     if (!element) throw 'No element to render within.';
-    if (!o.width) throw 'No width.';
-    if (!o.height) throw 'No height.';
 
     bonzo(element).append(this.node);
     bonzo(this.container).css({width : o.width, height : o.height});
