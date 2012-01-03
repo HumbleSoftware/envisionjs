@@ -45,6 +45,8 @@ yepnope([
   '../js/Action.Selection.js',
   '../js/Action.Hit.js',
   '../js/Data.js',
+  '../js/Templates.js',
+  '../js/templates/Zoom.js',
   '../js/flotr/namespace.js',
   '../js/flotr/defaultOptions.js',
   '../js/flotr/Child.js',

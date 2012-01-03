@@ -46,6 +46,10 @@ div.controls>span {
 .humble-vis-child+.humble-vis-child {
   margin-top: 1px;
 }
+.humble-vis-child-container {
+  width: 600px;
+  height: 200px;
+}
 
 /* Flotr */
 .flotr-handles-handle {
