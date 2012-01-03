@@ -49,49 +49,28 @@ function example () {
       return data;
     }
 
-    var
-      mainOptions     = {
-        height  : 200,
-        width   : 600,
-        data    : weierstrass(),
-        flotr   : {
-          xaxis : {
-            min : -1,
-            max : 1
-          }
-        }
-      },
-      summaryOptions  = {
-        height  : 200,
-        width   : 600,
-        data    : weierstrass(),
+    // Render Zoom template
+    new Humble.Vis.templates.Zoom({
+      container : container,
+      summary : {
+        data : weierstrass(),
         flotr : {
-          handles : {
-            show : true
-          },
-          selection : {
-            mode : 'x'
-          },
           xaxis : {
             min : -1,
             max : 1
           }
         }
       },
-      v, main, summary, interaction;
-
-    // Visualization
-    v = new H.Visualization,
-    main = new H.Child(mainOptions),
-    summary = new H.Child(summaryOptions),
-
-    v.add(main);
-    v.add(summary);
-    v.render(document.getElementById('demo'));
-
-    interaction = new H.Interaction({leader : summary});
-    interaction.add(H.Action.Selection);
-    interaction.follow(main);
+      zoom : {
+        data : weierstrass(),
+        flotr : {
+          xaxis : {
+            min : -1,
+            max : 1
+          }
+        }
+      }
+    });
 
   } else {
 
@@ -133,44 +112,16 @@ function example () {
 
     // womp womp womp
     function letsWomp () {
-
-      var
-        mainOptions = {},
-        summaryOptions = {},
-        v, main, summary, interaction;
-
-      // Config
-      mainOptions.height = 200;
-      mainOptions.width = 600;
-      mainOptions.data  = data;
-      mainOptions.flotr = {};
-
-      summaryOptions.height = 200;
-      summaryOptions.width = 600;
-      summaryOptions.data  = data;
-      summaryOptions.flotr = {
-        handles : {
-          show : true
+      // Render Zoom template
+      new Humble.Vis.templates.Zoom({
+        container : container,
+        summary : {
+          data : data
         },
-        selection : {
-          mode : 'x'
+        zoom : {
+          data : data
         }
-      };
-
-      v = new H.Visualization,
-      main = new H.Child(mainOptions),
-      summary = new H.Child(summaryOptions),
-
-      v.add(main);
-      v.add(summary);
-      v.render(document.getElementById('demo'));
-
-      interaction = new H.Interaction({leader : summary});
-      interaction.add(H.Action.Selection);
-      interaction.follow(main);
-
+      });
     }
   }
-
-
 }
