@@ -19,12 +19,18 @@ function defaultsSummary () {
   };
 }
 
+function getDefaults (options, defaults) {
+  var o = _.defaults(options, defaults);
+  o.flotr = _.defaults(o.flotr, defaults.flotr);
+  return o;
+}
+
 Zoom = function (options) {
 
   var
     vis = new V.Visualization(),
-    zoom = new V.Child(_.extend(defaultsZoom(), options.zoom || {})),
-    summary = new V.Child(_.extend(defaultsSummary(), options.summary || {})),
+    zoom = new V.Child(getDefaults(options.zoom || {}, defaultsZoom())),
+    summary = new V.Child(getDefaults(options.summary || {}, defaultsSummary())),
     interaction = new V.Interaction({leader : summary});
 
   vis.add(zoom);
