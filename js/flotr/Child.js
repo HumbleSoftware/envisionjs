@@ -46,7 +46,18 @@ Child.prototype = {
     if (!element) throw 'No element to render within.';
 
     bonzo(element).append(this.node);
-    bonzo(this.container).css({width : o.width, height : o.height});
+
+    if (o.width) {
+      bonzo(this.container).css({width : o.width});
+    } else {
+      o.width = parseInt(bonzo(this.container).css('width'));
+    }
+
+    if (o.height) {
+      bonzo(this.container).css({height : o.height});
+    } else {
+      o.height = parseInt(bonzo(this.container).css('height'));
+    }
 
     this.draw(o.data, o.flotr);
   },
