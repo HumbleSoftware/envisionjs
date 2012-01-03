@@ -3,48 +3,40 @@ function example () {
   var
     progress = document.getElementById('progress'),
     container = document.getElementById('demo'),
-    hash = window.location.hash,
-    H = Humble.Vis;
+    hash = window.location.hash;
 
   if (hash === '#generator') {
 
     // Weierstrass Function Constructor
-    function weierstrass () {
+    function weierstrass (min, max, resolution) {
 
       var
-        a = 2, // Weierstrass a 
-        i, k, x, y, t;
+        a     = 2, // Weierstrass a 
+        data  = [],
+        step  = (max - min) / resolution,
+        x     = min,
+        y     = 0,
+        iterations, i, j;
 
-      function data (min, max, resolution) {
-
-        var
-          d     = [],
-          step  = (max - min) / resolution,
-          x     = min,
-          it,
-          i, j;
-
-        if (max - min < .05) {
-          it = 250;
-        } else if (max - min < .5) {
-          it = 125;
-        } else {
-          it = 50;
-        }
-
-        for (i = 0; i <= resolution; i++, x += step) {
-          y = 0;
-          for (j = 1; j < it; j++) {
-            t = Math.PI * Math.pow(j, a);
-            y += Math.sin(t * x) / t; 
-          }
-          d.push([x, y]);
-        }
-
-        progress.innerHTML = "100";
-
-        return d;
+      // Dynamic iterations based upon range
+      if (max - min < .05) {
+        iterations = 250;
+      } else if (max - min < .5) {
+        iterations = 125;
+      } else {
+        iterations = 50;
       }
+
+      console.time('weier');
+      for (i = 0; i <= resolution; i++, x += step) {
+        y = 0;
+        for (j = 1; j < iterations; j++) {
+          t = Math.PI * Math.pow(j, a);
+          y += Math.sin(t * x) / t; 
+        }
+        data.push([x, y]);
+      }
+      console.timeEnd('weier');
 
       return data;
     }
@@ -53,7 +45,7 @@ function example () {
     new Humble.Vis.templates.Zoom({
       container : container,
       summary : {
-        data : weierstrass(),
+        data : weierstrass,
         flotr : {
           xaxis : {
             min : -1,
@@ -62,7 +54,7 @@ function example () {
         }
       },
       zoom : {
-        data : weierstrass(),
+        data : weierstrass,
         flotr : {
           xaxis : {
             min : -1,
@@ -71,6 +63,8 @@ function example () {
         }
       }
     });
+
+    progress.innerHTML = "100";
 
   } else {
 
