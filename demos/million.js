@@ -19,6 +19,7 @@ function example () {
   }
 
   if (hash !== '#minmax') {
+    // Fixed-interval subsampling:
     zoom.processData = summary.processData = function (o) {
       o.datum
         .bound(o.min, o.max)
@@ -26,6 +27,7 @@ function example () {
     }
   }
 
+  // Zoom template:
   million = new Humble.Vis.templates.Zoom({
     container : container,
     summary : summary,
