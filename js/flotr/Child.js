@@ -146,10 +146,12 @@ Child.prototype = {
       i;
 
     for (i in DEFAULTS) {
-      if (_.isUndefined(o[i])) {
-        o[i] = DEFAULTS[i];
-      } else {
-        _.defaults(o[i], DEFAULTS[i]);
+      if (DEFAULTS.hasOwnProperty(i)) {
+        if (_.isUndefined(o[i])) {
+          o[i] = DEFAULTS[i];
+        } else {
+          _.defaults(o[i], DEFAULTS[i]);
+        }
       }
     }
   }
