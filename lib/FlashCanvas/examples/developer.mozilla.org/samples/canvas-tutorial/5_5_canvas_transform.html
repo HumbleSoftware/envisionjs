@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas transform example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+
+        var i = 0;
+        var sin = Math.sin(Math.PI/6);
+        var cos = Math.cos(Math.PI/6);
+        ctx.translate(200, 200);
+        var c = 0;
+        for (i; i <= 12; i++) {
+          c = Math.floor(255 / 12 * i);
+          ctx.fillStyle = "rgb(" + c + "," + c + "," + c + ")";
+          ctx.fillRect(0, 0, 100, 10);
+          ctx.transform(cos, sin, -sin, cos, 0, 0);
+        }
+
+        ctx.setTransform(-1, 0, 0, 1, 200, 200);
+        ctx.fillStyle = "rgba(255, 128, 255, 0.5)";
+        ctx.fillRect(0, 50, 100, 100);
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>transform</code> example</h1>
+    <div>
+      <canvas id="canvas" width="300" height="400"></canvas>
+      <pre>
+function draw() {
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+
+  var i = 0;
+  var sin = Math.sin(Math.PI/6);
+  var cos = Math.cos(Math.PI/6);
+  ctx.translate(200, 200);
+  var c = 0;
+  for (i; i <= 12; i++) {
+    c = Math.floor(255 / 12 * i);
+    ctx.fillStyle = "rgb(" + c + "," + c + "," + c + ")";
+    ctx.fillRect(0, 0, 100, 10);
+    ctx.transform(cos, sin, -sin, cos, 0, 0);
+  }
+  
+  ctx.setTransform(-1, 0, 0, 1, 200, 200);
+  ctx.fillStyle = "rgba(255, 128, 255, 0.5)";
+  ctx.fillRect(0, 50, 100, 100);
+}
+      </pre>
+    </div>
+  </body>
+</html>

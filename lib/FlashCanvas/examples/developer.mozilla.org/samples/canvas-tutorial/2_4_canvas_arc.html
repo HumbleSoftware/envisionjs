@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas arc example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function drawShape(){
+        // get the canvas element using the DOM
+        var canvas = document.getElementById('tutorial');
+
+        // Make sure we don't execute when canvas isn't supported
+        if (canvas.getContext){
+
+          // use getContext to use the canvas for drawing
+          var ctx = canvas.getContext('2d');
+
+          // Draw shapes
+          for (i=0;i<4;i++){
+            for(j=0;j<3;j++){
+              ctx.beginPath();
+              var x          = 25+j*50;               // x coordinate
+              var y          = 25+i*50;               // y coordinate
+              var radius     = 20;                    // Arc radius
+              var startAngle = 0;                     // Starting point on circle
+              var endAngle   = Math.PI+(Math.PI*j)/2; // End point on circle
+              var clockwise  = i%2==0 ? false : true; // clockwise or anticlockwise
+          
+              ctx.arc(x,y,radius,startAngle,endAngle, clockwise);
+          
+              if (i>1){
+                ctx.fill();
+              } else {
+                ctx.stroke();
+              }
+            }
+          }
+
+        } else {
+          alert('You need Safari or Firefox 1.5+ to see this demo.');
+        }
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+
+  <body onload="drawShape();">
+    <h1>A canvas <code>arc</code> example</h1>
+    <div>
+      <canvas id="tutorial" width="150" height="200"></canvas>
+      <pre>
+function drawShape(){
+  // get the canvas element using the DOM
+  var canvas = document.getElementById('tutorial');
+
+  // Make sure we don't execute when canvas isn't supported
+  if (canvas.getContext){
+
+    // use getContext to use the canvas for drawing
+    var ctx = canvas.getContext('2d');
+
+    // Draw shapes
+    for (i=0;i<4;i++){
+      for(j=0;j<3;j++){
+        ctx.beginPath();
+        var x          = 25+j*50;               // x coordinate
+        var y          = 25+i*50;               // y coordinate
+        var radius     = 20;                    // Arc radius
+        var startAngle = 0;                     // Starting point on circle
+        var endAngle   = Math.PI+(Math.PI*j)/2; // End point on circle
+        var clockwise  = i%2==0 ? false : true; // clockwise or anticlockwise
+    
+        ctx.arc(x,y,radius,startAngle,endAngle, clockwise);
+    
+        if (i>1){
+          ctx.fill();
+        } else {
+          ctx.stroke();
+        }
+      }
+    }
+
+  } else {
+    alert('You need Safari or Firefox 1.5+ to see this demo.');
+  }
+}
+      </pre>
+    </div>
+  </body>
+
+</html>

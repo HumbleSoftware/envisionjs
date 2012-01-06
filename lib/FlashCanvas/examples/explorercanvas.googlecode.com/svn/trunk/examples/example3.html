@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<!--
+
+Copyright 2006 Google Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+-->
+
+<html>
+<head>
+<title>ExplorerCanvas Example 3</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--[if lt IE 9]><script type="text/javascript" src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<style type="text/css">
+
+body {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+#image-rotator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#image-rotator .tool-bar {
+  text-align: center;
+}
+
+.tool-bar button {
+  margin: 0.5em 0.5em 0 0;
+}
+
+#image-rotator img,
+#image-rotator canvas {
+  position: absolute;
+}
+
+</style>
+<script type="text/javascript">
+
+function sawFunc(a) {
+  var PI = Math.PI;
+  var PI2 = PI / 2;
+  // make sure a is within 0 to PI
+  a = a % PI;
+  if (a < 0) {
+    a += PI;
+  }
+  if (a < PI2) {
+    return a / PI2;
+  } else {
+    return (PI - a) / PI2;
+  }
+}
+
+function easeInEaseOut(t) {
+  var t2 = t * t;
+  return 3 * t2 - 2 * t * t2;
+}
+
+function ImageRotator(el, src, w, h) {
+  this.element = el;
+  this.toolBar = el.getElementsByTagName("div")[0];
+  this.canvas = el.getElementsByTagName("canvas")[0];
+  var images = el.getElementsByTagName("img");
+  this.image = images[images.length - 1];
+  var btns = el.getElementsByTagName("button");
+  this.btnCw = btns[0];
+  this.btnCcw = btns[1];
+  var self = this;
+  this.btnCcw.onclick = function () {
+    self.rotateCcw();
+  };
+  this.btnCw.onclick = function () {
+    self.rotateCw();
+  };
+  this.image.onload = function (e) {
+    self.onImageLoad(e);
+  };
+  this.image.onerror = function (e) {
+    self.onImageError(e);
+  };
+  this.image.onabort = function (e) {
+    self.onImageAbort(e);
+  };
+  this.setImage(src, w, h);
+  this.layout();
+
+  var onResize = function () {
+    self.layout();
+  };
+  var onLoad = function () {
+    self.onWindowLoad();
+  };
+  if (window.addEventListener) {
+    window.addEventListener("resize", onResize, false);
+    window.addEventListener("load", onLoad, false);
+  } else if (window.attachEvent) {
+    window.attachEvent("onresize", onResize);
+    window.attachEvent("onload", onLoad);
+  }
+}
+
+ImageRotator.prototype = {
+  getLoaded: function () {
+    return this.imageLoaded && this.windowLoaded;
+  },
+  setImage: function (src, w, h) {
+    this.imageLoaded = false;
+    this.image.src = src;
+    this.imageWidth = w;
+    this.imageHeight = h;
+  },
+
+  layout: function () {
+    var PI2 = Math.PI / 2;
+    var h = this.element.clientHeight;
+    var w = this.element.clientWidth;
+    var th = this.toolBar.offsetHeight;
+    h -= this.toolBar.offsetHeight;
+    if (!this.ctx || !this.getLoaded()) {
+      this.btnCw.disabled = true;
+      this.btnCcw.disabled = true;
+      this.canvas.style.display = "none";
+      this.image.style.display = "block";
+      var ratio = Math.min(w / this.imageWidth, h / this.imageHeight, 1);
+      var imgW = this.imageWidth * ratio;
+      var imgH = this.imageHeight * ratio;
+      var y = th + (h - imgH) / 2;
+      var x = (w - imgW) / 2;
+      this.image.style.left = Math.round(x) + "px";
+      this.image.style.top = Math.round(y) + "px";
+      this.image.style.width = Math.round(imgW) + "px";
+      this.image.style.height = Math.round(imgH) + "px";
+    } else {
+      this.btnCw.disabled = this.isAnimating_;
+      this.btnCcw.disabled = this.isAnimating_;
+      this.canvas.style.display = "block";
+      this.image.style.display = "none";
+
+      this.canvas.style.left = 0 + "px";
+      this.canvas.style.top = th + "px";
+      this.canvas.style.width = w + "px";
+      this.canvas.width = w;
+      this.canvas.style.height = h + "px";
+      this.canvas.height = h;
+
+      this.ctx.save();
+      this.ctx.clearRect(0, 0, w, h);
+      this.ctx.translate(w / 2, h / 2);
+      this.ctx.rotate(this.rotation);
+      // 0 -> 1, sin(0) = 0
+      // PI / 2 -> H / W, sin(PI/2) = 1
+
+      // sin(PI/2) = 1 -> limit factor is w and imgH
+
+      var iw = this.imageWidth;
+      var ih = this.imageHeight;
+      var scale;
+      if (iw <= w && iw <= h && ih <= h && ih <= w) {
+        scale = 1;
+      } else {
+        var sinr = sawFunc(this.rotation);
+        var cosr = sawFunc(this.rotation + PI2);
+        var ratio1 = sinr * Math.min(w / ih, h / iw);
+        var ratio2 = cosr * Math.min(w / iw, h / ih);
+        var ratio = Math.min(1, ratio1 + ratio2);
+        scale = ratio;
+      }
+      this.ctx.scale(scale, scale);
+      this.ctx.translate(-iw / 2, -ih / 2);
+      this.ctx.drawImage(this.image, 0, 0, iw, ih);
+      this.ctx.restore();
+    }
+  },
+
+  rotation: 0,
+  animationDuration: 500,
+
+  rotateCcw: function () {
+    if (!this.isAnimating_) {
+      this.startTime_ = (new Date).valueOf();
+      this.currentAngle_ = this.rotation;
+      this.deltaAngle_ = Math.PI / 2;
+      this.isAnimating_ = true;
+      this.animCounter_ = 0;
+      this.rotate_();
+    }
+  },
+
+  rotateCw: function () {
+    if (!this.isAnimating_) {
+      this.startTime_ = (new Date).valueOf();
+      this.currentAngle_ = this.rotation;
+      this.deltaAngle_ = -Math.PI / 2;
+      this.isAnimating_ = true;
+      this.animCounter_ = 0;
+      this.rotate_();
+    }
+  },
+
+  rotate_: function () {
+    if (this.isAnimating_) {
+      var t = easeInEaseOut(Math.min(1, (new Date - this.startTime_) /
+                            this.animationDuration));
+      this.rotation = t * this.deltaAngle_ + this.currentAngle_;
+      if (t < 1) {
+        var self = this;
+        window.setTimeout(function () {
+          self.rotate_();
+        }, 10);
+      } else {
+        this.isAnimating_ = false;
+      }
+      this.layout();
+    }
+  },
+
+  onImageLoad: function (e) {
+    this.imageLoaded = true;
+    this.initCanvas();
+  },
+  onImageError: function (e) {
+    this.imageLoaded = false;
+  },
+  onImageAbort: function (e) {
+    this.imageLoaded = false;
+  },
+  onWindowLoad: function (e) {
+    this.windowLoaded = true;
+    this.initCanvas();
+  },
+
+  initCanvas: function () {
+    if (!this.ctx && this.getLoaded()) {
+      // IE recreates the element?
+      this.canvas = this.element.getElementsByTagName("canvas")[0];
+      this.ctx = this.canvas.getContext("2d");
+
+      if (!this.ctx) {
+        return;
+      }
+      this.layout();
+    }
+  }
+};
+
+</script>
+</head>
+<body>
+
+<div id="image-rotator">
+  <div class="tool-bar">
+    <button>Rotate Left</button><button>Rotate Right</button>
+  </div>
+  <canvas id="c"></canvas>
+  <img src="" alt="">
+</div>
+<script type="text/javascript">
+  new ImageRotator(document.getElementById("image-rotator"),
+                   "ff.jpg", 608, 380);
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Save/restore path Test</title>
+<style>
+
+body {
+  text-align: center
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+window.onload = function() {
+  var ctx = document.getElementById('c').getContext('2d');
+
+  // Need to test  clearRect, strokeRect, fillRect
+  ctx.beginPath();
+  ctx.moveTo(0, 50);
+  ctx.lineTo(50, 100);
+
+  ctx.save();
+  ctx.lineTo(100, 50);
+  ctx.restore();
+
+  ctx.save();
+  ctx.lineTo(50, 0);
+  ctx.restore();
+
+  ctx.save();
+  ctx.lineTo(0, 50);
+  ctx.restore();
+
+  ctx.stroke();
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=200 height=200></canvas>
+
+<p>This tests ensures that save/restore does not do anything to the current
+path. You should see a diamond shape above.</p>
+
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Resizing Test</title>
+  <!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+  <script>
+    // Safari is known not to handle resizing well, expect this to
+    // compare to Firefox
+
+    var cv, ctx, size = 80;
+    var img = new Image();
+    img.src = "../examples/ff.jpg";
+
+    function a() {
+      cv = document.getElementById("aa");
+      ctx = cv.getContext("2d");
+
+      l();
+    }
+
+    function l() {
+      size = (size + 1) % 800;
+      cv.width = Number(size + 200);
+      cv.height = Number((size + 200) / 2);
+
+      // Firefox autoclears the canvas at this point
+
+      ctx.save();
+      ctx.translate(50, 50);
+      ctx.scale(0.1, 0.1);
+      ctx.rotate(size/800 * Math.PI*8);
+      ctx.drawImage(img, 0, -75);
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(cv.width, cv.height);
+      ctx.moveTo(20, 20);
+      ctx.lineTo(80, 20);
+      ctx.lineTo(80, 80);
+      ctx.lineTo(20, 80);
+      ctx.stroke();
+      ctx.closePath();
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.scale(size / 200, size / 200);
+      ctx.arc(100, 50, 20, 0, Math.PI, true);
+      ctx.fill();
+      ctx.restore();
+
+      setTimeout(l, 50);
+    }
+  </script>
+  <style>
+    canvas {
+      background-color:#eee;
+    }
+  </style>
+</head>
+<body onload="a();">
+<canvas id="aa" width="200" height="200">Fallback <b>content</b> markup</canvas>
+</body>
+</html>

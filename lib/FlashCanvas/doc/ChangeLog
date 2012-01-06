@@ -1,0 +1,128 @@
+FlashCanvas
+===========
+
+You can view a complete ChangeLog at the project page:
+http://code.google.com/p/flashcanvas/source/list
+
+
+FlashCanvas-20110201
+--------------------
+
+(Enhancements)
+
+ - Improvements to drawImage() and createPattern().
+   - Implement error handling.
+   - Accept any object that has a src property.
+ - Supported asynchronous loading of flashcanvas.js.
+ - Throw an exception if the given arguments are invalid.
+
+(Bug fixes)
+
+ - Backported the arcTo() code from FlashCanvas Pro.
+ - restore() didn't restore the clipping region correctly.
+ - clearRect() should not clear the pixels outside the clipping region.
+ - Special characters in a url need to be escaped when passed to Flash.
+ - toDataURL("image/jpeg") must composite the image to a black
+   background.
+ - Many minor bug fixes thanks to the canvas test suite developed by
+   Philip Taylor.
+
+
+FlashCanvas-20101115
+--------------------
+
+(Enhancements)
+
+ - Made it possible to load image files from other domain.
+ - Prepared FlashCanvas.saveImage() method.
+ - Modified strokeText() to draw an outline of the text.
+ - textAlign gets to support the directionality of "rtl".
+ - Refactored the handling of resize event.
+
+(Bug fixes)
+
+ - Canvas was rendered incorrectly when printed.
+   - Canvas was expanded if the page was in quirks mode.
+   - The background was painted gray.
+ - Tweaked the color parser to check the input more strictly.
+
+(etc.)
+
+ - Included canvas2png.js script that can be used to save a canvas image.
+ - Made the examples compatible with IE9.
+
+
+FlashCanvas-20100904
+--------------------
+
+(Enhancements)
+
+ - Reimplemented fillText().
+   - Supported transformations of text.
+   - Supported an alpha value of a color.
+   - Supported font size with a unit other than "px".
+   - Supported font family that contains white spaces in its name.
+   - Supported the textAlign attribute of "start" and "end".
+   - Gradients and patterns are not supported yet.
+ - Implemented strokeText().
+   - At present, strokeText() fills text as fillText() does.
+ - Implemented measureText().
+ - Made it possible to call initElement() before appendChild().
+ - Prepared FlashCanvas.setOptions() method for future use.
+
+(Bug fixes)
+
+ - Line styles were not set when the strokeStyle attribute was a
+   CanvasGradient or CanvasPattern object.
+ - Patterns were painted ignoring the globalAlpha attribute.
+ - arc() didn't add the end point to the subpath when the central angle
+   was greater than 2 pi.
+ - closePath() must do nothing if the context has no subpaths.
+ - IE8 didn't preload the swf file when the URL was a relative one.
+ - Many minor bug fixes.
+
+
+FlashCanvas-20100623
+--------------------
+
+ - Added a code which emulates ExplorerCanvas library.
+ - Added basic support for fillText() (thanks to code from fxCanvas).
+ - Added JPEG support to toDataURL().
+ - Supported data URI scheme in drawImage() and createPattern().
+ - Implemented "Save Image As..." in the right-click context menu.
+ - Implemented event bubbling for click and dblclick events.
+ - Made it possible to use FlashCanvas library installed in other domain.
+ - Optimized drawImage().
+ - Reduced CPU time consumption.
+ - Various bug fixes in drawImage().
+   - draw-image-flip.html, an example from ExplorerCanvas project, is
+     now rendered correctly.
+   - Images are rendered in the right order.
+ - Fixed a bug that arc() failed to calculate the central angle in some
+   cases.
+ - Fixed a bug that swf.resize() method could be called before
+   ExternalInterface was ready for use.
+ - Fixed a bug that resize event canceled createLinearGradient().
+ - Switched to using onunload event instead of onbeforeunload event.
+ - Included several additional Canvas demos.
+ - Some minor optimizations.
+
+
+FlashCanvas-20100131
+--------------------
+
+ - Implement a delayed execution mechanism so as not to process canvas
+   commands while loading SWF or image files.
+ - Implement toDataURL(). Only "image/png" MIME type is supported now.
+ - Improve drawImage()
+   - globalAlpha attribute is supported
+   - Bug fixes regarding the source rectangle
+ - Refine the source code
+ - Add document files
+ - Many small bug fixes
+
+
+FlashCanvas-20091123
+--------------------
+
+ - Initial release

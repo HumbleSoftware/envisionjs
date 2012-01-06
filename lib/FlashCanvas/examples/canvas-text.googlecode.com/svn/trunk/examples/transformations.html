@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Canvas text transformations example</title>
+		<link rel="stylesheet" type="text/css" href="style.css" />
+    
+		<!--[if lt IE 9]><script type="text/javascript" src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+	</head>
+	<body>
+	  <h1>Canvas text transformations example</h1>
+		<canvas width="500" height="300" id="test-canvas" style="font-size: 16px;"></canvas>
+		
+		<script type="text/javascript">
+      function initCanvas(canvas) {
+        if (typeof FlashCanvas != "undefined") {
+          FlashCanvas.initElement(canvas);
+        }
+        return canvas;
+      }
+      
+			window.onload = function(){
+		  	var canvas = initCanvas(document.getElementById("test-canvas")),
+				    ctx = canvas.getContext('2d');
+				
+		  	ctx.strokeStyle = "rgba(255,0,0,1)";
+		  	ctx.fillStyle = "rgba(0,0,0,1)";
+		  	ctx.lineWidth = 1;
+		  	ctx.font = "20pt Verdana, sans-serif";
+				
+        ctx.translate(60, 60);
+        
+		  	ctx.fillText('Horizontal', 0, 0);
+        
+        ctx.translate(0, 50);
+        
+        ctx.save();
+				ctx.rotate(Math.PI/4);
+        ctx.strokeText('Rotated', 0, 0);
+        ctx.restore();
+        
+        ctx.translate(0, 150);
+        
+        ctx.save();
+        ctx.fillStyle = "rgba(0,0,255,1)";
+        ctx.scale(4, 1);
+        ctx.fillText('Long', 0, 0);
+        ctx.restore();
+        
+        ctx.translate(350, -250);
+        
+        ctx.save();
+        ctx.font = "bold 2em Verdana, sans-serif";
+        ctx.strokeStyle = "#000";
+        ctx.fillStyle = "rgba(50,255,0,1)";
+        ctx.rotate(Math.PI/2);
+        ctx.fillText('Vertical', 0, 0);
+        ctx.strokeText('Vertical Stroke', 0, 0);
+        ctx.restore();
+			}
+		</script>
+    
+    <a href="index.html" class="footer">Back to the index</a>
+	</body>
+</html>

@@ -1,0 +1,33 @@
+body {
+  font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  color: #000;
+  
+  background: #fff;
+  margin: 1em;
+}
+
+h1, h2, h3 {
+  font-family: Georgia,"Times New Roman",Times,serif;
+  font-style: italic;
+}
+
+a {
+  color: #167BFF;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+canvas {
+  border: 2px dashed #999;
+  display: block;
+}
+
+.footer {
+  display: block;
+  margin-top: 1em;
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Arc Test</title>
+<style>
+
+body {
+  text-align: center
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+window.onload = function() {
+  var ctx = document.getElementById('c').getContext('2d');
+
+  ctx.beginPath();
+  ctx.arc(25, 25, 20, 0, Math.PI, false);
+  ctx.stroke();
+
+  ctx.save();
+  ctx.scale(0.5, 0.5);
+  ctx.beginPath();
+  ctx.arc(75, 25, 20, 0, Math.PI * 2, false);
+  ctx.stroke();
+  ctx.restore();
+
+  ctx.beginPath();
+  ctx.arc(25, 75, 20, 0, Math.PI, true);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(75, 75, 20, 0, Math.PI * 2, true);
+  ctx.stroke();
+
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=200 height=100></canvas>
+
+<p>This tests that drawing arches work in the same way in different
+browsers.</p>
+
+</body>
+</html>

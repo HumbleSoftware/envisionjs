@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas createPattern example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+
+        // create new image object to use as pattern
+        var img = new Image();
+        img.onload = function(){
+
+          // create pattern
+          var ptrn = ctx.createPattern(img,'repeat');
+          ctx.fillStyle = ptrn;
+          ctx.fillRect(0,0,150,150);
+
+          // prevent IE6 memory leak
+          img = null;
+        }
+        img.src = 'images/wallpaper.png';
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>createPattern</code> example</h1>
+    <div>
+      <canvas id="canvas" width="150" height="150"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+
+  // create new image object to use as pattern
+  var img = new Image();
+  img.onload = function(){
+
+    // create pattern
+    var ptrn = ctx.createPattern(img,'repeat');
+    ctx.fillStyle = ptrn;
+    ctx.fillRect(0,0,150,150);
+
+    // prevent IE6 memory leak
+    img = null;
+  }
+  img.src = 'images/wallpaper.png';
+}
+      </pre>
+    </div>
+  </body>
+</html>

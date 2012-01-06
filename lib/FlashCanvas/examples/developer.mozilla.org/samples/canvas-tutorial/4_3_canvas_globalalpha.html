@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas globalAlpha example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+    function draw() {
+      var ctx = document.getElementById('canvas').getContext('2d');
+      // draw background
+      ctx.fillStyle = '#FD0';
+      ctx.fillRect(0,0,75,75);
+      ctx.fillStyle = '#6C0';
+      ctx.fillRect(75,0,75,75);
+      ctx.fillStyle = '#09F';
+      ctx.fillRect(0,75,75,75);
+      ctx.fillStyle = '#F30';
+      ctx.fillRect(75,75,150,150);
+      ctx.fillStyle = '#FFF';
+    
+      // set transparency value
+      ctx.globalAlpha = 0.2;
+    
+      // Draw semi transparent circles
+      for (i=0;i<7;i++){
+          ctx.beginPath();
+          ctx.arc(75,75,10+10*i,0,Math.PI*2,true);
+          ctx.fill();
+      }
+    }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000;float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>globalAlpha</code> example</h1>
+    <div>
+      <canvas id="canvas" width="150" height="150"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  // draw background
+  ctx.fillStyle = '#FD0';
+  ctx.fillRect(0,0,75,75);
+  ctx.fillStyle = '#6C0';
+  ctx.fillRect(75,0,75,75);
+  ctx.fillStyle = '#09F';
+  ctx.fillRect(0,75,75,75);
+  ctx.fillStyle = '#F30';
+  ctx.fillRect(75,75,150,150);
+  ctx.fillStyle = '#FFF';
+
+  // set transparency value
+  ctx.globalAlpha = 0.2;
+
+  // Draw semi transparent circles
+  for (i=0;i<7;i++){
+      ctx.beginPath();
+      ctx.arc(75,75,10+10*i,0,Math.PI*2,true);
+      ctx.fill();
+  }
+}
+      </pre>
+    </div>
+  </body>
+</html>

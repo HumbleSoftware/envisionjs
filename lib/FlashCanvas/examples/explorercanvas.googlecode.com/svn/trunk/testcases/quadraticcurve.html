@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Quadratic Curve Test</title>
+<style>
+
+body {
+  text-align: center
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+window.onload = function() {
+  var ctx = document.getElementById('c').getContext('2d');
+
+  ctx.save();
+
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(50, 50);
+  ctx.quadraticCurveTo(0, 0, 25, 75);
+  ctx.quadraticCurveTo(50, 0, 50, 50);
+  ctx.stroke();
+
+  ctx.restore();
+
+  // Same with some scaling
+  ctx.save();
+
+  ctx.translate(-56, -24);
+  ctx.scale(3.5, 1.5);
+  ctx.strokeStyle = '#ddd';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(50, 50);
+  ctx.quadraticCurveTo(0, 0, 25, 75);
+  ctx.quadraticCurveTo(50, 0, 50, 50);
+  ctx.stroke();
+
+  ctx.restore();
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=200 height=200></canvas>
+
+<p>This tests that drawing quadratic curves work in the same way in different
+browsers.</p>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Canvas text position example</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    
+    <!--[if lt IE 9]><script type="text/javascript" src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+	</head>
+	<body>
+    <h1>Canvas text position example</h1>
+    
+    This example shows the differents text alignments and baselines.
+    
+    <p>
+      From left to right :
+      <ul>
+        <li>left</li>
+        <li>center</li>
+        <li>right</li>
+      </ul>
+    </p>
+    
+    <p>
+      From top to bottom :
+      <ul>
+        <li>top</li>
+        <li>hanging</li>
+        <li>middle</li>
+        <li>alphabetic</li>
+        <li>ideographic</li>
+        <li>bottom</li>
+      </ul>
+    </p>
+    
+		<canvas width="500" height="330" id="test-canvas"></canvas>
+		
+		<script type="text/javascript">
+      function initCanvas(canvas) {
+        if (typeof FlashCanvas != "undefined") {
+          FlashCanvas.initElement(canvas);
+        }
+        return canvas;
+      }
+      
+			window.onload = function(){
+		  	var canvas = initCanvas(document.getElementById("test-canvas")),
+				    ctx = canvas.getContext('2d');
+				
+        var i, j, text = "Hello world",
+            align = ['left', 'center', 'right'],
+            baseline = ['top', 'hanging', 'middle', 'alphabetic', 'ideographic', 'bottom'];
+            
+		  	ctx.fillStyle = "#000";
+        ctx.strokeStyle = "#f00";
+        ctx.font = "20px Optimer";
+		  	ctx.translate(70, 30);
+        
+        for (i = 0; i < align.length; i++) {
+          for (j = 0; j < baseline.length; j++) {
+            ctx.save();
+              ctx.translate(i * 170 + 0.5, j * 50 + 0.5);
+              
+              ctx.textAlign = align[i];
+              ctx.textBaseline = baseline[j];
+              
+              ctx.fillText(text, 0, 0);
+              
+              ctx.beginPath();
+                ctx.moveTo(-50, 0);
+                ctx.lineTo(50, 0);
+                
+                ctx.moveTo(0, -10);
+                ctx.lineTo(0, 10);
+              ctx.closePath();
+            ctx.restore();
+            
+            ctx.stroke();
+          }
+        }
+			}
+		</script>
+    
+    <a href="index.html" class="footer">Back to the index</a>
+	</body>
+</html>

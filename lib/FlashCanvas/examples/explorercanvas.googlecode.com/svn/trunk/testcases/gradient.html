@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Gradient Test</title>
+<style>
+
+body {
+  text-align: center
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+window.onload = function() {
+  var ctx = document.getElementById('c').getContext('2d');
+  var g = ctx.createLinearGradient(0, 0, 300, 0);
+  g.addColorStop(0, '#000');
+  g.addColorStop(1 / 7, '#00f');
+  g.addColorStop(2 / 7, '#0f0');
+  g.addColorStop(3 / 7, '#0ff');
+  g.addColorStop(4 / 7, '#f00');
+  g.addColorStop(5 / 7, '#f0f');
+  g.addColorStop(6 / 7, '#ff0');
+  g.addColorStop(1, '#fff');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 300, 200);
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=300 height=200></canvas>
+
+<p>This tests gradients</p>
+
+</body>
+</html>

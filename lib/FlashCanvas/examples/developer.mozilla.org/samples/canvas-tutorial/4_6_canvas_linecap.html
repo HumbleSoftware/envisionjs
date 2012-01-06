@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas lineCap example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+        var lineCap = ['butt','round','square'];
+      
+        // Draw guides
+        ctx.strokeStyle = '#09f';
+        ctx.beginPath();
+        ctx.moveTo(10,10);
+        ctx.lineTo(140,10);
+        ctx.moveTo(10,140);
+        ctx.lineTo(140,140);
+        ctx.stroke();
+      
+        // Draw lines
+        ctx.strokeStyle = 'black';
+        for (i=0;i<lineCap.length;i++){
+          ctx.lineWidth = 15;
+          ctx.lineCap = lineCap[i];
+          ctx.beginPath();
+          ctx.moveTo(25+i*50,10);
+          ctx.lineTo(25+i*50,140);
+          ctx.stroke();
+        }
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>lineCap</code> example</h1>
+    <div>
+      <canvas id="canvas" width="150" height="150"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  var lineCap = ['butt','round','square'];
+
+  // Draw guides
+  ctx.strokeStyle = '#09f';
+  ctx.beginPath();
+  ctx.moveTo(10,10);
+  ctx.lineTo(140,10);
+  ctx.moveTo(10,140);
+  ctx.lineTo(140,140);
+  ctx.stroke();
+
+  // Draw lines
+  ctx.strokeStyle = 'black';
+  for (i=0;i&lt;lineCap.length;i++){
+    ctx.lineWidth = 15;
+    ctx.lineCap = lineCap[i];
+    ctx.beginPath();
+    ctx.moveTo(25+i*50,10);
+    ctx.lineTo(25+i*50,140);
+    ctx.stroke();
+  }
+}
+      </pre>
+    </div>
+  </body>
+</html>

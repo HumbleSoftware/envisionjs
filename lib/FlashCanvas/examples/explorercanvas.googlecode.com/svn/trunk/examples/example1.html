@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<!--
+	Copyright 2006 Google Inc.
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	  http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+-->
+<html>
+<head>
+	<title>ExplorerCanvas Example 1</title>
+	<!--[if lt IE 9]><script type="text/javascript" src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+	<script type="text/javascript">
+		var canvas, ctx;
+		var particles = [];
+		var NUM_PARTICLES = 20;
+
+		function Particle() {
+			this.x = Math.random() * canvas.width;
+			this.y = Math.random() * canvas.height;
+
+			this.xvel = Math.random() * 5 - 2.5;
+			this.yvel = Math.random() * 5 - 2.5;
+		}
+
+		Particle.prototype.update = function() {
+			this.x += this.xvel;
+			this.y += this.yvel;
+
+			this.yvel += 0.1;
+
+			if (this.x > canvas.width || this.x < 0) {
+				this.xvel = -this.xvel;
+			}
+
+			if (this.y > canvas.height || this.y < 0) {
+				this.yvel = -this.yvel;
+			}
+		}
+
+		function loop() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			for(var i = 0; i < NUM_PARTICLES; i++) {
+				particles[i].update();
+
+				ctx.beginPath();
+				ctx.moveTo(particles[i].x, particles[i].y);
+				ctx.lineTo(particles[i].x - particles[i].xvel,
+									 particles[i].y - particles[i].yvel);
+				ctx.stroke();
+				ctx.closePath();
+			}
+
+			setTimeout(loop, 10);
+		}
+
+		function load() {
+			canvas = document.getElementById("cv");
+			ctx = canvas.getContext("2d");
+
+			for(var i = 0; i < NUM_PARTICLES; i++) {
+				particles[i] = new Particle();
+			}
+
+			ctx.lineWidth = "2";
+			ctx.strokeStyle = "rgb(255, 255, 255)";
+			loop();
+		}
+	</script>
+	<style>
+		body {
+			background-color:black;
+			margin:50px;
+			text-align:center;
+		}
+
+		canvas {
+			border:1px solid #444;
+		}
+	</style>
+</head>
+<body onload="load();">
+	<canvas id="cv" width="400" height="300"></canvas>
+</body>
+</html>

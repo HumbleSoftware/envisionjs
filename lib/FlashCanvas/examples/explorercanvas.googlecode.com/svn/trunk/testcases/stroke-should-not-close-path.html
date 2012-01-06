@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Stroke should not close path</title>
+<style>
+
+body {
+  text-align: center
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+window.onload = function() {
+
+  var canvas = document.getElementById("c");
+  var ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#ccc";
+  ctx.strokeStyle = "#000";
+
+  ctx.beginPath();
+  ctx.moveTo(30, 30);
+  ctx.lineTo(150, 150);
+  ctx.bezierCurveTo(60, 70, 60, 70, 70, 150);
+  ctx.fill();
+  ctx.stroke();
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=200 height=200></canvas>
+
+</body>
+</html>

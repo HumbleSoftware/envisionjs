@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Overlay animation</title>
+<style>
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+Date.now = Date.now || function() {
+  return new Date().getTime();
+};
+
+var points = [];
+var startTime = Date.now();
+
+function addPointAtEvent(e) {
+  var x = e.offsetX || e.layerX;
+  var y = e.offsetY || e.layerY;
+  if (!isNaN(x) && !isNaN(y)) {
+    points.push([x, y, Date.now()]);
+  }
+  if (points.length == 1) {
+    draw();
+  }
+}
+
+var AGE_TO_LIVE = 1500;
+
+function draw() {
+
+  var ctx = document.getElementById('c').getContext('2d');
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+  var now = Date.now();
+  var itemsToRemove = 0;
+  for (var i = 0; i < points.length; i++) {
+    var x = points[i][0];
+    var y = points[i][1];
+    var createTime = points[i][2];
+    var age = now - createTime;
+
+    if (age > AGE_TO_LIVE) {
+      itemsToRemove++;
+    } else {
+      var d = (AGE_TO_LIVE - age) / AGE_TO_LIVE;
+      var r = d * 50;
+      var hue = (createTime - startTime) / 10 % 360;
+      ctx.fillStyle = 'hsl(' + hue + ',100%,50%)';
+      ctx.globalAlpha = .5 * d;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2 * Math.PI, true);
+      ctx.fill();
+      ctx.closePath();
+    }
+  }
+
+  if (itemsToRemove) {
+    points = points.slice(itemsToRemove);
+  }
+
+  if (points.length) {
+    window.setTimeout(draw, 10);
+  }
+}
+
+window.onload = function() {
+  document.getElementById('c').onmousedown = function(e) {
+    addPointAtEvent(e || window.event);
+  };
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=500 height=500 onmousemove="addPointAtEvent(event)"></canvas>
+
+</body>
+</html>

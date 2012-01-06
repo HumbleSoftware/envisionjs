@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Canvas drawImage example 2</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+    function draw() {
+      var ctx = document.getElementById('canvas').getContext('2d');
+      var img = new Image();
+      img.onload = function(){
+        for (i=0;i<4;i++){
+          for (j=0;j<3;j++){
+            ctx.drawImage(img,j*50,i*38,50,38);
+          }
+        }
+
+        // prevent IE6 memory leak
+        img = null;
+      }
+      img.src = 'images/rhino.jpg';
+    }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      h2 { font-size: 100%; color: #036; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>Canvas <code>drawImage</code> example 2</h1>
+    <div>
+      <canvas id="canvas" width="150" height="150"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  var img = new Image();
+  img.onload = function(){
+    for (i=0;i<4;i++){
+      for (j=0;j<3;j++){
+        ctx.drawImage(img,j*50,i*38,50,38);
+      }
+    }
+
+    // prevent IE6 memory leak
+    img = null;
+  }
+  img.src = 'images/rhino.jpg';
+}
+      </pre>
+      <div style="float:left;">
+        <h2>Source image</h2>
+        <img src="images/rhino.jpg"/>
+      </div>
+    </div>
+  </body>
+</html>

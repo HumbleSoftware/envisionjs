@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Text Test</title>
+<style>
+
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+window.onload = draw;
+
+
+function draw() {
+  var ctx = document.getElementById('c').getContext('2d');
+  ctx.save();
+  ctx.rotate(Math.PI / 4)
+  ctx.fillText('Hello World', 100, 100);
+  ctx.restore();
+}
+
+function value(id) {
+  return document.getElementById(id).value;
+}
+
+var v = 0;
+
+function draw() {
+  var text = value('text');
+  var font = value('font');
+  var textAlign = value('textAlign');
+  var textBaseline = value('textBaseline');
+  var scale = value('scale').split(',');
+  var scaleX = scale[0] || 1;
+  var scaleY = scale[1] || 1;
+
+  var ctx = document.getElementById('c').getContext('2d');
+  ctx.save();
+
+  ctx.font = font;
+  ctx.textAlign = textAlign;
+  ctx.textBaseline = textBaseline;
+  var g = ctx.createLinearGradient(0, 0, 0, 50);
+  g.addColorStop(0, '#d4f4f5');
+  g.addColorStop(0.4, '#d4f4f5');
+  g.addColorStop(0.6, '#c2d7c4');
+  g.addColorStop(1, '#c2d7c4');
+  ctx.fillStyle = g;
+
+  ctx.strokeStyle = '#92a3a4';
+
+  ctx.clearRect(0, 0, 500, 500);
+  ctx.translate(250, 250);
+  ctx.rotate(v);
+  ctx.scale(scaleX, scaleY);
+
+  ctx.strokeText(text, 0, 0);
+  ctx.fillText(text, 0, 0);
+
+  ctx.restore();
+
+  v += Math.PI / 100;
+}
+
+setInterval(draw, 50);
+
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=500 height=500></canvas>
+
+<br><input type=text id=text value="Explorer Canvas">
+<br><input type=text id=font value="bold 35px 'courier new'">
+<br><input type=text id=textAlign value="center">
+<br><input type=text id=textBaseline value="middle">
+<br><input type=text id=scale value="1, 2.5"
+
+
+</body>
+</html>

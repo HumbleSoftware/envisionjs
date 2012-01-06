@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Pattern Test</title>
+<style>
+
+body {
+  text-align: center
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+var img;
+function draw() {
+  var ctx = document.getElementById('c').getContext('2d');
+  var p = ctx.createPattern(img, 'repeat');
+  ctx.translate(50, 50);
+  ctx.fillStyle = p;
+  ctx.fillRect(0, 0, 300, 300);
+}
+
+window.onload = function() {
+  img = new Image;
+  img.onload = function() {
+    draw();
+  };
+  img.src = 'pattern.jpg';
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=400 height=400></canvas>
+
+<p>This tests patterns</p>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Canvas text animation example</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    
+    <!--[if lt IE 9]><script type="text/javascript" src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+	</head>
+	<body>
+    <h1>Canvas text animation example</h1>
+    
+		<canvas width="500" height="300" id="test-canvas"></canvas>
+		
+		<script type="text/javascript">
+      function initCanvas(canvas) {
+        if (typeof FlashCanvas != "undefined") {
+          FlashCanvas.initElement(canvas);
+        }
+        return canvas;
+      }
+      
+			window.onload = function(){
+		  	var canvas = initCanvas(document.getElementById("test-canvas")),
+				    ctx = canvas.getContext('2d');
+				
+		  	ctx.font = "3em Optimer";
+        ctx.textAlign = 'center';
+
+		  	var i, n = 0, 
+            components = [0, 0, 0], 
+            operations = [1, 2, 3];
+            
+		  	function draw(){
+          ctx.clearRect(0, 0, 500, 300);
+          ctx.fillStyle = "rgb("+components.join(',')+")";
+          ctx.textBaseline = 'top';
+          
+          // Jumping text
+          ctx.save();
+            ctx.translate(250, 0);
+  		  		ctx.fillText('Lorem ipsum dolor sit amet', 0, components[1]);
+          ctx.restore();
+          
+          // Rotating text
+          ctx.save();
+            ctx.translate(250, 150);
+            ctx.rotate(0.01*n++);
+            ctx.fillStyle = '#000';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Lorem ipsum dolor sit amet', 0, 0);
+          ctx.restore();
+          
+          for(i = 0; i < 3; i++) {
+            components[i] += operations[i];
+            if ((components[i] >= 256) || (components[i] <= 0)) operations[i] *= -1;
+          }
+          
+					/*if (n < 1000)*/ setTimeout(draw, 10);
+		  	}
+		    draw();
+			}
+		</script>
+    
+    <a href="index.html" class="footer">Back to the index</a>
+	</body>
+</html>

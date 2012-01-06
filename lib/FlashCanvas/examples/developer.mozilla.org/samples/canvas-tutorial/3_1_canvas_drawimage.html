@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Canvas drawImage example 1</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+    function draw() {
+      var ctx = document.getElementById('canvas').getContext('2d');
+      var img = new Image();
+      img.onload = function(){
+        ctx.drawImage(img,0,0);
+        ctx.beginPath();
+        ctx.moveTo(30,96);
+        ctx.lineTo(70,66);
+        ctx.lineTo(103,76);
+        ctx.lineTo(170,15);
+        ctx.stroke();
+
+        // prevent IE6 memory leak
+        img = null;
+      }
+      img.src = 'images/backdrop.png';
+    }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      h2 { font-size: 100%; color: #036; }
+      canvas { float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>Canvas <code>drawImage</code> example 1</h1>
+    <div>
+      <canvas id="canvas" width="180" height="130"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  var img = new Image();
+  img.onload = function(){
+    ctx.drawImage(img,0,0);
+    ctx.beginPath();
+    ctx.moveTo(30,96);
+    ctx.lineTo(70,66);
+    ctx.lineTo(103,76);
+    ctx.lineTo(170,15);
+    ctx.stroke();
+
+    // prevent IE6 memory leak
+    img = null;
+  }
+  img.src = 'images/backdrop.png';
+}
+      </pre>
+      <div style="float:left;">
+        <h2>Source image</h2>
+        <img src="images/backdrop.png"/>
+      </div>
+    </div>
+  </body>
+</html>

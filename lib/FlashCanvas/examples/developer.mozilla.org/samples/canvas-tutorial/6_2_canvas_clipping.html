@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas clip example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+        ctx.fillRect(0,0,150,150);
+        ctx.translate(75,75);
+
+        // Create a circular clipping path        
+        ctx.beginPath();
+        ctx.arc(0,0,60,0,Math.PI*2,true);
+        ctx.clip();
+
+        // draw background
+        var lingrad = ctx.createLinearGradient(0,-75,0,75);
+        lingrad.addColorStop(0, '#232256');
+        lingrad.addColorStop(1, '#143778');
+        
+        ctx.fillStyle = lingrad;
+        ctx.fillRect(-75,-75,150,150);
+
+        // draw stars
+        for (j=1;j<50;j++){
+          ctx.save();
+          ctx.fillStyle = '#fff';
+          ctx.translate(75-Math.floor(Math.random()*150),75-Math.floor(Math.random()*150));
+          drawStar(ctx,Math.floor(Math.random()*4)+2);
+          ctx.restore();
+        }
+        
+      }
+      function drawStar(ctx,r){
+        ctx.save();
+        ctx.beginPath()
+        ctx.moveTo(r,0);
+        for (i=0;i<9;i++){
+          ctx.rotate(Math.PI/5);
+          if(i%2 == 0) {
+            ctx.lineTo((r/0.525731)*0.200811,0);
+          } else {
+            ctx.lineTo(r,0);
+          }
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>clip</code> example</h1>
+    <div>
+      <canvas id="canvas" width="150" height="150"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  ctx.fillRect(0,0,150,150);
+  ctx.translate(75,75);
+
+  // Create a circular clipping path        
+  ctx.beginPath();
+  ctx.arc(0,0,60,0,Math.PI*2,true);
+  ctx.clip();
+
+  // draw background
+  var lingrad = ctx.createLinearGradient(0,-75,0,75);
+  lingrad.addColorStop(0, '#232256');
+  lingrad.addColorStop(1, '#143778');
+  
+  ctx.fillStyle = lingrad;
+  ctx.fillRect(-75,-75,150,150);
+
+  // draw stars
+  for (j=1;j<50;j++){
+    ctx.save();
+    ctx.fillStyle = '#fff';
+    ctx.translate(75-Math.floor(Math.random()*150),75-Math.floor(Math.random()*150));
+    drawStar(ctx,Math.floor(Math.random()*4)+2);
+    ctx.restore();
+  }
+  
+}
+function drawStar(ctx,r){
+  ctx.save();
+  ctx.beginPath()
+  ctx.moveTo(r,0);
+  for (i=0;i<9;i++){
+    ctx.rotate(Math.PI/5);
+    if(i%2 == 0) {
+      ctx.lineTo((r/0.525731)*0.200811,0);
+    } else {
+      ctx.lineTo(r,0);
+    }
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+      </pre>
+    </div>
+  </body>
+</html>

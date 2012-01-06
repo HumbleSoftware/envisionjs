@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas rotate example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+        ctx.translate(75,75);
+        for (i=1;i<6;i++){
+          ctx.save();
+          ctx.fillStyle = 'rgb(255,'+Math.abs(306-51*i)+',0)';
+          for (j=0;j<i*6;j++){
+          ctx.rotate(Math.PI*2/(i*6));
+          ctx.beginPath();
+          ctx.arc(0,i*12.5,5,0,Math.PI*2,true);
+          ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>rotate</code> example</h1>
+    <div>
+      <canvas id="canvas" width="150" height="150"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  ctx.translate(75,75);
+  for (i=1;i&lt;6;i++){
+    ctx.save();
+    ctx.fillStyle = 'rgb('+(51*i)+','+(255-51*i)+',255)';
+    for (j=0;j&lt;i*6;j++){
+    ctx.rotate(Math.PI*2/(i*6));
+    ctx.beginPath();
+    ctx.arc(0,i*12.5,5,0,Math.PI*2,true);
+    ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+      </pre>
+    </div>
+  </body>
+</html>

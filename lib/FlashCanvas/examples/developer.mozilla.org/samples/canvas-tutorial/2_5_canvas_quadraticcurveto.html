@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas quadraticCurveTo example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function drawShape(){
+        // get the canvas element using the DOM
+        var canvas = document.getElementById('tutorial');
+
+        // Make sure we don't execute when canvas isn't supported
+        if (canvas.getContext){
+
+          // use getContext to use the canvas for drawing
+          var ctx = canvas.getContext('2d');
+
+          // Draw shapes
+
+          ctx.beginPath();
+          ctx.moveTo(75,25);
+          ctx.quadraticCurveTo(25,25,25,62.5);
+          ctx.quadraticCurveTo(25,100,50,100);
+          ctx.quadraticCurveTo(50,120,30,125);
+          ctx.quadraticCurveTo(60,120,65,100);
+          ctx.quadraticCurveTo(125,100,125,62.5);
+          ctx.quadraticCurveTo(125,25,75,25);
+          ctx.stroke();
+
+        } else {
+          alert('You need Safari or Firefox 1.5+ to see this demo.');
+        }
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+
+  <body onload="drawShape();">
+    <h1>A canvas <code>quadraticCurveTo</code> example</h1>
+    <div>
+      <canvas id="tutorial" width="150" height="150"></canvas>
+      <pre>
+function drawShape(){
+  // get the canvas element using the DOM
+  var canvas = document.getElementById('tutorial');
+
+  // Make sure we don't execute when canvas isn't supported
+  if (canvas.getContext){
+
+    // use getContext to use the canvas for drawing
+    var ctx = canvas.getContext('2d');
+
+    // Draw shapes
+
+    ctx.beginPath();
+    ctx.moveTo(75,25);
+    ctx.quadraticCurveTo(25,25,25,62.5);
+    ctx.quadraticCurveTo(25,100,50,100);
+    ctx.quadraticCurveTo(50,120,30,125);
+    ctx.quadraticCurveTo(60,120,65,100);
+    ctx.quadraticCurveTo(125,100,125,62.5);
+    ctx.quadraticCurveTo(125,25,75,25);
+    ctx.stroke();
+
+  } else {
+    alert('You need Safari or Firefox 1.5+ to see this demo.');
+  }
+}
+      </pre>
+    </div>
+  </body>
+
+</html>

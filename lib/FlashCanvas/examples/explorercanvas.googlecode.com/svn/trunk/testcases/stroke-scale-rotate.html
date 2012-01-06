@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Stroke Scale</title>
+<style>
+
+body {
+  text-align: center
+}
+
+canvas {
+  background: #eee;
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+// draw a star
+function drawStar (ctx, r){
+  ctx.save();
+
+  ctx.beginPath();
+  ctx.rotate(-Math.PI / 10);
+  ctx.scale(r, r);
+  ctx.moveTo(1, 0);
+  ctx.lineWidth = ctx.lineWidth / r;
+
+  for (var i = 0; i < 9; i++) {
+    ctx.rotate(Math.PI / 5);
+    if (i % 2 == 0) {
+      ctx.lineTo(0.3819653016466596, 0);
+    } else {
+      ctx.lineTo(1, 0);
+    }
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+window.onload = function() {
+  var ctx = document.getElementById('c').getContext('2d');
+
+  ctx.save();
+
+  ctx.translate(100.5, 100);
+  ctx.lineWidth = 1;
+
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(50, 0);
+  ctx.scale(1, 2);
+  ctx.rotate(Math.PI / 2);
+  ctx.lineTo(25, -50)
+  ctx.rotate(Math.PI / 2);
+  ctx.lineTo(0, -25)
+  ctx.scale(1, 2);
+  ctx.closePath();
+  ctx.stroke();
+
+  ctx.restore();
+
+  ctx.translate(50, 50);
+
+  ctx.fillStyle = 'white';
+  ctx.strokeStyle = 'blue';
+  drawStar(ctx, 20);
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=500 height=500></canvas>
+
+</body>
+</html>

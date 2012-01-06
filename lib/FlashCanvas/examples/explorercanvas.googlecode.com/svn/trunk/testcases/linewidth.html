@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Line Width Test</title>
+<style>
+
+body {
+  text-align: center
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+window.onload = function() {
+  var ctx = document.getElementById('c').getContext('2d');
+
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 1;
+  for (var i = 0; i < 100; i++) {
+    ctx.beginPath();
+    ctx.moveTo(49 + i / 100, i);
+    ctx.lineTo(49 + i / 100, i + 1);
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  for (var i = 0; i < 100; i++) {
+    ctx.beginPath();
+    ctx.moveTo(i, 49 + i / 100);
+    ctx.lineTo(i + 1, 49 + i / 100);
+    ctx.closePath();
+    ctx.stroke();
+  }
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=100 height=100></canvas>
+
+<p>This tests that lines work in the same way in different browsers when you are
+using sub pixel coordinates.</p>
+
+</body>
+</html>

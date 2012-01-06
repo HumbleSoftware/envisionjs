@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas scale example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+        ctx.strokeStyle = "#fc0";
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(0,0,300,300);
+
+        // Uniform scaling
+        ctx.save()
+        ctx.translate(50,50);
+        drawSpirograph(ctx,22,6,5);
+
+        ctx.translate(100,0);
+        ctx.scale(0.75,0.75);
+        drawSpirograph(ctx,22,6,5);
+
+        ctx.translate(133.333,0);
+        ctx.scale(0.75,0.75);
+        drawSpirograph(ctx,22,6,5);
+        ctx.restore();
+
+        // Non uniform scaling (y direction)
+        ctx.strokeStyle = "#0cf";
+        ctx.save()
+        ctx.translate(50,150);
+        ctx.scale(1,0.75);
+        drawSpirograph(ctx,22,6,5);
+
+        ctx.translate(100,0);
+        ctx.scale(1,0.75);
+        drawSpirograph(ctx,22,6,5);
+
+        ctx.translate(100,0);
+        ctx.scale(1,0.75);
+        drawSpirograph(ctx,22,6,5);
+        ctx.restore();
+
+        // Non uniform scaling (x direction)
+        ctx.strokeStyle = "#cf0";
+        ctx.save()
+        ctx.translate(50,250);
+        ctx.scale(0.75,1);
+        drawSpirograph(ctx,22,6,5);
+
+        ctx.translate(133.333,0);
+        ctx.scale(0.75,1);
+        drawSpirograph(ctx,22,6,5);
+
+        ctx.translate(177.777,0);
+        ctx.scale(0.75,1);
+        drawSpirograph(ctx,22,6,5);
+        ctx.restore();
+
+      }
+      function drawSpirograph(ctx,R,r,O){
+        var x1 = R-O;
+        var y1 = 0;
+        var i  = 1;
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        do {
+          if (i>20000) break;
+          var x2 = (R+r)*Math.cos(i*Math.PI/72) - (r+O)*Math.cos(((R+r)/r)*(i*Math.PI/72))
+          var y2 = (R+r)*Math.sin(i*Math.PI/72) - (r+O)*Math.sin(((R+r)/r)*(i*Math.PI/72))
+          ctx.lineTo(x2,y2);
+          x1 = x2;
+          y1 = y2;
+          i++;
+        } while (x2 != R-O && y2 != 0 );
+        ctx.stroke();
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>scale</code> example</h1>
+    <div>
+      <canvas id="canvas" width="300" height="300"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  ctx.strokeStyle = "#fc0";
+  ctx.lineWidth = 1.5;
+  ctx.fillRect(0,0,300,300);
+
+  // Uniform scaling
+  ctx.save()
+  ctx.translate(50,50);
+  drawSpirograph(ctx,22,6,5);
+
+  ctx.translate(100,0);
+  ctx.scale(0.75,0.75);
+  drawSpirograph(ctx,22,6,5);
+
+  ctx.translate(133.333,0);
+  ctx.scale(0.75,0.75);
+  drawSpirograph(ctx,22,6,5);
+  ctx.restore();
+
+  // Non uniform scaling (y direction)
+  ctx.strokeStyle = "#0cf";
+  ctx.save()
+  ctx.translate(50,150);
+  ctx.scale(1,0.75);
+  drawSpirograph(ctx,22,6,5);
+
+  ctx.translate(100,0);
+  ctx.scale(1,0.75);
+  drawSpirograph(ctx,22,6,5);
+
+  ctx.translate(100,0);
+  ctx.scale(1,0.75);
+  drawSpirograph(ctx,22,6,5);
+  ctx.restore();
+
+  // Non uniform scaling (x direction)
+  ctx.strokeStyle = "#cf0";
+  ctx.save()
+  ctx.translate(50,250);
+  ctx.scale(0.75,1);
+  drawSpirograph(ctx,22,6,5);
+
+  ctx.translate(133.333,0);
+  ctx.scale(0.75,1);
+  drawSpirograph(ctx,22,6,5);
+
+  ctx.translate(177.777,0);
+  ctx.scale(0.75,1);
+  drawSpirograph(ctx,22,6,5);
+  ctx.restore();
+  
+}
+function drawSpirograph(ctx,R,r,O){
+  var x1 = R-O;
+  var y1 = 0;
+  var i  = 1;
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  do {
+    if (i>20000) break;
+    var x2 = (R+r)*Math.cos(i*Math.PI/72) - (r+O)*Math.cos(((R+r)/r)*(i*Math.PI/72))
+    var y2 = (R+r)*Math.sin(i*Math.PI/72) - (r+O)*Math.sin(((R+r)/r)*(i*Math.PI/72))
+    ctx.lineTo(x2,y2);
+    x1 = x2;
+    y1 = y2;
+    i++;
+  } while (x2 != R-O && y2 != 0 );
+  ctx.stroke();
+}
+      </pre>
+    </div>
+  </body>
+</html>

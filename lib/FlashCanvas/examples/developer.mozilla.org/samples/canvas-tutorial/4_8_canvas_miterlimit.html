@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas miterLimit example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+  
+        // Clear canvas
+        ctx.clearRect(0,0,150,150);
+  
+        // Draw guides
+        ctx.strokeStyle = '#09f';
+        ctx.lineWidth   = 2;
+        ctx.strokeRect(-5,50,160,50);
+  
+        // Set line styles
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 10;
+  
+        // check input
+        if (document.getElementById('miterLimit').value.match(/\d+(\.\d+)?/)) {
+          ctx.miterLimit = parseFloat(document.getElementById('miterLimit').value);
+        } else {
+          alert('Value must be a positive number');
+        }
+  
+        // Draw lines
+        ctx.beginPath();
+        ctx.moveTo(0,100);
+        for (i=0;i<24;i++){
+          var dy = i%2==0 ? 25 : -25 ;
+          ctx.lineTo(Math.pow(i,1.5)*2,75+dy);
+        }
+        ctx.stroke();
+        return false;
+      }
+      function init(){
+        document.getElementById('miterLimit').value = 
+          document.getElementById('canvas').getContext('2d').miterLimit;
+        draw();
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+      td { vertical-align:top; }
+    </style>
+  </head>
+  <body onload="init();">
+    <h1>A canvas <code>miterLimit</code> example</h1>
+    <table>
+      <tr>
+        <td><canvas id="canvas" width="150" height="150"></canvas></td>
+        <td>
+          Change the miterLimit by entering a new value below and clicking the 
+          redraw button.<br><br>
+          <form onsubmit="return draw();">
+            <label>Miter limit</label>
+            <input type="text" size="3" id="miterLimit"/>
+            <input type="submit" value="Redraw"/>
+          </form>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

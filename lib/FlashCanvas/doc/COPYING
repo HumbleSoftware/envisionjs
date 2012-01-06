@@ -1,0 +1,68 @@
+FlashCanvas
+===========
+
+FlashCanvas is developed by FlashCanvas Project and released under the
+MIT License. It contains, however, several files which are derived from
+other projects. The following is a summary of those files and their
+licenses; the concrete license is written in each source file.
+
+
+Predecessor projects
+--------------------
+
+FlashCanvas is based on the following works:
+
+ * The first prototype of FlashCanvas by Grant Jones
+   http://gxjones.blogspot.com/2008/07/flashcanvas.html
+   Apache License 2.0
+
+ * ASCanvas by Colin Leung
+   http://code.google.com/p/ascanvas/
+   CC0 / Public domain
+
+ * haXe version of FlashCanvas by Tim Cameron Ryan
+   http://timcameronryan.github.com/FlashCanvas/
+   MIT License
+
+
+Third-party libraries used in FlashCanvas
+-----------------------------------------
+
+ * bezier_lib.as by Timothée Groleau
+   http://www.timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm
+
+ * BitString.as, JPGEncoder.as and PNGEncoder.as by Adobe Systems Incorporated
+   https://github.com/mikechambers/as3corelib
+   New BSD License
+
+
+Examples included in this package
+---------------------------------
+
+This package includes examples from the following pages. The examples
+are modified so as to use FlashCanvas if the browser is Internet
+Explorer 8 or earlier.
+
+ * ExplorerCanvas
+   http://code.google.com/p/explorercanvas/
+   Apache License 2.0
+
+ * Canvas text
+   http://code.google.com/p/canvas-text/
+   MIT License
+
+ * Canvas tutorial - Mozilla Developer Center
+   https://developer.mozilla.org/en/Canvas_tutorial
+   MIT License
+
+ * Kaleidoscope by Christophe Résigné
+   http://www.chiptune.com/kaleidoscope/
+   (Included with the permission of the author)
+
+ * Starfield by Christophe Résigné
+   http://www.chiptune.com/starfield/starfield.html
+   (Included with the permission of the author)
+
+ * Cloth Simulation by Andrew Hoyer
+   http://www.andrew-hoyer.com/experiments/cloth
+   (Included with the permission of the author)

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas rgba() example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+      
+        // Draw background
+        ctx.fillStyle = 'rgb(255,221,0)';
+        ctx.fillRect(0,0,150,37.5);
+        ctx.fillStyle = 'rgb(102,204,0)';
+        ctx.fillRect(0,37.5,150,37.5);
+        ctx.fillStyle = 'rgb(0,153,255)';
+        ctx.fillRect(0,75,150,37.5);
+        ctx.fillStyle = 'rgb(255,51,0)';
+        ctx.fillRect(0,112.5,150,37.5);
+      
+        // Draw semi transparent circles
+        for (i=0;i<10;i++){
+          ctx.fillStyle = 'rgba(255,255,255,'+(i+1)/10+')';
+          for (j=0;j<4;j++){
+            ctx.fillRect(5+i*14,5+j*37.5,14,27.5)
+          }
+        }
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000;float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>rgba()</code> example</h1>
+    <div>
+      <canvas id="canvas" width="150" height="150"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+
+  // Draw background
+  ctx.fillStyle = 'rgb(255,221,0)';
+  ctx.fillRect(0,0,150,37.5);
+  ctx.fillStyle = 'rgb(102,204,0)';
+  ctx.fillRect(0,37.5,150,37.5);
+  ctx.fillStyle = 'rgb(0,153,255)';
+  ctx.fillRect(0,75,150,37.5);
+  ctx.fillStyle = 'rgb(255,51,0)';
+  ctx.fillRect(0,112.5,150,37.5);
+
+  // Draw semi transparent circles
+  for (i=0;i<10;i++){
+    ctx.fillStyle = 'rgba(255,255,255,'+(i+1)/10+')';
+    for (j=0;j<4;j++){
+      ctx.fillRect(5+i*14,5+j*37.5,14,27.5)
+    }
+  }
+}
+      </pre>
+    </div>
+  </body>
+</html>

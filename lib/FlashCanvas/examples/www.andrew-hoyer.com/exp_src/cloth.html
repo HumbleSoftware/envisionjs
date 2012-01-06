@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>index</title>
+	<script type="text/javascript" charset="utf-8">
+		function out(msg){
+			document.getElementById('debug_output').innerHTML += msg;
+		}
+		function outpl(msg){
+			document.getElementById('debug_output').innerHTML += msg+"\n";
+		}
+		function clearOutput(){
+			document.getElementById('debug_output').innerHTML = "";
+		}
+	</script>
+	<style type='text/css'>
+		body{
+			margin:0;
+			padding:0;
+		}
+		canvas{
+			border:1px dashed #ddd;
+			margin:0;
+			padding:0;
+		}
+		#cloth_controls{
+			width:500px;
+		}
+		table{
+			text-align:center;
+			margin:0 auto;
+		}
+	</style>
+	
+	<!--[if lt IE 9]><script type="text/javascript" src="../../../bin/flashcanvas.js"></script><![endif]-->
+	<script src="cloth_JS/fast_vector.js" type="text/javascript" charset="utf-8"></script>
+	<script src="cloth_JS/canvas.js" type="text/javascript" charset="utf-8"></script>
+	<script src="cloth_JS/point.js" type="text/javascript" charset="utf-8"></script>
+	<script src="cloth_JS/constraint.js" type="text/javascript" charset="utf-8"></script>
+	<script src="cloth_JS/cloth.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+	<canvas id='canvas' width='500' height='500'></canvas><br/>
+	<div id='cloth_controls'>
+		<table>
+			<tr>
+				<td>
+					<input type='checkbox' id='constraints' checked='checked' onclick='checkboxes()'>Draw Lines</input>
+				</td>
+				<td>
+					<input type='checkbox' id='points' onclick='checkboxes()'>Draw Points</input>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<select id='num_points' onchange='load()' >
+						<option value='3'>3</option>
+						<option value='5'>5</option>
+						<option value='8'>8</option>
+						<option selected='selected' value='10'>10</option>
+						<option value='15'>15</option>
+					</select>
+					points
+				</td>
+				<td>
+					<input type="button" onclick='load()' value='reset'/>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<pre id='debug_output'></pre>
+	<script type="text/javascript" charset="utf-8">
+		load();
+	</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Canvas drawImage example 3</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+    function draw() {
+      var ctx = document.getElementById('canvas').getContext('2d');
+      ctx.drawImage(document.getElementById('source'),33,71,104,124,21,20,87,104);
+      ctx.drawImage(document.getElementById('frame'),0,0);
+    }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      h2 { font-size: 100%; color: #036; }
+      canvas { float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <div>
+      <h1>Canvas <code>drawImage</code> example 3</h1>
+      <canvas id="canvas" width="150" height="150"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  ctx.drawImage(document.getElementById('source'),33,71,104,124,21,20,87,104);
+  ctx.drawImage(document.getElementById('frame'),0,0);
+}
+</pre>
+      <div style="float:left;">
+        <h2>Source images</h2>
+        <img id="source" src="images/rhino.jpg" width="300" height="227" alt="">
+        <img id="frame" src="images/picture_frame.png" width="132" height="150" alt="">
+      </div>
+    </div>
+  </body>
+</html>

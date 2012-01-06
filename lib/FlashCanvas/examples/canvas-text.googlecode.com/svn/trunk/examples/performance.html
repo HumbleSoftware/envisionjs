@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Canvas text performance example</title>
+    <!--[if lt IE 9]><script type="text/javascript" src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+    <link rel="stylesheet" type="text/css" href="style.css" />
+	</head>
+	<body>
+    <script type="text/javascript">
+      window.onload = function(){
+        if (!window.CanvasRenderingContext2D.prototype.fillText)
+          document.getElementById('native-title').innerHTML += ' (not available in your browser)'; 
+        if (typeof FlashCanvas != "undefined") {
+          document.getElementById('native-title').innerHTML = 'FlashCanvas';
+        }
+      }
+    </script>
+    
+    <h1>Canvas text performance example</h1>
+    <p>This example shows the built-in text functions performances vs. the native ones (if available in your browser).</p>
+    
+    <h2 id="native-title">Native</h2>
+		<iframe src="performance-native.html" width="600" height="300" style="border: 1px solid #999;" onload=""></iframe>
+    
+    <h2>canvas.text.js</h2>
+    <iframe src="performance-lib.html" width="600" height="300" style="border: 1px solid #999;"></iframe>
+    
+    <a href="index.html" class="footer">Back to the index</a>
+	</body>
+</html>

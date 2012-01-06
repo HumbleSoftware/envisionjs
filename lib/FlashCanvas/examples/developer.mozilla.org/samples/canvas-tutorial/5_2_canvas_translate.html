@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A canvas translate example</title>
+    <meta name="DC.creator" content="Kamiel Martinet, http://www.martinet.nl/">
+    <meta name="DC.publisher" content="Mozilla Developer Center, http://developer.mozilla.org">
+<!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../../bin/flashcanvas.js"></script>
+<![endif]-->
+    <script type="text/javascript">
+      function draw() {
+        var ctx = document.getElementById('canvas').getContext('2d');
+        ctx.fillRect(0,0,300,300);
+        for (i=0;i<3;i++) {
+          for (j=0;j<3;j++) {
+            ctx.save();
+            ctx.strokeStyle = "#9CFF00";
+            ctx.translate(50+j*100,50+i*100);
+            drawSpirograph(ctx,20*(j+2)/(j+1),-8*(i+3)/(i+1),10);
+            ctx.restore();
+          }
+        }
+      }
+      function drawSpirograph(ctx,R,r,O){
+        var x1 = R-O;
+        var y1 = 0;
+        var i  = 1;
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        do {
+          if (i>20000) break;
+          var x2 = (R+r)*Math.cos(i*Math.PI/72) - (r+O)*Math.cos(((R+r)/r)*(i*Math.PI/72))
+          var y2 = (R+r)*Math.sin(i*Math.PI/72) - (r+O)*Math.sin(((R+r)/r)*(i*Math.PI/72))
+          ctx.lineTo(x2,y2);
+          x1 = x2;
+          y1 = y2;
+          i++;
+        } while (x2 != R-O && y2 != 0 );
+        ctx.stroke();
+      }
+    </script>
+    <style type="text/css">
+      body { margin: 20px; font-family: arial,verdana,helvetica; background: #fff;}
+      h1 { font-size: 140%; font-weight:normal; color: #036; border-bottom: 1px solid #ccc; }
+      canvas { border: 2px solid #000; float: left; margin-right: 20px; margin-bottom: 20px; }
+      pre { float:left; display:block; background: rgb(238,238,238); border: 1px dashed #666; padding: 15px 20px; margin: 0 0 10px 0; }
+    </style>
+  </head>
+  <body onload="draw();">
+    <h1>A canvas <code>translate</code> example</h1>
+    <div>
+      <canvas id="canvas" width="300" height="300"></canvas>
+      <pre>
+function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  ctx.fillRect(0,0,300,300);
+  for (i=0;i<3;i++) {
+    for (j=0;j<3;j++) {
+      ctx.save();
+      ctx.strokeStyle = "#9CFF00";
+      ctx.translate(50+j*100,50+i*100);
+      drawSpirograph(ctx,20*(j+2)/(j+1),-8*(i+3)/(i+1),10);
+      ctx.restore();
+    }
+  }
+}
+function drawSpirograph(ctx,R,r,O){
+  var x1 = R-O;
+  var y1 = 0;
+  var i  = 1;
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  do {
+    if (i>20000) break;
+    var x2 = (R+r)*Math.cos(i*Math.PI/72) - (r+O)*Math.cos(((R+r)/r)*(i*Math.PI/72))
+    var y2 = (R+r)*Math.sin(i*Math.PI/72) - (r+O)*Math.sin(((R+r)/r)*(i*Math.PI/72))
+    ctx.lineTo(x2,y2);
+    x1 = x2;
+    y1 = y2;
+    i++;
+  } while (x2 != R-O && y2 != 0 );
+  ctx.stroke();
+}
+      </pre>
+    </div>
+  </body>
+</html>

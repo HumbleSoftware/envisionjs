@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Clear path Test</title>
+<style>
+
+body {
+  text-align: center
+}
+
+</style>
+<!--[if lt IE 9]><script src="../../../../../bin/flashcanvas.js"></script><![endif]-->
+<script>
+
+window.onload = function() {
+  var ctx = document.getElementById('c').getContext('2d');
+
+  // Need to test  clearRect, strokeRect, fillRect
+  ctx.beginPath();
+  ctx.moveTo(0, 50);
+  ctx.lineTo(50, 100);
+
+  ctx.strokeRect(100.5, 125.5, 49, 49);
+
+  ctx.lineTo(100, 50);
+
+  ctx.fillRect(50, 125, 50, 50);
+
+  ctx.lineTo(50, 0);
+
+  // clearRect is not correctly implmented in ExCanvas but for this test its
+  // current behavior is enough.
+  ctx.clearRect(50, 125, 100, 50);
+
+  ctx.lineTo(0, 50);
+  ctx.stroke();
+};
+
+</script>
+</head>
+<body>
+
+<canvas id=c width=200 height=200></canvas>
+
+<p>This tests the clearing of the path. You should only see a diamond shape
+above.</p>
+
+</body>
+</html>
