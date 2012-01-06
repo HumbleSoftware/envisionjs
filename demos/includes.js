@@ -1,3 +1,6 @@
+window.FlashCanvasOptions = {
+  swfPath: '../lib/FlashCanvas/bin/'
+};
 yepnope([
   // Libs
   '../lib/flotr2/lib/bean.js',
@@ -6,12 +9,13 @@ yepnope([
   test : (navigator.appVersion.indexOf("MSIE") != -1  && parseFloat(navigator.appVersion.split("MSIE")[1]) < 9),
     // Load for IE < 9
     yep : [
-      '../lib/flotr2/lib/excanvas.js',
+      '../lib/FlashCanvas/bin/flashcanvas.js',
+      /*'../lib/flotr2/lib/excanvas.js',*/
       '../lib/flotr2/lib/base64.js'
     ]
   },
   '../lib/flotr2/lib/canvas2image.js',
-  '../lib/flotr2/lib/canvastext.js',
+  /*'../lib/flotr2/lib/canvastext.js',*/
   '../lib/bonzo/bonzo.min.js',
 
   // Flotr
