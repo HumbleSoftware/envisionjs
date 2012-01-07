@@ -3,6 +3,7 @@ window.FlashCanvasOptions = {
 };
 yepnope([
   // Libs
+  '../lib/jquery/jquery-1.7.1.min.js',
   '../lib/flotr2/lib/bean.js',
   '../lib/flotr2/lib/underscore-min.js',
   {
