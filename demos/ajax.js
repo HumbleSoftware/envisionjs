@@ -56,7 +56,7 @@ function example () {
       flotr   : {
         lines : {
           fill : true,
-          fillOpacity : .2
+          fillOpacity : .2,
         },
         xaxis : {
           noTicks: 5,
@@ -96,18 +96,19 @@ function example () {
     vis.add(summary);
     vis.render(container);
 
-    selection.add(H.Action.Selection);
+    selection.add(H.Action.Selection, {
+      callback : function (o) {
+        if (Math.abs(o.xaxis.max - o.xaxis.min) < 250) {
+          $.get('data/ajax.json', function (data) {
+            priceOptions.data = data.price;
+            volumeOptions.data = data.volume;
+            jsonData = data.data;
+          });
+        }
+      }
+    });
     selection.follow(price);
     selection.follow(volume);
-    selection.reaction = function (o) {
-      if (Math.abs(o.xaxis.max - o.xaxis.min) < 250) {
-        $.get('data/ajax.json', function (data) {
-          priceOptions.data = data.price;
-          volumeOptions.data = data.volume;
-          jsonData = data.data;
-        });
-      }
-    };
 
     hit.add(H.Action.Hit);
     hit.group([price, volume]);
