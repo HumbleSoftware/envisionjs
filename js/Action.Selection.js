@@ -24,6 +24,8 @@ var Selection = {
     _.each(this.followers, function (follower) {
       follower.draw(null, o);
     }, this);
+
+    return o;
   },
 
   reset : function () {
@@ -42,6 +44,8 @@ var Selection = {
     _.each(this.followers, function (follower) {
       follower.draw(null, o);
     }, this);
+
+    return o;
   }
 };
 
