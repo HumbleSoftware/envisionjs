@@ -97,15 +97,40 @@ function example () {
     vis.render(container);
 
     selection.add(H.Action.Selection, {
-      callback : function (o) {
-        if (Math.abs(o.xaxis.max - o.xaxis.min) < 250) {
-          $.get('data/ajax.json', function (data) {
-            priceOptions.data = data.price;
-            volumeOptions.data = data.volume;
-            jsonData = data.data;
+      callback : (function () {
+        var data = {
+          original : {
+            price : priceOptions.data,
+            volume : volumeOptions.data
+          },
+          fetched : {
+            price : null,
+            volume : null
+          }
+        };
+        function fetchData () {
+          $.get('data/ajax.json', function (d) {
+            data.fetched.price = d.price;
+            data.fetched.volume = d.volume;
+            priceOptions.data = d.price;
+            volumeOptions.data = d.volume;
+            jsonData = d.data;
           });
         }
-      }
+        return function (o) {
+          if (Math.abs(o.xaxis.max - o.xaxis.min) < 250) {
+            if (data.fetched.price && data.fetched.volume) {
+              priceOptions.data = data.fetched.price;
+              volumeOptions.data = data.fetched.volume;
+            } else {
+              fetchData();
+            }
+          } else {
+            priceOptions.data = data.original.price;
+            volumeOptions.data = data.original.volume;
+          }
+        }
+      })()
     });
     selection.follow(price);
     selection.follow(volume);
