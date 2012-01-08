@@ -66,16 +66,23 @@ Interaction.prototype = {
     }, this);
   },
 
-  add : function (action) {
+  add : function (action, options) {
     this.actions.push(action);
     _.each(this.leaders, function (leader) {
-      this._bindLeader(leader, action);
+      this._bindLeader(leader, action, options);
     }, this);
   },
 
-  _bindLeader : function (leader, action) {
+  _bindLeader : function (leader, action, options) {
     _.each(action.events, function (method, name) {
-      E.observe(leader.container, name, _.bind(action[method], this, leader));
+      E.observe(leader.container, name, _.bind(function () {
+        var
+          args = [leader].concat(Array.prototype.slice.call(arguments)),
+          result = action[method].apply(this, args);
+        if (options && options.callback) {
+          options.callback.call(this, result);
+        }
+      }, this));
     }, this);
   }
 };
