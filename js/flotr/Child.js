@@ -50,13 +50,13 @@ Child.prototype = {
     if (o.width) {
       bonzo(this.container).css({width : o.width});
     } else {
-      o.width = parseInt(bonzo(this.container).css('width'));
+      o.width = parseInt(bonzo(this.container).css('width'), 10);
     }
 
     if (o.height) {
       bonzo(this.container).css({height : o.height});
     } else {
-      o.height = parseInt(bonzo(this.container).css('height'));
+      o.height = parseInt(bonzo(this.container).css('height'), 10);
     }
 
     this.draw(o.data, o.flotr);
