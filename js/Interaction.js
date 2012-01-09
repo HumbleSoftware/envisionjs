@@ -20,6 +20,7 @@ function Interaction(options) {
   this.actions = [];
   this.followers = [];
   this.leaders = [];
+  this.prevent = {};
 
   //this._initOptions();
   //if (!options.leader) throw 'No leader.';
@@ -74,11 +75,31 @@ Interaction.prototype = {
   },
 
   _bindLeader : function (leader, action, options) {
-    _.each(action.events, function (method, name) {
+    _.each(action.events, function (methods, name) {
       E.observe(leader.container, name, _.bind(function () {
+
+        if (this.prevent[name]) return;
+
         var
           args = [leader].concat(Array.prototype.slice.call(arguments)),
-          result = method.apply(this, args);
+          result = null;
+
+        if (methods.handler) {
+          result = methods.handler.apply(this, args);
+        }
+
+        this.prevent[name] = true; // Prevent recursions for this name
+        try {
+          _.each(this.followers, function (follower) {
+            if (leader === follower) return; // Skip leader (recursion)
+            methods.callback.apply(this, [follower, result]);
+          }, this);
+        } catch (e) {
+          this.prevent[name] = false;
+          throw e;
+        }
+        this.prevent[name] = false;
+
         if (options && options.callback) {
           options.callback.call(this, result);
         }

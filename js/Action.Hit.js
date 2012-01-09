@@ -2,33 +2,30 @@
 
 var Hit = {
   events : {
-    'flotr:hit' : function (leader, hit) {
-      if (this._preventHit) return;
-      this._preventHit = true;
-
-      var index = hit.index,
-        x = hit.x,
-        offset, graph, o, xaxis, yaxis;
-
-      _.each(this.followers, function (follower) {
-
-        if (leader === follower) return;
+    'flotr:hit' : {
+      handler : function (leader, hit) {
+        return hit;
+      },
+      callback : function (follower, options) {
+        var
+          x = options.x,
+          graph = follower.flotr,
+          o;
 
         // TODO this is a hack; the hit plugin should expose an API to do this easily
-        graph = follower.flotr;
         o = {
           relX : graph.axes.x.d2p(x),
           relY : 1
         };
         graph.hit.hit(o);
-      }, this);
-
-      this._preventHit = false;
+      }
     },
-    'mouseout' : function () {
-      _.each(this.followers, function (follower) {
-        follower.flotr.hit.clearHit();
-      }, this);
+    'mouseout' : {
+      callback : function () {
+        _.each(this.followers, function (follower) {
+          follower.flotr.hit.clearHit();
+        }, this);
+      }
     }
   }
 };
