@@ -106,7 +106,7 @@ Data.prototype = {
 
     return this;
   }
-}
+};
 
 humblevis.Data = Data;
 
