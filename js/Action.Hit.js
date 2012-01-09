@@ -1,42 +1,35 @@
 (function () {
 
-
 var Hit = {
-
   events : {
-    'flotr:hit' : 'hit',
-    'mouseout' : 'reset'
-  },
+    'flotr:hit' : function (leader, hit) {
+      if (this._preventHit) return;
+      this._preventHit = true;
 
-  hit : function (leader, hit) {
+      var index = hit.index,
+        x = hit.x,
+        offset, graph, o, xaxis, yaxis;
 
-    if (this._preventHit) return;
-    this._preventHit = true;
+      _.each(this.followers, function (follower) {
 
-    var index = hit.index,
-      x = hit.x,
-      offset, graph, o, xaxis, yaxis;
+        if (leader === follower) return;
 
-    _.each(this.followers, function (follower) {
+        // TODO this is a hack; the hit plugin should expose an API to do this easily
+        graph = follower.flotr;
+        o = {
+          relX : graph.axes.x.d2p(x),
+          relY : 1
+        };
+        graph.hit.hit(o);
+      }, this);
 
-      if (leader === follower) return;
-
-      // TODO this is a shit hack; the hit plugin should expose an API to do this easily
-      graph = follower.flotr;
-      o = {
-        relX : graph.axes.x.d2p(x),
-        relY : 1
-      };
-      graph.hit.hit(o);
-    }, this);
-
-    this._preventHit = false;
-  },
-
-  reset : function () {
-    _.each(this.followers, function (follower) {
-      follower.flotr.hit.clearHit();
-    }, this);
+      this._preventHit = false;
+    },
+    'mouseout' : function () {
+      _.each(this.followers, function (follower) {
+        follower.flotr.hit.clearHit();
+      }, this);
+    }
   }
 };
 

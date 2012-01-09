@@ -78,7 +78,7 @@ Interaction.prototype = {
       E.observe(leader.container, name, _.bind(function () {
         var
           args = [leader].concat(Array.prototype.slice.call(arguments)),
-          result = action[method].apply(this, args);
+          result = method.apply(this, args);
         if (options && options.callback) {
           options.callback.call(this, result);
         }
