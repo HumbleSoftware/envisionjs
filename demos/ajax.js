@@ -108,13 +108,16 @@ function example () {
             volume : null
           }
         };
-        function fetchData () {
+        function fetchData (o) {
           $.get('data/ajax.json', function (d) {
             data.fetched.price = d.price;
             data.fetched.volume = d.volume;
             priceOptions.data = d.price;
             volumeOptions.data = d.volume;
             jsonData = d.data;
+            _.each(selection.followers, function (follower) {
+              follower.draw(null, o);
+            }, this);
           });
         }
         return function (o) {
@@ -123,7 +126,7 @@ function example () {
               priceOptions.data = data.fetched.price;
               volumeOptions.data = data.fetched.volume;
             } else {
-              fetchData();
+              fetchData(o);
             }
           } else {
             priceOptions.data = data.original.price;
