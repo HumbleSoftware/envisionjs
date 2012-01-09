@@ -95,7 +95,7 @@ Child.prototype = {
       }, this);
     }
 
-    if (!flotr) throw 'No graph submitted.'
+    if (!flotr) throw 'No graph submitted.';
 
     this.flotr = Flotr.draw(container, fData, flotr);
   },
