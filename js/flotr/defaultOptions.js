@@ -11,7 +11,7 @@ humblevis.flotr.defaultOptions = {
   },
   bars : {
     show        : false,
-    barWidth    : .5,
+    barWidth    : 0.5,
     fill        : true,
     lineWidth   : 2,
     fillOpacity : 1
