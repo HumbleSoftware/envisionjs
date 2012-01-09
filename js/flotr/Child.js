@@ -66,7 +66,7 @@ Child.prototype = {
 
     var
       o           = this.options,
-      flotr       = _.clone(flotr),
+      flotr       = Flotr.clone(flotr),
       data        = data || o.data,
       fData       = [],
       container   = this.container;
