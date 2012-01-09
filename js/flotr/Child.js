@@ -66,12 +66,12 @@ Child.prototype = {
 
     var
       o           = this.options,
-      flotr       = Flotr.clone(flotr),
       data        = data || o.data,
       fData       = [],
       container   = this.container;
 
     if (flotr) {
+      flotr = Flotr.clone(flotr);
       _.extend(o.flotr, flotr);
       this._flotrDefaultOptions(flotr);
     }
