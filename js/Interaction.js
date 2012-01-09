@@ -88,6 +88,11 @@ Interaction.prototype = {
           result = methods.handler.apply(this, args);
         }
 
+        // Apply custom callback configured for this action
+        if (options && options.callback) {
+          options.callback.call(this, result);
+        }
+
         this.prevent[name] = true; // Prevent recursions for this name
         try {
           _.each(this.followers, function (follower) {
@@ -99,10 +104,6 @@ Interaction.prototype = {
           throw e;
         }
         this.prevent[name] = false;
-
-        if (options && options.callback) {
-          options.callback.call(this, result);
-        }
       }, this));
     }, this);
   }
