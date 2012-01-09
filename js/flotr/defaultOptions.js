@@ -2,7 +2,7 @@
  * Flotr Default Options
  */
 
-Humble.Vis.flotr.defaultOptions = {
+humblevis.flotr.defaultOptions = {
   grid : {
     outlineWidth : 0,
     labelMargin : 0,

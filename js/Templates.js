@@ -1,1 +1,1 @@
-if (typeof(Humble.Vis.templates) === 'undefined') Humble.Vis.templates = {};
+humblevis.templates = humblevis.templates || {};

@@ -1,7 +1,7 @@
 (function () {
 
 var
-  V = Humble.Vis,
+  V = humblevis,
   Zoom;
 
 function defaultsZoom () {
@@ -36,7 +36,7 @@ Zoom = function (options) {
   vis.add(zoom);
   vis.add(summary);
 
-  interaction.add(V.Action.Selection);
+  interaction.add(V.action.selection);
   interaction.follow(zoom);
 
   this.vis = vis;
@@ -53,6 +53,6 @@ Zoom.prototype = {
   }
 };
 
-Humble.Vis.templates.Zoom = Zoom;
+V.templates.Zoom = Zoom;
 
 })();

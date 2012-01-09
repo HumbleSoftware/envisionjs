@@ -12,14 +12,14 @@
 
 var
 
-  V = Humble.Vis,
+  V = humblevis,
 
   CN_CHILD = 'humble-vis-child',
 
   T_CHILD       = '<div class="' + CN_CHILD + '"></div>',
   T_CONTAINER   = '<div class="' + CN_CHILD + '-container"></div>',
 
-  DEFAULTS = Humble.Vis.flotr.defaultOptions;
+  DEFAULTS = V.flotr.defaultOptions;
 
 function Child(options) {
 
@@ -157,6 +157,6 @@ Child.prototype = {
   }
 };
 
-Humble.Vis.Child = Child;
+V.Child = Child;
 
 })();

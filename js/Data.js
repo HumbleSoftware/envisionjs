@@ -108,6 +108,6 @@ Data.prototype = {
   }
 }
 
-Humble.Vis.Data = Data;
+humblevis.Data = Data;
 
 }());

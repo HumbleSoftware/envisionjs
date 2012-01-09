@@ -15,7 +15,7 @@ function example () {
 
   var
     container = document.getElementById('demo'),
-    H = Humble.Vis,
+    H = humblevis,
     E = Flotr.EventAdapter,
     data = [],
 

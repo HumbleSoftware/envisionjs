@@ -1,6 +1,6 @@
 (function () {
 
-var Hit = {
+var hit = {
   events : {
     'flotr:hit' : {
       handler : function (leader, hit) {
@@ -30,6 +30,7 @@ var Hit = {
   }
 };
 
-Humble.Vis.Action.Hit = Hit;
+humblevis.action = humblevis.action || {};
+humblevis.action.hit = hit;
 
 })();

@@ -42,7 +42,7 @@ function example () {
     }
 
     // Render Zoom template
-    new Humble.Vis.templates.Zoom({
+    new humblevis.templates.Zoom({
       container : container,
       summary : {
         data : weierstrass,
@@ -107,7 +107,7 @@ function example () {
     // womp womp womp
     function letsWomp () {
       // Render Zoom template
-      new Humble.Vis.templates.Zoom({
+      new humblevis.templates.Zoom({
         container : container,
         summary : {
           data : data

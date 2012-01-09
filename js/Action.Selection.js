@@ -1,6 +1,6 @@
 (function () {
 
-var Selection = {
+var selection = {
 
   events : {
     'flotr:select' : {
@@ -40,7 +40,7 @@ var Selection = {
   }
 };
 
-Humble.Vis.Action = {};
-Humble.Vis.Action.Selection = Selection;
+humblevis.action = humblevis.action || {};
+humblevis.action.selection = selection;
 
 })();

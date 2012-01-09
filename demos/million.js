@@ -28,7 +28,7 @@ function example () {
   }
 
   // Zoom template:
-  million = new Humble.Vis.templates.Zoom({
+  million = new humblevis.templates.Zoom({
     container : container,
     summary : summary,
     zoom : zoom

@@ -1,1 +1,1 @@
-Humble.Vis.flotr = {};
+humblevis.flotr = {};

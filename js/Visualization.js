@@ -115,6 +115,6 @@ Visualization.prototype = {
   }
 };
 
-Humble.Vis.Visualization = Visualization;
+humblevis.Visualization = Visualization;
 
 })();

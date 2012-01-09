@@ -109,6 +109,6 @@ Interaction.prototype = {
   }
 };
 
-Humble.Vis.Interaction = Interaction;
+humblevis.Interaction = Interaction;
 
 })();

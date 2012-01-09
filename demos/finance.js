@@ -2,7 +2,7 @@ function example () {
 
   // Configuraiton
   var
-    H = Humble.Vis,
+    H = humblevis,
     E = Flotr.EventAdapter,
 
     container = document.getElementById('demo'),
@@ -92,11 +92,11 @@ function example () {
   vis.add(summary);
   vis.render(container);
 
-  selection.add(H.Action.Selection);
+  selection.add(H.action.selection);
   selection.follow(price);
   selection.follow(volume);
 
-  hit.add(H.Action.Hit);
+  hit.add(H.action.hit);
   hit.group([price, volume]);
 }
 
