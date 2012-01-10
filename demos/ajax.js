@@ -56,7 +56,7 @@ function example () {
       flotr   : {
         lines : {
           fill : true,
-          fillOpacity : .2,
+          fillOpacity : .2
         },
         xaxis : {
           noTicks: 5,
