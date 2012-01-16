@@ -18,6 +18,7 @@ var E = Flotr.EventAdapter;
 function Interaction(options) {
   this.options = options = options || {};
   this.actions = [];
+  this.actionOptions = [];
   this.followers = [];
   this.leaders = [];
   this.prevent = {};
@@ -50,8 +51,8 @@ Interaction.prototype = {
 
     this.leaders.push(child);
 
-    _.each(this.actions, function (action) {
-      this._bindLeader(child, action);
+    _.each(this.actions, function (action, i) {
+      this._bindLeader(child, action, this.actionOptions[i]);
     }, this);
   },
 
@@ -69,6 +70,7 @@ Interaction.prototype = {
 
   add : function (action, options) {
     this.actions.push(action);
+    this.actionOptions.push(options);
     _.each(this.leaders, function (leader) {
       this._bindLeader(leader, action, options);
     }, this);
