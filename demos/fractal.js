@@ -10,8 +10,6 @@ function example () {
      */
     draw : function (options) {
 
-      console.log('draw');
-
       var
         range     = options.data,
         context   = options.context,
