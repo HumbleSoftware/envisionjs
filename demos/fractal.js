@@ -10,17 +10,20 @@ function example () {
      */
     draw : function (options) {
 
+      console.log('draw');
+
       var
+        range     = options.data,
         context   = options.context,
         width     = options.width,
         height    = options.height,
-        minRe     = -2.0,
-        maxRe     = 1.0,
-        minIm     = -1.2,
-        maxIm     = minIm + (maxRe - minRe) * height / width,
+        minRe     = range[0][0],
+        maxRe     = range[1][0],
+        minIm     = range[1][1],
+        maxIm     = range[0][1],
         reFactor  = (maxRe - minRe) / (width - 1),
         imFactor  = (maxIm - minIm) / (height - 1),
-        max       = 30,
+        max       = 50,
         row, column, n, index,
         c_r, c_i, 
         z_r, z_i,
@@ -59,12 +62,12 @@ function example () {
           var r;
           if (!inside) {
             data[index + 2] = Math.min(255, Math.round(Math.abs(255 * n / max)));
-            if (n > 25) {
-              data[index] = 155 - (max - n) * 30;
-              data[index + 1] = 155 - (max - n) * 30;
+            if (n >= 25) {
+              data[index] = 100 - (max - n) * 20;
+              data[index + 1] = 100 - (max - n) * 20;
             }
           } else {
-            data[index + 2] = 120;
+            data[index + 2] = 80;
           }
         }
       }
@@ -76,32 +79,58 @@ function example () {
   var
     container = document.getElementById('demo'),
     E = Flotr.EventAdapter,
-    summary = {
-      data : [[-1, 1], [1, -1]],
+    H = humblevis,
+    fractalOptions = {
+      data : [[-2, 1.2], [1, -1.2]],
       width : 598,
       height : 456,
       flotr : {
         fractal : {
           show : true
+        },
+        selection : {
+          mode : 'xy'
         }
       }
     },
-    zoom = {
-      data : [[-1, 1], [1, -1]],
-      width : 598,
-      height : 456,
-      flotr : {
-        fractal : {
-          show : true
-        }
-      }
-    },
-    fractal;
+    vis, zoom;
 
-  // Zoom template:
-  fractal = new humblevis.templates.Zoom({
-    container : container,
-    summary : summary,
-    zoom : zoom
+  vis = new H.Visualization();
+  fractal = new H.Child(fractalOptions);
+  //summary = new H.Child(fractalOptions);
+  //zoom = new H.Interaction({leader : summary});
+
+  vis.add(fractal);
+  //vis.add(summary);
+  vis.render(container);
+
+  /*
+  zoom.add(H.action.selection, {
+    callback : function (o) {
+      fractalOptions.data = [
+        [o.xaxis.min, o.yaxis.max],
+        [o.xaxis.max, o.yaxis.min]
+      ]
+    }
+  });
+  zoom.follow(fractal);
+  */
+
+  E.observe(fractal.container, 'flotr:select', function (selection) {
+    fractal.draw([
+      [selection.x1, selection.y2],
+      [selection.x2, selection.y1],
+    ]);
+  });
+
+  E.observe(fractal.container, 'flotr:select', function (selection) {
+    fractal.draw([
+      [selection.x1, selection.y2],
+      [selection.x2, selection.y1],
+    ]);
+  });
+
+  E.observe(fractal.container, 'flotr:click', function (selection) {
+    fractal.draw([[-2, 1.2], [1, -1.2]]);
   });
 }
