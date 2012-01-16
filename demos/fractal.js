@@ -21,26 +21,28 @@ function example () {
         reFactor  = (maxRe - minRe) / (width - 1),
         imFactor  = (maxIm - minIm) / (height - 1),
         max       = 30,
-        i, j, k,
+        row, column, n, index,
         c_r, c_i, 
         z_r, z_i,
         z_r2, z_i2,
         inside;
 
-      context.beginPath();
+      var
+        image = context.getImageData(0, 0, width, height),
+        data = image.data;
 
-      for (i = 0; i < height; ++i) {
+      for (row = 0; row < height; row++) {
 
-        c_i = maxIm - i * imFactor;
+        c_i = maxIm - row * imFactor;
 
-        for (j = 0; j < width; ++j) {
+        for (column = 0; column < width; column++) {
 
-          c_r = minRe + j * reFactor;
+          c_r = minRe + column * reFactor;
           z_r = c_r;
           z_i = c_i;
           inside = true;
 
-          for (k = 0; k < max; k++) {
+          for (n = 0; n < max; n++) {
             z_r2 = z_r * z_r;
             z_i2 = z_i * z_i;
             if (z_r2 + z_i2 > 4) {
@@ -52,15 +54,22 @@ function example () {
             z_r = z_r2 - z_i2 + c_r;
           }
 
-          if (inside) {
-            context.moveTo(j, i);
-            context.lineTo(j+1, i+0);
+          index = row * width * 4 + column * 4;
+          data[index + 3] = 255;
+          var r;
+          if (!inside) {
+            data[index + 2] = Math.min(255, Math.round(Math.abs(255 * n / max)));
+            if (n > 25) {
+              data[index] = 155 - (max - n) * 30;
+              data[index + 1] = 155 - (max - n) * 30;
+            }
+          } else {
+            data[index + 2] = 120;
           }
         }
       }
 
-      context.closePath();
-      context.stroke();
+      context.putImageData(image, 0, 0);
     }
   });
 
@@ -69,6 +78,8 @@ function example () {
     E = Flotr.EventAdapter,
     summary = {
       data : [[-1, 1], [1, -1]],
+      width : 598,
+      height : 456,
       flotr : {
         fractal : {
           show : true
@@ -77,6 +88,8 @@ function example () {
     },
     zoom = {
       data : [[-1, 1], [1, -1]],
+      width : 598,
+      height : 456,
       flotr : {
         fractal : {
           show : true
