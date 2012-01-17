@@ -14,6 +14,8 @@ var hit = {
 
         // TODO this is a hack; the hit plugin should expose an API to do this easily
         o = {
+          x : x,
+          y : 1,
           relX : graph.axes.x.d2p(x),
           relY : 1
         };
