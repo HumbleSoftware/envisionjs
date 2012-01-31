@@ -1,0 +1,9 @@
+src_files:
+  - "lib/flotr2/flotr2.js"
+  - "js/Vis.js"
+  - "js/Visualization.js"
+helpers:
+spec_files:
+  - "js/Visualization.js"
+src_dir: "."
+spec_dir: "spec/"
