@@ -1,5 +1,6 @@
 src_files:
   - "lib/flotr2/flotr2.js"
+  - "lib/bonzo/bonzo.min.js"
   - "js/Vis.js"
   - "js/Visualization.js"
 helpers:
