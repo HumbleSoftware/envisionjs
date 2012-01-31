@@ -3,7 +3,6 @@ function example () {
   // Configuraiton
   var
     H = humblevis,
-    E = Flotr.EventAdapter,
 
     container = document.getElementById('demo'),
 

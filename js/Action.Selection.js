@@ -5,16 +5,26 @@ var selection = {
   events : {
     'flotr:select' : {
       handler : function (leader, selection) {
-        var data = leader.getData(),
-          x1 = selection.x1,
-          x2 = selection.x2;
+        var
+          data = leader.getData(),
+          mode = leader.options.flotr.selection.mode,
+          o = {};
 
-        return {
-          xaxis : {
-            min : x1,
-            max : x2
+        if (mode.indexOf('x') !== -1) {
+          o.xaxis = {
+            min : selection.x1,
+            max : selection.x2
           }
-        };
+        }
+
+        if (mode.indexOf('y') !== -1) {
+          o.yaxis = {
+            min : selection.y1,
+            max : selection.y2
+          }
+        }
+
+        return o;
       },
       callback : function (follower, options) {
         follower.draw(null, options);
