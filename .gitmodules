@@ -1,3 +1,6 @@
 [submodule "lib/flotr2"]
 	path = lib/flotr2
 	url = git://github.com/HumbleSoftware/Flotr2.git
+[submodule "spec/jasmine-jquery"]
+	path = spec/jasmine-jquery
+	url = git://github.com/velesin/jasmine-jquery.git
