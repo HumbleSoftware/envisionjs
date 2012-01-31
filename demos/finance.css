@@ -31,6 +31,9 @@ div#demo {
 .flotr-mouse-value {
 	font-size: 12px;
 }
+.humble-vis-child.price .flotr-grid-label {
+    margin-left: 4px;
+}
 
 .humble-vis-child.price .humble-vis-child-container {
   width : 598px;
