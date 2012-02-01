@@ -69,7 +69,7 @@ Visualization.prototype = {
       if (newIndex === children.length)
         bonzo(this.node).append(child.node);
       else
-        this.node[0].insertBefore(child.node[0], children[newIndex].node[0]);
+        this.node.insertBefore(child.container, children[newIndex].container);
       children.splice(newIndex, 0, child);
       this._updateClasses();
       return true;
