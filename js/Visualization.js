@@ -56,7 +56,7 @@ Visualization.prototype = {
       index     = this.indexOf(child);
     if (index !== -1) {
       children.splice(index, 1);
-      bonzo(child.element).remove();
+      bonzo(child.container).remove();
       this._updateClasses();
       return true;
     }
