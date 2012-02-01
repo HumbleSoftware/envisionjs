@@ -11,61 +11,22 @@
 (function () { 
 
 var
-
   V = humblevis,
-
-  CN_CHILD = 'humble-vis-child',
-
-  T_CHILD       = '<div class="' + CN_CHILD + '"></div>';
-
   DEFAULTS = V.flotr.defaultOptions;
 
 function Child (options) {
-
-  this.options    = options || {};
-  this.node  = bonzo.create(T_CHILD)[0];
-
-  if (options.name) bonzo(this.node).addClass(options.name);
-
+  this.options = options || {};
   this.flotr = null;
   this._flotrDefaultOptions();
 }
 
 Child.prototype = {
 
-  getFlotr : function () { return this.flotr; },
-  getData : function () { return this.options.data; },
-
-  render : function (element) {
-
-    var o = this.options;
-
-    if (!element) throw 'No element to render within.';
-
-    this.container = element;
-    bonzo(element).append(this.node);
-
-    if (o.width) {
-      bonzo(this.node).css({width : o.width});
-    } else {
-      o.width = parseInt(bonzo(this.node).css('width'), 10);
-    }
-
-    if (o.height) {
-      bonzo(this.node).css({height : o.height});
-    } else {
-      o.height = parseInt(bonzo(this.node).css('height'), 10);
-    }
-
-    this.draw(o.data, o.flotr);
-  },
-
-  draw : function (data, flotr) {
+  draw : function (data, flotr, node) {
 
     var
       o           = this.options,
-      fData       = [],
-      container   = this.node;
+      fData       = [];
 
     data = data || o.data;
 
@@ -95,12 +56,7 @@ Child.prototype = {
 
     if (!flotr) throw 'No graph submitted.';
 
-    this.flotr = Flotr.draw(container, fData, flotr);
-  },
-
-  // TODO remove?
-  getNode : function () {
-    return this.node;
+    this.flotr = Flotr.draw(node, fData, flotr);
   },
 
   _processData : function (data) {
@@ -157,6 +113,6 @@ Child.prototype = {
   }
 };
 
-V.Child = Child;
+V.flotr.Child = Child;
 
 })();

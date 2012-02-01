@@ -30,6 +30,10 @@ function Child (options) {
 
   this.options = options;
   this.node = node;
+
+  if (options.flotr) {
+    this.api = new V.flotr.Child(options);
+  }
 }
 
 Child.prototype = {
@@ -44,10 +48,22 @@ Child.prototype = {
 
     if (!element) throw 'No element to render within.';
 
+    bonzo(element).append(this.node);
     this._setDimension('width');
     this._setDimension('height');
     this.container = element;
-    bonzo(element).append(this.node);
+
+    this.draw(options.data, options.flotr);
+  },
+
+  draw : function (data, flotr) {
+    if (this.api) {
+      this.api.draw(data, flotr, this.node);
+    }
+  },
+
+  getData : function () {
+    return this.data;
   },
 
   _setDimension : function (attribute) {
@@ -57,8 +73,9 @@ Child.prototype = {
     if (options[attribute]) {
       bonzo(node).css(attribute, options[attribute]);
     } else {
-      options[attribute]= parseInt(bonzo(node).css(attribute), 10);
+      options[attribute] = parseInt(bonzo(node).css(attribute), 10);
     }
+    this[attribute] = options[attribute];
   }
 };
 
