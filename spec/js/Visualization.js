@@ -1,6 +1,16 @@
 describe('Visualization', function () {
 
   var
+    CN_FIRST          = 'humble-vis-first',
+    CN_LAST           = 'humble-vis-last',
+    CN_VISUALIZATION  = 'humble-vis-visualization',
+    CN_CONTAINER      = 'humble-vis-child-container',
+
+    S_FIRST           = '.' + CN_FIRST,
+    S_LAST            = '.' + CN_LAST,
+    S_VISUALIZATION   = '.' + CN_VISUALIZATION,
+    S_CONTAINER       = '.' + CN_CONTAINER,
+
     H = humblevis;
 
   function MockChild () {
@@ -33,7 +43,7 @@ describe('Visualization', function () {
 
     document.body.appendChild(div);
     vis.render(div);
-    expect($(div)).toContain('.humble-vis-visualization');
+    expect($(div)).toContain(S_VISUALIZATION);
 
     this.after(cleanup(div));
   });
@@ -45,7 +55,7 @@ describe('Visualization', function () {
       vis = new H.Visualization({element : div});
 
     vis.render();
-    expect($(div)).toContain('.humble-vis-visualization');
+    expect($(div)).toContain(S_VISUALIZATION);
   });
 
   it('has children member', function () {
@@ -147,7 +157,7 @@ describe('Visualization', function () {
     vis.add(child);
     vis.render(div);
 
-    expect($(div)).toContain('.humble-vis-child-container.humble-vis-first.humble-vis-last');
+    expect($(div)).toContain(S_CONTAINER + S_FIRST + S_LAST);
 
     this.after(cleanup(div));
   });
@@ -167,14 +177,14 @@ describe('Visualization', function () {
     vis.add(c);
     vis.render(div);
 
-    expect($div.find('.humble-vis-child-container').size()).toBe(3);
-    expect($div).toContain('.humble-vis-child-container.humble-vis-first');
-    expect($(a.container)).toBe('.humble-vis-child-container.humble-vis-first');
-    expect($div).toContain('.humble-vis-child-container.humble-vis-last');
-    expect($(b.container)).not.toHaveClass('humble-vis-first');
-    expect($(b.container)).not.toHaveClass('humble-vis-last');
-    expect($(c.container)).toBe('.humble-vis-child-container.humble-vis-last');
-    expect($div.find('.humble-vis-first')).not.toBe($div.find('.humble-vis-last'));
+    expect($div.find(S_CONTAINER).size()).toBe(3);
+    expect($div).toContain(S_CONTAINER + S_FIRST);
+    expect($(a.container)).toBe(S_CONTAINER + S_FIRST);
+    expect($(b.container)).not.toHaveClass(CN_FIRST);
+    expect($(b.container)).not.toHaveClass(CN_LAST);
+    expect($div).toContain(S_CONTAINER + S_LAST);
+    expect($(c.container)).toBe(S_CONTAINER + S_LAST);
+    expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
 
     this.after(cleanup(div));
   });
@@ -190,12 +200,12 @@ describe('Visualization', function () {
     document.body.appendChild(div);
     vis.render(div);
     vis.add(a);
-    expect($div).toContain('.humble-vis-child-container.humble-vis-first.humble-vis-last');
+    expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
 
     vis.add(b);
-    expect($div).toContain('.humble-vis-child-container.humble-vis-first');
-    expect($div).toContain('.humble-vis-child-container.humble-vis-last');
-    expect($div.find('.humble-vis-first')).not.toBe($div.find('.humble-vis-last'));
+    expect($div).toContain(S_CONTAINER + S_FIRST);
+    expect($div).toContain(S_CONTAINER + S_LAST);
+    expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
 
     this.after(cleanup(div));
   });
@@ -211,7 +221,7 @@ describe('Visualization', function () {
     vis.render(div);
     vis.remove(child);
 
-    expect($(div)).not.toContain('.humble-vis-child-container');
+    expect($(div)).not.toContain(S_CONTAINER);
 
     this.after(cleanup(div));
   });
@@ -230,8 +240,8 @@ describe('Visualization', function () {
     vis.render(div);
     vis.remove(a);
 
-    expect($div).toContain('.humble-vis-child-container.humble-vis-first.humble-vis-last');
-    expect($(b.container)).toBe('.humble-vis-child-container.humble-vis-first.humble-vis-last');
+    expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
+    expect($(b.container)).toBe(S_CONTAINER + S_FIRST + S_LAST);
     expect($(a.container)).not.toBe($(b.container));
 
     this.after(cleanup(div));
@@ -251,8 +261,8 @@ describe('Visualization', function () {
     vis.render(div);
     vis.remove(b);
 
-    expect($div).toContain('.humble-vis-child-container.humble-vis-first.humble-vis-last');
-    expect($(a.container)).toBe('.humble-vis-child-container.humble-vis-first.humble-vis-last');
+    expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
+    expect($(a.container)).toBe(S_CONTAINER + S_FIRST + S_LAST);
     expect($(a.container)).not.toBe($(b.container));
 
     this.after(cleanup(div));
@@ -275,14 +285,14 @@ describe('Visualization', function () {
 
     vis.setPosition(c, 0);
 
-    expect($(c.container)).toHaveClass('humble-vis-first');
-    expect($(a.container)).not.toHaveClass('humble-vis-first');
-    expect($(a.container)).not.toHaveClass('humble-vis-last');
-    expect($(b.container)).toHaveClass('humble-vis-last');
+    expect($(c.container)).toHaveClass(CN_FIRST);
+    expect($(a.container)).not.toHaveClass(CN_FIRST);
+    expect($(a.container)).not.toHaveClass(CN_LAST);
+    expect($(b.container)).toHaveClass(CN_LAST);
 
     vis.setPosition(c, 2);
-    expect($(c.container)).toHaveClass('humble-vis-last');
-    expect($(c.container)).not.toHaveClass('humble-vis-first');
+    expect($(c.container)).toHaveClass(CN_LAST);
+    expect($(c.container)).not.toHaveClass(CN_FIRST);
 
     this.after(cleanup(div));
   });
