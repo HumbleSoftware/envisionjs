@@ -19,12 +19,6 @@ describe('Visualization', function () {
     }
   }
 
-  function cleanup (div) {
-    return function () {
-      document.body.removeChild(div)
-    };
-  }
-
   it('defines visualization', function () {
     expect(H.Visualization).toBeDefined();
   });
@@ -33,29 +27,6 @@ describe('Visualization', function () {
     var
       vis = new H.Visualization();
     expect(vis).toBeDefined();
-  });
-
-  it('renders', function () {
-
-    var
-      vis = new H.Visualization(),
-      div = document.createElement('div');
-
-    document.body.appendChild(div);
-    vis.render(div);
-    expect($(div)).toContain(S_VISUALIZATION);
-
-    this.after(cleanup(div));
-  });
-
-  it('renders inside a configured element', function () {
-
-    var
-      div = document.createElement('div'),
-      vis = new H.Visualization({element : div});
-
-    vis.render();
-    expect($(div)).toContain(S_VISUALIZATION);
   });
 
   it('has children member', function () {
@@ -71,6 +42,14 @@ describe('Visualization', function () {
       child = new MockChild();
     vis.add(child);
     expect(vis.children).toContain(child);
+  });
+
+  it('removes a child', function () {
+    var
+      vis = new H.Visualization(),
+      child = new MockChild();
+    vis.remove(child);
+    expect(vis.children).not.toContain(child);
   });
 
   it('adds children', function () {
@@ -133,162 +112,155 @@ describe('Visualization', function () {
     expect(vis.indexOf(c)).toBe(2);
   });
 
-  it('removes a child', function () {
-    var
-      vis = new H.Visualization(),
-      child = new MockChild();
-    vis.remove(child);
-    expect(vis.children).not.toContain(child);
-  });
+  describe('Render', function () {
 
-  it('renders a child', function () {
     var
-      vis = new H.Visualization(),
-      child = new MockChild(),
+      div, $div;
+
+    beforeEach(function () {
       div = document.createElement('div');
-
-    document.body.appendChild(div);
-    vis.add(child);
-    vis.render(div);
-
-    expect($(div)).toContain(S_CONTAINER + S_FIRST + S_LAST);
-
-    this.after(cleanup(div));
-  });
-
-  it('renders children', function () {
-    var
-      vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild(),
-      c = new MockChild(),
-      div = document.createElement('div'),
       $div = $(div);
+      document.body.appendChild(div);
+    });
 
-    document.body.appendChild(div);
-    vis.add(a);
-    vis.add(b);
-    vis.add(c);
-    vis.render(div);
+    afterEach(function () {
+      document.body.removeChild(div)
+      div = null;
+      $div = null;
+    });
 
-    expect($div.find(S_CONTAINER).size()).toBe(3);
-    expect($div).toContain(S_CONTAINER + S_FIRST);
-    expect($(a.container)).toBe(S_CONTAINER + S_FIRST);
-    expect($(b.container)).not.toHaveClass(CN_FIRST);
-    expect($(b.container)).not.toHaveClass(CN_LAST);
-    expect($div).toContain(S_CONTAINER + S_LAST);
-    expect($(c.container)).toBe(S_CONTAINER + S_LAST);
-    expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
+    it('renders', function () {
+      var
+        vis = new H.Visualization();
+      vis.render(div);
+      expect($div).toContain(S_VISUALIZATION);
+    });
 
-    this.after(cleanup(div));
-  });
+    it('renders inside a configured element', function () {
 
-  it('adds new children rendering dynamically', function () {
-    var
-      vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild(),
-      div = document.createElement('div'),
-      $div = $(div);
+      var
+        vis = new H.Visualization({element : div});
 
-    document.body.appendChild(div);
-    vis.render(div);
-    vis.add(a);
-    expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
+      vis.render();
+      expect($div).toContain(S_VISUALIZATION);
+    });
 
-    vis.add(b);
-    expect($div).toContain(S_CONTAINER + S_FIRST);
-    expect($div).toContain(S_CONTAINER + S_LAST);
-    expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
+    it('renders a child', function () {
+      var
+        vis = new H.Visualization(),
+        child = new MockChild();
 
-    this.after(cleanup(div));
-  });
+      vis.add(child);
+      vis.render(div);
 
-  it('removes a rendered child', function () {
-    var
-      vis = new H.Visualization(),
-      child = new MockChild(),
-      div = document.createElement('div');
+      expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
+    });
 
-    document.body.appendChild(div);
-    vis.add(child);
-    vis.render(div);
-    vis.remove(child);
+    it('renders children', function () {
+      var
+        vis = new H.Visualization(),
+        a = new MockChild(),
+        b = new MockChild(),
+        c = new MockChild();
 
-    expect($(div)).not.toContain(S_CONTAINER);
+      vis.add(a);
+      vis.add(b);
+      vis.add(c);
+      vis.render(div);
 
-    this.after(cleanup(div));
-  });
+      expect($div.find(S_CONTAINER).size()).toBe(3);
+      expect($div).toContain(S_CONTAINER + S_FIRST);
+      expect($(a.container)).toBe(S_CONTAINER + S_FIRST);
+      expect($(b.container)).not.toHaveClass(CN_FIRST);
+      expect($(b.container)).not.toHaveClass(CN_LAST);
+      expect($div).toContain(S_CONTAINER + S_LAST);
+      expect($(c.container)).toBe(S_CONTAINER + S_LAST);
+      expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
+    });
 
-  it('removes the first child', function () {
-    var
-      vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild(),
-      div = document.createElement('div'),
-      $div = $(div);
+    it('adds new children rendering dynamically', function () {
+      var
+        vis = new H.Visualization(),
+        a = new MockChild(),
+        b = new MockChild();
 
-    document.body.appendChild(div);
-    vis.add(a);
-    vis.add(b);
-    vis.render(div);
-    vis.remove(a);
+      vis.render(div);
+      vis.add(a);
+      expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
 
-    expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
-    expect($(b.container)).toBe(S_CONTAINER + S_FIRST + S_LAST);
-    expect($(a.container)).not.toBe($(b.container));
+      vis.add(b);
+      expect($div).toContain(S_CONTAINER + S_FIRST);
+      expect($div).toContain(S_CONTAINER + S_LAST);
+      expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
+    });
 
-    this.after(cleanup(div));
-  });
+    it('removes a rendered child', function () {
+      var
+        vis = new H.Visualization(),
+        child = new MockChild();
 
-  it('removes the last child', function () {
-    var
-      vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild(),
-      div = document.createElement('div'),
-      $div = $(div);
+      vis.add(child);
+      vis.render(div);
+      vis.remove(child);
 
-    document.body.appendChild(div);
-    vis.add(a);
-    vis.add(b);
-    vis.render(div);
-    vis.remove(b);
+      expect($div).not.toContain(S_CONTAINER);
+    });
 
-    expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
-    expect($(a.container)).toBe(S_CONTAINER + S_FIRST + S_LAST);
-    expect($(a.container)).not.toBe($(b.container));
+    it('removes the first child', function () {
+      var
+        vis = new H.Visualization(),
+        a = new MockChild(),
+        b = new MockChild();
 
-    this.after(cleanup(div));
-  });
+      vis.add(a);
+      vis.add(b);
+      vis.render(div);
+      vis.remove(a);
 
-  it('reorders rendered children', function () {
-    var
-      vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild(),
-      c = new MockChild(),
-      div = document.createElement('div'),
-      $div = $(div);
+      expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
+      expect($(b.container)).toBe(S_CONTAINER + S_FIRST + S_LAST);
+      expect($(a.container)).not.toBe($(b.container));
+    });
 
-    document.body.appendChild(div);
-    vis.add(a);
-    vis.add(b);
-    vis.add(c);
-    vis.render(div);
+    it('removes the last child', function () {
+      var
+        vis = new H.Visualization(),
+        a = new MockChild(),
+        b = new MockChild();
 
-    vis.setPosition(c, 0);
+      vis.add(a);
+      vis.add(b);
+      vis.render(div);
+      vis.remove(b);
 
-    expect($(c.container)).toHaveClass(CN_FIRST);
-    expect($(a.container)).not.toHaveClass(CN_FIRST);
-    expect($(a.container)).not.toHaveClass(CN_LAST);
-    expect($(b.container)).toHaveClass(CN_LAST);
+      expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
+      expect($(a.container)).toBe(S_CONTAINER + S_FIRST + S_LAST);
+      expect($(a.container)).not.toBe($(b.container));
+    });
 
-    vis.setPosition(c, 2);
-    expect($(c.container)).toHaveClass(CN_LAST);
-    expect($(c.container)).not.toHaveClass(CN_FIRST);
+    it('reorders rendered children', function () {
+      var
+        vis = new H.Visualization(),
+        a = new MockChild(),
+        b = new MockChild(),
+        c = new MockChild();
 
-    this.after(cleanup(div));
+      vis.add(a);
+      vis.add(b);
+      vis.add(c);
+      vis.render(div);
+
+      vis.setPosition(c, 0);
+
+      expect($(c.container)).toHaveClass(CN_FIRST);
+      expect($(a.container)).not.toHaveClass(CN_FIRST);
+      expect($(a.container)).not.toHaveClass(CN_LAST);
+      expect($(b.container)).toHaveClass(CN_LAST);
+
+      vis.setPosition(c, 2);
+      expect($(c.container)).toHaveClass(CN_LAST);
+      expect($(c.container)).not.toHaveClass(CN_FIRST);
+    });
   });
 });
 
