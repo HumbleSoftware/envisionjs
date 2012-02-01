@@ -104,11 +104,8 @@ describe('Visualization', function () {
       vis = new H.Visualization(),
       a = new MockChild(),
       b = new MockChild(),
-      c = new MockChild(),
-      div = document.createElement('div'),
-      $div = $(div);
+      c = new MockChild();
 
-    document.body.appendChild(div);
     vis.add(a);
     vis.add(b);
     vis.add(c);
@@ -124,11 +121,8 @@ describe('Visualization', function () {
       vis = new H.Visualization(),
       a = new MockChild(),
       b = new MockChild(),
-      c = new MockChild(),
-      div = document.createElement('div'),
-      $div = $(div);
+      c = new MockChild();
 
-    document.body.appendChild(div);
     vis.add(a);
     vis.add(b);
     vis.add(c);
