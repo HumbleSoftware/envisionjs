@@ -8,6 +8,7 @@ var selection = {
         var
           data = leader.getData(),
           mode = leader.options.flotr.selection.mode,
+          axes = leader.api.flotr.axes,
           o = {};
 
         if (mode.indexOf('x') !== -1) {
@@ -15,6 +16,8 @@ var selection = {
             min : selection.x1,
             max : selection.x2
           }
+          o.min = axes.x.d2p(selection.x1);
+          o.max = axes.x.d2p(selection.x2);
         }
 
         if (mode.indexOf('y') !== -1) {
@@ -38,8 +41,8 @@ var selection = {
           max = leader.api.flotr.axes.x.max;
         return {
           xaxis : {
-            min : min,
-            max : max 
+            min : null,//min,
+            max : null//max 
           }
         };
       },

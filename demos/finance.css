@@ -1,6 +1,6 @@
 /* Vis */
 div#demo {
-  height: 416px;
+  height: auto;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
@@ -9,16 +9,22 @@ div#demo {
 }
 
 .humble-vis-visualization {
-  background: #99CCFF;
+  background: #fff;
 }
 
 .humble-vis-child-container {
-  border-top: 8px solid white;
-  border-bottom: 0px;
+  border: 0px;
+}
+.humble-vis-child-container + .humble-vis-child-container {
+  margin-top: 0px;
+  background: #fff;
+}
+.humble-vis-child-container.humble-vis-first {
+  border-bottom: 1px solid #99CCFF;
 }
 
 .humble-vis-child.price .flotr-grid-label {
-    margin-left: 4px;
+  margin-left: 4px;
 }
 .humble-vis-child.volume .flotr-mouse-value {
   display: none;
@@ -39,14 +45,22 @@ div#demo {
 }
 
 .humble-vis-child.price {
-  width : 598px;
+  margin-top: 8px;
   height : 240px;
 }
 .humble-vis-child.volume {
-  width : 598px;
+  margin-top: 8px;
+  background: #fff;
   height : 80px;
 }
+.humble-vis-child.connection {
+  height: 14px;
+}
+.humble-vis-child.connection canvas {
+  background: #fff;
+  z-index: 10;
+}
 .humble-vis-child.summary {
-  width : 598px;
   height : 70px;
+  margin-top: -1px;
 }

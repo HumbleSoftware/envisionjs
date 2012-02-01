@@ -66,6 +66,10 @@ function example () {
             return (parseInt(n) === 0 ? false : jsonData[n].date.split(' ')[2]);
           }
         },
+        yaxis : {
+          autoscale : true,
+          autoscaleMargin : .1
+        },
         handles   : { show : true },
         selection : { mode : 'x'},
         grid : {
@@ -74,7 +78,11 @@ function example () {
       }
     },
 
-    vis, price, volume, summary, selection, hit;
+    connectionOptions = {
+      name : 'connection'
+    },
+
+    vis, price, volume, summary, connection, selection, hit;
 
 
   // Application
@@ -83,17 +91,82 @@ function example () {
   price = new H.Child(priceOptions);
   volume = new H.Child(volumeOptions);
   summary = new H.Child(summaryOptions);
+  connection = new H.Child(connectionOptions);
   selection = new H.Interaction({leader : summary});
   hit = new H.Interaction();
 
+  connection.api = {
+    height : null,
+    width : null,
+    rendered : false,
+    render : function (node) {
+      var
+        canvas = bonzo.create('<canvas></canvas>')[0],
+        offset = bonzo(node).offset();
+
+      this.height = offset.height;
+      this.width = offset.width;
+
+      bonzo(canvas)
+        .attr('height', offset.height)
+        .attr('width', offset.width)
+        .css({
+          position : 'absolute',
+          top : '0px',
+          left : '0px'
+        });
+
+      node.appendChild(canvas);
+      bonzo(node).css({
+        position : 'relative'
+      });
+
+      this.context = canvas.getContext('2d');
+      this.rendered = true;
+    },
+    draw : function (data, options, node) {
+
+      if (!this.rendered) this.render(node);
+      options = options || {};
+
+      var
+        context = this.context,
+        height = this.height,
+        width = this.width,
+        min = options.min,
+        max = options.max + 1;
+
+      context.clearRect(0, 0, this.width, this.height);
+      if (min || max) {
+        context.save();
+        context.strokeStyle = '#B6D9FF';
+        context.fillOpacity = .5;
+        context.fillStyle = 'rgba(182, 217, 255, .4)';
+        context.beginPath();
+        context.moveTo(min, this.height);
+        context.bezierCurveTo(min, 0, 0, this.height, 0, 0);
+        context.lineTo(this.width, 0);
+        context.bezierCurveTo(this.width, this.height, max, 0, max, this.height);
+        context.stroke();
+        context.closePath();
+        context.fill();
+        context.restore();
+      }
+    }
+  }
+
   vis.add(price);
   vis.add(volume);
+  vis.add(connection);
   vis.add(summary);
   vis.render(container);
 
   selection.add(H.action.selection);
   selection.follow(price);
   selection.follow(volume);
+  selection.follow(connection);
+
+  summary.api.flotr.selection.setSelection({ y1 : 0, y2 : 0, x1 : 50, x2 : 150});
 
   hit.add(H.action.hit);
   hit.group([price, volume]);
