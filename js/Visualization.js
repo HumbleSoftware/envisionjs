@@ -68,7 +68,7 @@ Visualization.prototype = {
     if (newIndex >= 0 && newIndex < children.length && this.remove(child)) {
       if (this.rendered) {
         if (newIndex === children.length)
-          bonzo(this.node).append(child.node);
+          this.node.appendChild(child.container);
         else
           this.node.insertBefore(child.container, children[newIndex].container);
       }
