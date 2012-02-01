@@ -7,12 +7,18 @@ div#demo {
   -o-user-select: none;
   user-select: none;
 }
+
 .humble-vis-visualization {
   background: #99CCFF;
 }
-.humble-vis-child {
+
+.humble-vis-child-container {
   border-top: 8px solid white;
   border-bottom: 0px;
+}
+
+.humble-vis-child.price .flotr-grid-label {
+    margin-left: 4px;
 }
 .humble-vis-child.volume .flotr-mouse-value {
   display: none;
@@ -31,19 +37,16 @@ div#demo {
 .flotr-mouse-value {
 	font-size: 12px;
 }
-.humble-vis-child.price .flotr-grid-label {
-    margin-left: 4px;
-}
 
-.humble-vis-child.price .humble-vis-child-container {
+.humble-vis-child.price {
   width : 598px;
   height : 240px;
 }
-.humble-vis-child.volume .humble-vis-child-container {
+.humble-vis-child.volume {
   width : 598px;
   height : 80px;
 }
-.humble-vis-child.summary .humble-vis-child-container {
+.humble-vis-child.summary {
   width : 598px;
   height : 70px;
 }

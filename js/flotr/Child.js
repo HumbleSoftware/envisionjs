@@ -16,19 +16,16 @@ var
 
   CN_CHILD = 'humble-vis-child',
 
-  T_CHILD       = '<div class="' + CN_CHILD + '"></div>',
-  T_CONTAINER   = '<div class="' + CN_CHILD + '-container"></div>',
+  T_CHILD       = '<div class="' + CN_CHILD + '"></div>';
 
   DEFAULTS = V.flotr.defaultOptions;
 
-function Child(options) {
+function Child (options) {
 
   this.options    = options || {};
-  this.container  = bonzo.create(T_CONTAINER)[0];
-  this.node       = bonzo.create(T_CHILD);
+  this.container  = bonzo.create(T_CHILD)[0];
 
-  if (options.name) bonzo(this.node).addClass(options.name);
-  bonzo(this.node).append(this.container);
+  if (options.name) bonzo(this.container).addClass(options.name);
 
   this.flotr = null;
   this._flotrDefaultOptions();
@@ -45,7 +42,7 @@ Child.prototype = {
 
     if (!element) throw 'No element to render within.';
 
-    bonzo(element).append(this.node);
+    bonzo(element).append(this.container);
 
     if (o.width) {
       bonzo(this.container).css({width : o.width});
@@ -100,8 +97,9 @@ Child.prototype = {
     this.flotr = Flotr.draw(container, fData, flotr);
   },
 
+  // TODO remove?
   getNode : function () {
-    return this.node;
+    return this.container;
   },
 
   _processData : function (data) {

@@ -10,7 +10,8 @@ var
   CN_FIRST  = 'humble-vis-first',
   CN_LAST   = 'humble-vis-last',
 
-  TEMPLATE  = '<div class="humble-vis-visualization"></div>';
+  T_VISUALIZATION   = '<div class="humble-vis-visualization"></div>';
+  T_CHILD_CONTAINER = '<div class="humble-vis-child-container"></div>';
 
 function Visualization (options) {
   this.options = options || {};
@@ -28,11 +29,11 @@ Visualization.prototype = {
     element = element || o.element;
     if (!element) throw 'No element to render within.';
 
-    this.container = bonzo.create(TEMPLATE);
+    this.container = bonzo.create(T_VISUALIZATION)[0];
     bonzo(element).append(this.container);
 
     _.each(this.children, function (child) {
-      child.render(this.container);
+      this._renderChild(child);
     }, this);
     this._updateClasses();
 
@@ -42,7 +43,7 @@ Visualization.prototype = {
   add : function (child) {
     this.children.push(child);
     if (this.rendered) {
-      child.render(this.container);
+      this._renderChild(child);
       this._updateClasses();
     }
     return child;
@@ -54,7 +55,7 @@ Visualization.prototype = {
       index     = this.indexOf(child);
     if (index !== -1) {
       children.splice(index, 1);
-      bonzo(child.node).remove();
+      bonzo(child.element).remove();
       this._updateClasses();
       return true;
     }
@@ -89,6 +90,14 @@ Visualization.prototype = {
 
   isLast : function (child) {
     return (this.indexOf(child) === this.children.length - 1 ? true : false);
+  },
+
+  _renderChild : function (child) {
+    var
+      childContainer = bonzo.create(T_CHILD_CONTAINER)[0];
+
+    bonzo(this.container).append(childContainer);
+    child.render(childContainer);
   },
 
   _updateClasses : function () {

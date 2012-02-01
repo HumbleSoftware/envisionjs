@@ -38,15 +38,15 @@ div.controls>span {
 .humble-vis-visualization {
   background: #eee;
 }
-.humble-vis-child {
+.humble-vis-child-container {
   border-bottom: 4px solid white;
   border-top: 4px solid white;
   background: #fff;
 }
-.humble-vis-child+.humble-vis-child {
+.humble-vis-child-container+.humble-vis-child-container {
   margin-top: 1px;
 }
-.humble-vis-child-container {
+.humble-vis-child {
   width: 598px;
   height: 200px;
 }
