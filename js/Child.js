@@ -59,8 +59,7 @@ Child.prototype = {
 
     this.container = element;
     bonzo(element).append(this.node);
-
-  },
+  }
 };
 
 V.Child = Child;
