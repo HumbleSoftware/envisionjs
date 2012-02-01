@@ -45,6 +45,7 @@ describe('Child', function () {
       child.render();
       expect($div).toContain(S_CHILD);
     });
+
     it('assigns a name', function () {
       var
         child = new H.Child({name : 'test'});
@@ -62,6 +63,16 @@ describe('Child', function () {
       node = $div.find(S_CHILD);
       expect(node.width()).toBe(width);
       expect(node.height()).toBe(height);
+    });
+
+    it('sets height and width dynamically', function () {
+      var
+        height = 175,
+        width = 250,
+        child = new H.Child({height : height, width: width});
+      child.render(div);
+      expect(child.width).toBeDefined();
+      expect(child.height).toBeDefined();
     });
   });
 });
