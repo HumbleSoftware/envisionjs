@@ -66,10 +66,12 @@ Visualization.prototype = {
     var
       children  = this.children;
     if (newIndex >= 0 && newIndex < children.length && this.remove(child)) {
-      if (newIndex === children.length)
-        bonzo(this.node).append(child.node);
-      else
-        this.node.insertBefore(child.container, children[newIndex].container);
+      if (this.rendered) {
+        if (newIndex === children.length)
+          bonzo(this.node).append(child.node);
+        else
+          this.node.insertBefore(child.container, children[newIndex].container);
+      }
       children.splice(newIndex, 0, child);
       this._updateClasses();
       return true;
