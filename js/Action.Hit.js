@@ -9,7 +9,7 @@ var hit = {
       callback : function (follower, options) {
         var
           x = options.x,
-          graph = follower.flotr,
+          graph = follower.api.flotr,
           o;
 
         // TODO this is a hack; the hit plugin should expose an API to do this easily
@@ -25,7 +25,7 @@ var hit = {
     'mouseout' : {
       callback : function () {
         _.each(this.followers, function (follower) {
-          follower.flotr.hit.clearHit();
+          follower.api.flotr.hit.clearHit();
         }, this);
       }
     }

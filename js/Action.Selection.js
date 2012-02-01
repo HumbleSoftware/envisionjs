@@ -34,8 +34,8 @@ var selection = {
       handler : function () {
         var
           leader = this.leaders[0], // Hack
-          min = leader.flotr.axes.x.min,
-          max = leader.flotr.axes.x.max;
+          min = leader.api.flotr.axes.x.min,
+          max = leader.api.flotr.axes.x.max;
         return {
           xaxis : {
             min : min,

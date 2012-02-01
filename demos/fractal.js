@@ -114,21 +114,21 @@ function example () {
   zoom.follow(fractal);
   */
 
-  E.observe(fractal.container, 'flotr:select', function (selection) {
+  E.observe(fractal.node, 'flotr:select', function (selection) {
     fractal.draw([
       [selection.x1, selection.y2],
       [selection.x2, selection.y1],
     ]);
   });
 
-  E.observe(fractal.container, 'flotr:select', function (selection) {
+  E.observe(fractal.node, 'flotr:select', function (selection) {
     fractal.draw([
       [selection.x1, selection.y2],
       [selection.x2, selection.y1],
     ]);
   });
 
-  E.observe(fractal.container, 'flotr:click', function (selection) {
+  E.observe(fractal.node, 'flotr:click', function (selection) {
     fractal.draw([[-2, 1.2], [1, -1.2]]);
   });
 }

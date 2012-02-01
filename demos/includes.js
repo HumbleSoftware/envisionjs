@@ -46,6 +46,7 @@ yepnope([
   // Visualization
   '../js/Vis.js',
   '../js/Visualization.js',
+  '../js/Child.js',
   '../js/Interaction.js',
   '../js/Action.Selection.js',
   '../js/Action.Hit.js',
