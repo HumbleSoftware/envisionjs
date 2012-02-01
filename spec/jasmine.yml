@@ -3,6 +3,8 @@ src_files:
   - "lib/bonzo/bonzo.min.js"
   - "js/Vis.js"
   - "js/Visualization.js"
+  - "spec/jasmine-jquery/lib/jasmine-jquery.js"
+  - "spec/jasmine-jquery/vendor/jquery/jquery.js"
 helpers:
 spec_files:
   - "js/Visualization.js"
