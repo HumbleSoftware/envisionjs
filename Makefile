@@ -21,3 +21,6 @@ demo:
 	cp demos/includes.build.js build/includes.js
 	cp demos/ajax-loader.gif build/
 	cp -R lib/ build/
+
+test:
+	jasmine-headless-webkit -j spec/jasmine.yml -c
