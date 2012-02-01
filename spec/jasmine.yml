@@ -1,12 +1,14 @@
 src_files:
+  - "spec/jasmine-jquery/lib/jasmine-jquery.js"
+  - "spec/jasmine-jquery/vendor/jquery/jquery.js"
   - "lib/flotr2/flotr2.js"
   - "lib/bonzo/bonzo.min.js"
   - "js/Vis.js"
   - "js/Visualization.js"
-  - "spec/jasmine-jquery/lib/jasmine-jquery.js"
-  - "spec/jasmine-jquery/vendor/jquery/jquery.js"
+  - "js/Child.js"
 helpers:
 spec_files:
   - "js/Visualization.js"
+  - "js/Child.js"
 src_dir: "."
 spec_dir: "spec/"
