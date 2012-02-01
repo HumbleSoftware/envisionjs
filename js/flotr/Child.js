@@ -23,9 +23,9 @@ var
 function Child (options) {
 
   this.options    = options || {};
-  this.container  = bonzo.create(T_CHILD)[0];
+  this.node  = bonzo.create(T_CHILD)[0];
 
-  if (options.name) bonzo(this.container).addClass(options.name);
+  if (options.name) bonzo(this.node).addClass(options.name);
 
   this.flotr = null;
   this._flotrDefaultOptions();
@@ -42,18 +42,19 @@ Child.prototype = {
 
     if (!element) throw 'No element to render within.';
 
-    bonzo(element).append(this.container);
+    this.container = element;
+    bonzo(element).append(this.node);
 
     if (o.width) {
-      bonzo(this.container).css({width : o.width});
+      bonzo(this.node).css({width : o.width});
     } else {
-      o.width = parseInt(bonzo(this.container).css('width'), 10);
+      o.width = parseInt(bonzo(this.node).css('width'), 10);
     }
 
     if (o.height) {
-      bonzo(this.container).css({height : o.height});
+      bonzo(this.node).css({height : o.height});
     } else {
-      o.height = parseInt(bonzo(this.container).css('height'), 10);
+      o.height = parseInt(bonzo(this.node).css('height'), 10);
     }
 
     this.draw(o.data, o.flotr);
@@ -64,7 +65,7 @@ Child.prototype = {
     var
       o           = this.options,
       fData       = [],
-      container   = this.container;
+      container   = this.node;
 
     data = data || o.data;
 
@@ -99,7 +100,7 @@ Child.prototype = {
 
   // TODO remove?
   getNode : function () {
-    return this.container;
+    return this.node;
   },
 
   _processData : function (data) {

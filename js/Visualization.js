@@ -16,7 +16,7 @@ var
 function Visualization (options) {
   this.options = options || {};
   this.children = [];
-  this.container = null;
+  this.node = null;
   this.rendered = false;
 }
 
@@ -29,8 +29,9 @@ Visualization.prototype = {
     element = element || o.element;
     if (!element) throw 'No element to render within.';
 
-    this.container = bonzo.create(T_VISUALIZATION)[0];
-    bonzo(element).append(this.container);
+    this.node = bonzo.create(T_VISUALIZATION)[0];
+    this.container = element;
+    bonzo(element).append(this.node);
 
     _.each(this.children, function (child) {
       this._renderChild(child);
@@ -66,9 +67,9 @@ Visualization.prototype = {
       children  = this.children;
     if (newIndex >= 0 && newIndex < children.length && this.remove(child)) {
       if (newIndex === children.length)
-        bonzo(this.container).append(child.node);
+        bonzo(this.node).append(child.node);
       else
-        this.container[0].insertBefore(child.node[0], children[newIndex].node[0]);
+        this.node[0].insertBefore(child.node[0], children[newIndex].node[0]);
       children.splice(newIndex, 0, child);
       this._updateClasses();
       return true;
@@ -96,7 +97,7 @@ Visualization.prototype = {
     var
       childContainer = bonzo.create(T_CHILD_CONTAINER)[0];
 
-    bonzo(this.container).append(childContainer);
+    bonzo(this.node).append(childContainer);
     child.render(childContainer);
   },
 
@@ -109,7 +110,7 @@ Visualization.prototype = {
       node;
 
     _.each(children, function (child, index) {
-      node = bonzo(child.node);
+      node = bonzo(child.container);
 
       if (index === first)
         node.addClass(CN_FIRST);

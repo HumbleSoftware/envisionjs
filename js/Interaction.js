@@ -78,7 +78,7 @@ Interaction.prototype = {
 
   _bindLeader : function (leader, action, options) {
     _.each(action.events, function (methods, name) {
-      E.observe(leader.container, name, _.bind(function () {
+      E.observe(leader.node, name, _.bind(function () {
 
         if (this.prevent[name]) return;
 
