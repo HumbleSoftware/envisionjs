@@ -16,7 +16,7 @@ var
 
   CN_CHILD = 'humble-vis-child',
 
-  T_CHILD       = '<div class="' + CN_CHILD + '"></div>';
+  T_CHILD = '<div class="' + CN_CHILD + '"></div>';
 
 function Child (options) {
 
@@ -44,21 +44,21 @@ Child.prototype = {
 
     if (!element) throw 'No element to render within.';
 
-
-    if (options.width) {
-      bonzo(this.node).css({width : options.width});
-    } else {
-      options.width = parseInt(bonzo(this.node).css('width'), 10);
-    }
-
-    if (options.height) {
-      bonzo(this.node).css({height : options.height});
-    } else {
-      options.height = parseInt(bonzo(this.node).css('height'), 10);
-    }
-
+    this._setDimension('width');
+    this._setDimension('height');
     this.container = element;
     bonzo(element).append(this.node);
+  },
+
+  _setDimension : function (attribute) {
+    var
+      node = this.node,
+      options = this.options;
+    if (options[attribute]) {
+      bonzo(node).css(attribute, options[attribute]);
+    } else {
+      options[attribute]= parseInt(bonzo(node).css(attribute), 10);
+    }
   }
 };
 
