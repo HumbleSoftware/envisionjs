@@ -50,7 +50,9 @@ Child.prototype = {
 
     if (!element) throw 'No element to render within.';
 
-    bonzo(element).append(this.node);
+    bonzo(element)
+      .addClass(options.name)
+      .append(this.node);
     this._setDimension('width');
     this._setDimension('height');
     this.container = element;
