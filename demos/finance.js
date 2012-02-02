@@ -124,6 +124,7 @@ function example () {
       this.context = canvas.getContext('2d');
       this.rendered = true;
     },
+
     draw : function (data, options, node) {
 
       if (!this.rendered) this.render(node);
@@ -159,11 +160,12 @@ function example () {
     }
   }
 
-  vis.add(price);
-  vis.add(volume);
-  vis.add(connection);
-  vis.add(summary);
-  vis.render(container);
+  vis
+    .add(price)
+    .add(volume)
+    .add(connection)
+    .add(summary)
+    .render(container);
 
   selection.add(H.action.selection);
   selection.follow(price);

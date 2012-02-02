@@ -33,8 +33,9 @@ Zoom = function (options) {
     summary = new V.Child(getDefaults(options.summary || {}, defaultsSummary())),
     interaction = new V.Interaction({leader : summary});
 
-  vis.add(zoom);
-  vis.add(summary);
+  vis
+    .add(zoom)
+    .add(summary);
 
   interaction.add(V.action.selection);
   interaction.follow(zoom);
