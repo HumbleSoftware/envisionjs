@@ -143,10 +143,14 @@ function example () {
         context.fillOpacity = .5;
         context.fillStyle = 'rgba(182, 217, 255, .4)';
         context.beginPath();
-        context.moveTo(min, this.height);
-        context.bezierCurveTo(min, 0, 0, this.height, 0, 0);
-        context.lineTo(this.width, 0);
-        context.bezierCurveTo(this.width, this.height, max, 0, max, this.height);
+        context.moveTo(min, height);
+        context.quadraticCurveTo(min, height / 2, Math.max(min - height / 2, min / 2), height / 2);
+        context.lineTo(Math.min(height / 2, min / 2), height / 2);
+        context.quadraticCurveTo(0, height / 2, 0, 0);
+        context.lineTo(width, 0);
+        context.quadraticCurveTo(width, height / 2, Math.max(width - height / 2, width - (width - max) / 2), height / 2);
+        context.lineTo(Math.min(max + height / 2, width - (width - max) / 2), height / 2);
+        context.quadraticCurveTo(max, height / 2, max, height);
         context.stroke();
         context.closePath();
         context.fill();
