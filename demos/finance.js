@@ -104,9 +104,10 @@ function example () {
     .render(container);
 
   selection.add(H.action.selection);
-  selection.follower(price);
-  selection.follower(volume);
-  selection.follower(connection);
+  selection
+    .follower(price)
+    .follower(volume)
+    .follower(connection);
 
   summary.api.flotr.selection.setSelection({ y1 : 0, y2 : 0, x1 : 50, x2 : 150});
 

@@ -54,10 +54,12 @@ Interaction.prototype = {
     _.each(this.actions, function (action, i) {
       this._bindLeader(child, action, this.actionOptions[i]);
     }, this);
+    return this;
   },
 
   follower : function (child) {
     this.followers.push(child);
+    return this;
   },
 
   group : function (children) {
@@ -66,6 +68,7 @@ Interaction.prototype = {
       this.leader(child);
       this.follower(child);
     }, this);
+    return this;
   },
 
   add : function (action, options) {
