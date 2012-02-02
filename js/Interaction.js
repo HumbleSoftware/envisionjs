@@ -27,7 +27,7 @@ function Interaction(options) {
   //if (!options.leader) throw 'No leader.';
 
   if (options.leader) {
-    this.lead(options.leader);
+    this.leader(options.leader);
   }
 
   //this.leaders = (_.isArray(options.leader) ? options.leader : [options.leader]);
@@ -47,7 +47,7 @@ Interaction.prototype = {
     return this.actions;
   },
 
-  lead : function (child) {
+  leader : function (child) {
 
     this.leaders.push(child);
 
@@ -56,15 +56,15 @@ Interaction.prototype = {
     }, this);
   },
 
-  follow : function (child) {
+  follower : function (child) {
     this.followers.push(child);
   },
 
   group : function (children) {
     if (!_.isArray(children)) children = [children];
     _.each(children, function (child) {
-      this.lead(child);
-      this.follow(child);
+      this.leader(child);
+      this.follower(child);
     }, this);
   },
 
