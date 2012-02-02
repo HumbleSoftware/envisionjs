@@ -33,6 +33,8 @@ function Child (options) {
 
   if (options.flotr) {
     this.api = new V.flotr.Child(options);
+  } else if (options.drawing) {
+    this.api = options.drawing;
   }
 }
 
