@@ -13,12 +13,6 @@ describe('Visualization', function () {
 
     H = humblevis;
 
-  function MockChild () {
-    this.render = function (element) {
-      this.container = element;
-    }
-  }
-
   it('defines visualization', function () {
     expect(H.Visualization).toBeDefined();
   });
