@@ -1,11 +1,13 @@
 /* Vis */
 div#demo {
   height: auto;
+  width: auto;
   -webkit-user-select: none;
   -khtml-user-select: none;
   -moz-user-select: none;
   -o-user-select: none;
   user-select: none;
+  border: none;
 }
 
 .humble-vis-visualization {
@@ -14,13 +16,20 @@ div#demo {
 
 .humble-vis-child-container {
   border: 0px;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #fff;
+}
+.humble-vis-child-container.price,
+.humble-vis-child-container.volume {
+  border: 1px solid #99CCFF;
+  padding-top: 8px;
+}
+.humble-vis-child-container.volume {
+  border-top: 0px solid #fff;
 }
 .humble-vis-child-container + .humble-vis-child-container {
   margin-top: 0px;
   background: #fff;
-}
-.humble-vis-child-container.humble-vis-first {
-  border-bottom: 1px solid #99CCFF;
 }
 
 .humble-vis-child.price .flotr-grid-label {
@@ -45,7 +54,6 @@ div#demo {
 }
 
 .humble-vis-child.price {
-  margin-top: 8px;
   height : 240px;
 }
 .humble-vis-child.volume {
