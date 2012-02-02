@@ -89,7 +89,7 @@ describe('Visualization', function () {
     vis.add(b);
     vis.add(c);
 
-    expect(vis.setPosition(c, 0)).toBe(true);
+    vis.setPosition(c, 0);
     expect(vis.indexOf(c)).toBe(0);
     expect(vis.indexOf(a)).toBe(1);
     expect(vis.indexOf(b)).toBe(2);
@@ -106,7 +106,7 @@ describe('Visualization', function () {
     vis.add(b);
     vis.add(c);
 
-    expect(vis.setPosition(c, 3)).toBeFalsy();
+    vis.setPosition(c, 3);
     expect(vis.indexOf(a)).toBe(0);
     expect(vis.indexOf(b)).toBe(1);
     expect(vis.indexOf(c)).toBe(2);
@@ -260,6 +260,48 @@ describe('Visualization', function () {
       vis.setPosition(c, 2);
       expect($(c.container)).toHaveClass(CN_LAST);
       expect($(c.container)).not.toHaveClass(CN_FIRST);
+    });
+  });
+
+  describe('Chaining', function () {
+    var
+      vis, child;
+
+    beforeEach(function () {
+      vis = new H.Visualization();
+      child = new MockChild();
+    });
+    afterEach(function () {
+      vis = null;
+      child = null;
+    });
+
+    it('chains add', function () {
+      expect(vis.add(child)).toBe(vis);
+    });
+
+    it('chains remove', function () {
+      expect(
+        vis
+          .add(child)
+          .remove(child)
+      ).toBe(vis);
+    });
+
+    it('chains setPosition', function () {
+      expect(
+        vis
+          .add(child)
+          .remove(child)
+          .setPosition(child, 0)
+      ).toBe(vis);
+    });
+
+    it('chains render', function () {
+      var
+        div = document.createElement('div');
+      document.body.appendChild(div);
+      expect(vis.render(div)).toBe(vis);
     });
   });
 });
