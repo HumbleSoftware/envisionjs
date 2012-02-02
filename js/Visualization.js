@@ -39,6 +39,8 @@ Visualization.prototype = {
     this._updateClasses();
 
     this.rendered = true;
+
+    return this;
   },
 
   add : function (child) {
@@ -47,7 +49,7 @@ Visualization.prototype = {
       this._renderChild(child);
       this._updateClasses();
     }
-    return child;
+    return this;
   },
 
   remove : function (child) {
@@ -58,8 +60,8 @@ Visualization.prototype = {
       children.splice(index, 1);
       bonzo(child.container).remove();
       this._updateClasses();
-      return true;
     }
+    return this;
   },
 
   setPosition : function (child, newIndex) {
@@ -74,8 +76,8 @@ Visualization.prototype = {
       }
       children.splice(newIndex, 0, child);
       this._updateClasses();
-      return true;
     }
+    return this;
   },
 
   indexOf : function (child) {
