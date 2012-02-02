@@ -49,4 +49,30 @@ describe('Interaction', function () {
     expect(interaction.followers).toContain(b);
   });
 
+  describe('Chaining', function () {
+    var
+      interaction, child;
+
+    beforeEach(function () {
+      interaction = new H.Interaction();
+      child = new MockChild();
+    });
+    afterEach(function () {
+      interaction = null;
+      child = null;
+    });
+
+    it('chains leader', function () {
+      expect(interaction.leader(child)).toBe(interaction);
+    });
+
+    it('chains follower', function () {
+      expect(interaction.follower(child)).toBe(interaction);
+    });
+
+    it('chains group', function () {
+      expect(interaction.group(child)).toBe(interaction);
+    });
+  });
+
 });
