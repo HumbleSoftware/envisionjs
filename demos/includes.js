@@ -51,6 +51,7 @@ yepnope([
   '../js/Action.Selection.js',
   '../js/Action.Hit.js',
   '../js/Data.js',
+  '../js/QuadraticDrawing.js',
   '../js/Templates.js',
   '../js/templates/Zoom.js',
   '../js/flotr/namespace.js',
