@@ -8,11 +8,13 @@ src_files:
   - "js/Vis.js"
   - "js/Visualization.js"
   - "js/Child.js"
+  - "js/Interaction.js"
 helper_files:
   - "MockChild.js"
 spec_files:
   - "js/Visualization.js"
   - "js/Child.js"
+  - "js/Interaction.js"
 src_dir: "."
 spec_dir: "spec/"
 helper_dir: "spec/helpers/"
