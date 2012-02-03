@@ -91,10 +91,11 @@ function example () {
     selection = new H.Interaction({leader : summary});
     hit = new H.Interaction();
 
-    vis.add(price);
-    vis.add(volume);
-    vis.add(summary);
-    vis.render(container);
+    vis
+      .add(price)
+      .add(volume)
+      .add(summary)
+      .render(container);
 
     selection.add(H.action.selection, {
       callback : (function () {
@@ -135,8 +136,10 @@ function example () {
         }
       })()
     });
-    selection.follow(price);
-    selection.follow(volume);
+
+    selection
+      .follower(price)
+      .follower(volume);
 
     hit.add(H.action.hit);
     hit.group([price, volume]);
