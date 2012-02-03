@@ -91,44 +91,31 @@ function example () {
         }
       }
     },
-    vis, zoom;
+    vis, zoom, zoomConfig;
 
   vis = new H.Visualization();
   fractal = new H.Child(fractalOptions);
-  //summary = new H.Child(fractalOptions);
-  //zoom = new H.Interaction({leader : summary});
+  zoom = new H.Interaction({leader : fractal});
 
-  vis.add(fractal);
-  //vis.add(summary);
-  vis.render(container);
+  vis
+    .add(fractal)
+    .render(container);
 
-  /*
-  zoom.add(H.action.selection, {
+  zoomConfig = {
     callback : function (o) {
-      fractalOptions.data = [
-        [o.xaxis.min, o.yaxis.max],
-        [o.xaxis.max, o.yaxis.min]
-      ]
+      var
+        xaxis = o.xaxis,
+        yaxis = o.yaxis || {},
+        xmin = xaxis.min || -2,
+        xmax = xaxis.max || 1,
+        ymin = yaxis.min || -1.2,
+        ymax = yaxis.max || 1.2;
+      fractal.draw([
+        [xmin, ymax],
+        [xmax, ymin]
+      ]);
     }
-  });
-  zoom.follow(fractal);
-  */
+  };
 
-  E.observe(fractal.node, 'flotr:select', function (selection) {
-    fractal.draw([
-      [selection.x1, selection.y2],
-      [selection.x2, selection.y1],
-    ]);
-  });
-
-  E.observe(fractal.node, 'flotr:select', function (selection) {
-    fractal.draw([
-      [selection.x1, selection.y2],
-      [selection.x2, selection.y1],
-    ]);
-  });
-
-  E.observe(fractal.node, 'flotr:click', function (selection) {
-    fractal.draw([[-2, 1.2], [1, -1.2]]);
-  });
+  zoom.add(H.action.selection, zoomConfig);
 }
