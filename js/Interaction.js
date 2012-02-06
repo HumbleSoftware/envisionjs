@@ -82,7 +82,7 @@ Interaction.prototype = {
 
   _bindLeader : function (leader, action, options) {
     _.each(action.events, function (e) {
-      H.flotr.adapter.attach(leader, e, _.bind(function (leader, result) {
+      leader.api.adapter.attach(leader, e, _.bind(function (leader, result) {
 
         if (this.prevent[name]) return;
 
@@ -97,7 +97,7 @@ Interaction.prototype = {
 
             if (leader === follower) return; // Skip leader (recursion)
 
-            H.flotr.adapter.trigger(follower, e, result);
+            follower.api.adapter.trigger(follower, e, result);
 
           }, this);
         } catch (e) {
