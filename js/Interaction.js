@@ -13,7 +13,7 @@
  */
 (function () {
 
-var E = Flotr.EventAdapter;
+var H = humblevis;
 
 function Interaction(options) {
   this.options = options = options || {};
@@ -77,21 +77,26 @@ Interaction.prototype = {
     _.each(this.leaders, function (leader) {
       this._bindLeader(leader, action, options);
     }, this);
+    return this;
   },
 
   _bindLeader : function (leader, action, options) {
-    _.each(action.events, function (methods, name) {
-      E.observe(leader.node, name, _.bind(function () {
+    _.each(action.events, function (e) {
+      H.flotr.adapter.attach(leader, e, _.bind(function (leader, result) {
 
         if (this.prevent[name]) return;
 
         var
-          args = [leader].concat(Array.prototype.slice.call(arguments)),
-          result = null;
+          args = [leader].concat(Array.prototype.slice.call(arguments));
+        //,
+          //result = null;
 
+        /*
+        console.log(methods);
         if (methods.handler) {
           result = methods.handler.apply(this, args);
         }
+        */
 
         // Apply custom callback configured for this action
         if (options && options.callback) {
@@ -99,21 +104,28 @@ Interaction.prototype = {
         }
 
         this.prevent[name] = true; // Prevent recursions for this name
-        try {
+        //try {
           _.each(this.followers, function (follower) {
+
             if (leader === follower) return; // Skip leader (recursion)
-            methods.callback.apply(this, [follower, result]);
+
+            //methods.callback.apply(this, [follower, result]);
+
+            H.flotr.adapter.trigger(follower, e, result);
+
           }, this);
+          /*
         } catch (e) {
           this.prevent[name] = false;
           throw e;
         }
+        */
         this.prevent[name] = false;
       }, this));
     }, this);
   }
 };
 
-humblevis.Interaction = Interaction;
+H.Interaction = Interaction;
 
 })();

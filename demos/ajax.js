@@ -122,7 +122,11 @@ function example () {
           });
         }
         return function (o) {
-          if (Math.abs(o.xaxis.max - o.xaxis.min) < 250) {
+
+          var
+            x = o.data.x;
+
+          if (x.max !== null && Math.abs(x.max - x.min) < 250) {
             if (data.fetched.price && data.fetched.volume) {
               priceOptions.data = data.fetched.price;
               volumeOptions.data = data.fetched.volume;

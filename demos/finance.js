@@ -103,15 +103,16 @@ function example () {
     .add(summary)
     .render(container);
 
-  selection.add(H.action.selection);
   selection
     .follower(price)
     .follower(volume)
-    .follower(connection);
+    .follower(connection)
+    .add(H.action.selection);
 
   summary.api.flotr.selection.setSelection({ y1 : 0, y2 : 0, x1 : 50, x2 : 150});
 
-  hit.add(H.action.hit);
-  hit.group([price, volume]);
+  hit
+    .group([price, volume])
+    .add(H.action.hit);
 }
 
