@@ -36,6 +36,8 @@
       if (!this.rendered) this.render(node);
       options = options || {};
 
+      console.log(options.min, options.max);
+
       var
         context = this.context,
         height = this.height,
@@ -51,14 +53,30 @@
         context.fillOpacity = .5;
         context.fillStyle = 'rgba(182, 217, 255, .4)';
         context.beginPath();
-        context.moveTo(min, height);
-        context.quadraticCurveTo(min, half, Math.max(min - half, min / 2), half);
-        context.lineTo(Math.min(half, min / 2), half);
-        context.quadraticCurveTo(0, half, 0, 0);
+
+        // Left
+        if (min === 1) {
+          context.moveTo(0, height);
+          context.lineTo(0, 0);
+        } else {
+          context.moveTo(min, height);
+          context.quadraticCurveTo(min, half, Math.max(min - half, min / 2), half);
+          context.lineTo(Math.min(half, min / 2), half);
+          context.quadraticCurveTo(0, half, 0, 0);
+        }
+
+        // Top
         context.lineTo(width, 0);
-        context.quadraticCurveTo(width, half, Math.max(width - half, width - (width - max) / 2), half);
-        context.lineTo(Math.min(max + half, width - (width - max) / 2), half);
-        context.quadraticCurveTo(max, half, max, height);
+
+        // Right
+        if (max >= width - 1) {
+          context.lineTo(max, height);
+        } else {
+          context.quadraticCurveTo(width, half, Math.max(width - half, width - (width - max) / 2), half);
+          context.lineTo(Math.min(max + half, width - (width - max) / 2), half);
+          context.quadraticCurveTo(max, half, max, height);
+        }
+
         context.stroke();
         context.closePath();
         context.fill();
