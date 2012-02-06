@@ -36,8 +36,6 @@
       if (!this.rendered) this.render(node);
       options = options || {};
 
-      console.log(options.min, options.max);
-
       var
         context = this.context,
         height = this.height,
