@@ -86,40 +86,24 @@ Interaction.prototype = {
 
         if (this.prevent[name]) return;
 
-        var
-          args = [leader].concat(Array.prototype.slice.call(arguments));
-        //,
-          //result = null;
-
-        /*
-        console.log(methods);
-        if (methods.handler) {
-          result = methods.handler.apply(this, args);
-        }
-        */
-
         // Apply custom callback configured for this action
         if (options && options.callback) {
           options.callback.call(this, result);
         }
 
         this.prevent[name] = true; // Prevent recursions for this name
-        //try {
+        try {
           _.each(this.followers, function (follower) {
 
             if (leader === follower) return; // Skip leader (recursion)
 
-            //methods.callback.apply(this, [follower, result]);
-
             H.flotr.adapter.trigger(follower, e, result);
 
           }, this);
-          /*
         } catch (e) {
           this.prevent[name] = false;
           throw e;
         }
-        */
         this.prevent[name] = false;
       }, this));
     }, this);
