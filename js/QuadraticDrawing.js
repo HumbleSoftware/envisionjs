@@ -64,6 +64,25 @@
         context.fill();
         context.restore();
       }
+    },
+    adapter : {
+      trigger : function (child, name, options) {
+        if (name === 'select') {
+          this.select(child, options);
+        }
+      },
+      select : function (child, options) {
+        var
+          x = options.x || {},
+          min = x.min,
+          max = x.max,
+          api = child.api;
+
+        child.draw(null, {
+          min : min,
+          max : max
+        });
+      }
     }
   };
   humblevis.QuadraticDrawing = QuadraticDrawing;
