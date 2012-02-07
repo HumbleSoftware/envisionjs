@@ -7,7 +7,7 @@
 
     render : function (node) {
       var
-        canvas = bonzo.create('<canvas></canvas>')[0],
+        canvas = document.createElement('canvas'),//bonzo.create('<canvas></canvas>')[0],
         offset = bonzo(node).offset();
 
       this.height = offset.height;
@@ -27,6 +27,7 @@
         position : 'relative'
       });
 
+      if (FlashCanvas) FlashCanvas.initElement(canvas);
       this.context = canvas.getContext('2d');
       this.rendered = true;
     },
