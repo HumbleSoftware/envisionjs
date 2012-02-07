@@ -19,6 +19,7 @@ function example () {
         mouse : {
           track: true,
           trackY: false,
+          trackAll: true,
           sensibility: 1,
           trackDecimals: 4,
           trackFormatter: function (o) {
@@ -48,6 +49,7 @@ function example () {
         mouse: {
           track: true,
           trackY: false,
+          trackAll: true,
           position: 'ne',
           trackDecimals: 0
         }
