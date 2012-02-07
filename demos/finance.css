@@ -19,9 +19,13 @@ div#demo {
   border-left: 1px solid #fff;
   border-right: 1px solid #fff;
 }
+.humble-vis-child-container.price {
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+}
 .humble-vis-child-container.price,
 .humble-vis-child-container.volume {
-  border: 1px solid #99CCFF;
+  border: 1px solid #B6D9FF;
   padding-top: 8px;
 }
 .humble-vis-child-container.volume {
@@ -30,6 +34,9 @@ div#demo {
 .humble-vis-child-container + .humble-vis-child-container {
   margin-top: 0px;
   background: #fff;
+}
+.humble-vis-child-container.connection {
+  border: 0px;
 }
 
 .humble-vis-child.price .flotr-grid-label {
@@ -65,6 +72,7 @@ div#demo {
   height: 14px;
 }
 .humble-vis-child.connection canvas {
+  width: 600px;
   background: #fff;
   z-index: 10;
 }
