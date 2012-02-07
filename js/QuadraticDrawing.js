@@ -53,7 +53,7 @@
         context.beginPath();
 
         // Left
-        if (min <= 2) {
+        if (min <= 1) {
           context.moveTo(0, height);
           context.lineTo(0, 0);
         } else {
