@@ -85,6 +85,8 @@
       trigger : function (child, name, options) {
         if (name === 'select') {
           this.select(child, options);
+        } else if (name === 'click') {
+          this.click(child);
         }
       },
       select : function (child, options) {
@@ -97,6 +99,12 @@
         child.draw(null, {
           min : min,
           max : max
+        });
+      },
+      click : function (child) {
+        child.draw(null, {
+          min : child.width / 2,
+          max : child.width / 2
         });
       }
     }
