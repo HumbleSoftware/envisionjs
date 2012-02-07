@@ -35,7 +35,8 @@ div#demo {
   margin-top: 0px;
   background: #fff;
 }
-.humble-vis-child-container.connection {
+.humble-vis-child-container.connection,
+.humble-vis-child-container.summary {
   border: 0px;
 }
 
