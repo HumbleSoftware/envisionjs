@@ -42,6 +42,8 @@ yepnope([
   '../lib/flotr2/js/plugins/legend.js',
   '../lib/flotr2/js/plugins/titles.js',
   '../lib/flotr2/js/types/gantt.js',
+  '../js/flotr/lite-lines.js',
+  '../js/flotr/whiskers.js',
 
   // Visualization
   '../js/Vis.js',
@@ -58,6 +60,7 @@ yepnope([
   '../js/flotr/defaultOptions.js',
   '../js/flotr/Child.js',
   '../js/flotr/Action.js',
+
 
   { complete : example }
 ]);

@@ -10,7 +10,9 @@ function example () {
       name    : 'price',
       data    : priceData,
       flotr   : {
-        lines : {
+        'lite-lines' : {
+          lineWidth : 1,
+          show : true,
           fill : true,
           fillOpacity : .2
         },
@@ -40,7 +42,9 @@ function example () {
       name    : 'volume',
       data    : volumeData,
       flotr   : {
-        bars : { show : true },
+        whiskers : {
+          show : true 
+        },
         mouse: {
           track: true,
           trackY: false,
@@ -54,7 +58,9 @@ function example () {
       name    : 'summary',
       data    : priceData,
       flotr   : {
-        lines : {
+        'lite-lines' : {
+          show : true,
+          lineWidth : 1,
           fill : true,
           fillOpacity : .2,
           fillBorder : true
