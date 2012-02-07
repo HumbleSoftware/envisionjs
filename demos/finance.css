@@ -69,14 +69,15 @@ div#demo {
   height : 80px;
 }
 .humble-vis-child.connection {
+  width: 600px;
   height: 14px;
 }
 .humble-vis-child.connection canvas {
-  width: 600px;
   background: #fff;
   z-index: 10;
 }
 .humble-vis-child.summary {
+  width: 600px;
   height : 70px;
   margin-top: -1px;
 }
