@@ -41,8 +41,8 @@
         height = this.height,
         width = this.width,
         half = Math.round(height / 2) - .5,
-        min = options.min + 1,
-        max = options.max;
+        min = options.min + 0.5,
+        max = options.max + 0.5;
 
       context.clearRect(0, 0, width, height);
       if (min || max) {
@@ -53,7 +53,7 @@
         context.beginPath();
 
         // Left
-        if (min === 1) {
+        if (min <= 2) {
           context.moveTo(0, height);
           context.lineTo(0, 0);
         } else {
