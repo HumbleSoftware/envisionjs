@@ -1,7 +1,19 @@
 (function () {
 
-function Data (data) {
-  this.data = data;
+function Data (options) {
+
+  options = options || {};
+
+  var
+    data = options.data;
+
+  this.getData = function () {
+    return data;
+  }
+
+  this.setData = function (newData) {
+    data = newData;
+  }
 }
 
 Data.prototype = {
