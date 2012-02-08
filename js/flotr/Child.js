@@ -81,7 +81,7 @@ Child.prototype = {
       axis        = options.flotr.xaxis,
       min         = axis.min,
       max         = axis.max,
-      datum       = new V.Data(data);
+      datum       = new V.Preprocessor(data);
 
     if (_.isFunction(data)) {
       return data(min, max, resolution);

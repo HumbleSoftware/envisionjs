@@ -1,6 +1,6 @@
 (function () {
 
-function Data (options) {
+function Preprocessor (options) {
 
   options = options || {};
 
@@ -16,7 +16,7 @@ function Data (options) {
   }
 }
 
-Data.prototype = {
+Preprocessor.prototype = {
 
   bound : function (min, max) {
 
@@ -139,6 +139,6 @@ Data.prototype = {
   }
 };
 
-humblevis.Data = Data;
+humblevis.Preprocessor = Preprocessor;
 
 }());
