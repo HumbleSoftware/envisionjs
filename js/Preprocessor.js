@@ -30,38 +30,40 @@ function Preprocessor (options) {
 
 Preprocessor.prototype = {
 
+  length : function () {
+    return this.getData()[0].length;
+  },
+
   bound : function (min, max) {
 
     if (!_.isNumber(min) || !_.isNumber(max)) return this;
 
     var
-      data    = this.data,
-      length  = data.length,
-      x       = data.x,
-      y       = data.y,
-      newData = {},
+      data    = this.getData(),
+      length  = this.length(),
+      x       = data[0],
+      y       = data[1],
       i, index;
 
     for (i = 0; i < length; i++) {
       if (x[i] >= min) break;
     }
 
-    if (i > 0) i--;
     index = i;
+    if (i > 0) i--;
 
     for (i; i < length; i++) {
       if (x[i] > max) break;
     }
 
-    // Slices
-    newData.x = x.slice(index, i);
-    newData.y = y.slice(index, i);
-    newData.length = newData.x.length;
-
-    this.data = newData;
+    this.setData([
+      x.slice(index, i),
+      y.slice(index, i)
+    ]);
 
     return this;
   },
+
   /**
    * Sample using min and max.
    */
