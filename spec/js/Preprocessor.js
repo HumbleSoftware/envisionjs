@@ -64,5 +64,12 @@ describe('Preprocessor', function () {
       expect(function () { preprocessor.setData([[], [1]]); })
         .toThrow(new Error('Data dimensions must contain the same number of points.'));
     });
+
+    it('validates options data', function () {
+      var
+        options = { data : {} };
+      expect(function () { new H.Preprocessor(options); })
+        .toThrow(new Error("Array expected."));
+    });
   });
 });
