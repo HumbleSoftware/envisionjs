@@ -12,6 +12,16 @@ function Preprocessor (options) {
   }
 
   this.setData = function (newData) {
+    var
+      i, length;
+    if (!_.isArray(newData)) throw new Error('Array expected.');
+    if (newData.length < 2) throw new Error('Data must contain at least two dimensions.');
+    length = newData[0].length;
+    for (i = newData.length; i--;) {
+      if (!_.isArray(newData[i])) throw new Error('Data dimensions must be arrays.');
+      if (newData[i].length !== length) throw new Error('Data dimensions must contain the same number of points.');
+    }
+
     data = newData;
   }
 }
