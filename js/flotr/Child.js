@@ -60,10 +60,10 @@ Child.prototype = {
     fData = fData[0];
     var
       flotrData = [],
-      x = fData.x,
-      y = fData.y,
+      x = fData[0],
+      y = fData[1],
       i;
-    for (i = 0; i < fData.length; i++) {
+    for (i = 0; i < x.length; i++) {
       flotrData.push([x[i], y[i]]);
     }
 
@@ -98,7 +98,7 @@ Child.prototype = {
         .subsampleMinMax(resolution);
     }
 
-    return datum.data;
+    return datum.getData();
   },
 
   _getDataArray : function (data) {
