@@ -5,7 +5,7 @@ function Preprocessor (options) {
   options = options || {};
 
   var
-    data = options.data;
+    data;
 
   this.getData = function () {
     return data;
@@ -24,6 +24,8 @@ function Preprocessor (options) {
 
     data = newData;
   }
+
+  if (options.data) this.setData(options.data);
 }
 
 Preprocessor.prototype = {
