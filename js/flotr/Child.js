@@ -81,24 +81,25 @@ Child.prototype = {
       axis        = options.flotr.xaxis,
       min         = axis.min,
       max         = axis.max,
-      datum       = new V.Preprocessor({data : data});
+      preprocessor;
 
     if (_.isFunction(data)) {
       return data(min, max, resolution);
     } else if (process) {
+      preprocessor = new V.Preprocessor({data : data});
       process.apply(this, [{
-        datum : datum,
+        preprocessor : preprocessor,
         min : min,
         max : max,
         resolution : resolution
       }]);
     } else {
-      datum
+      preprocessor = new V.Preprocessor({data : data})
         .bound(min, max)
         .subsampleMinMax(resolution);
     }
 
-    return datum.getData();
+    return preprocessor.getData();
   },
 
   _getDataArray : function (data) {
