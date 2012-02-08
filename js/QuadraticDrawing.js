@@ -27,7 +27,7 @@
         position : 'relative'
       });
 
-      if (FlashCanvas) FlashCanvas.initElement(canvas);
+      if (typeof FlashCanvas !== 'undefined') FlashCanvas.initElement(canvas);
       this.context = canvas.getContext('2d');
       this.rendered = true;
     },
