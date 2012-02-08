@@ -3,7 +3,9 @@ function example () {
   var
     container = document.getElementById('demo'),
     E = Flotr.EventAdapter,
-    data = { x : [], y : [] },
+    x = [],
+    y = [],
+    data = [x, y],
     hash = window.location.hash,
     amplitude = (hash ? .05 : .001),
     summary = {
@@ -14,10 +16,9 @@ function example () {
     },
     million;
 
-  data.length = 1e6;
   for (i = 0; i < 1e6; i++) {
-    data.x.push(i/10000);
-    data.y.push(.2*Math.sin(i/10000) + i/100000 + amplitude * Math.sin(i/50));
+    x.push(i/10000);
+    y.push(.2*Math.sin(i/10000) + i/100000 + amplitude * Math.sin(i/50));
   }
 
   if (hash !== '#minmax') {
