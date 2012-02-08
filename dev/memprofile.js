@@ -1,4 +1,6 @@
-
+// Compare on JS Perf:
+// http://jsperf.com/arrays-vs-points/2
+//
 var
   test = 1e5,
   data = {};
@@ -29,6 +31,8 @@ function test_arrays (data) {
   }
 }
 
-//test_arrays(data);
+//test_points(data);
+
+test_arrays(data);
 
 console.log(window.data);
