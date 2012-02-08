@@ -87,7 +87,7 @@ adapter = {
     },
 
     select : {
-      name : 'flotr:select',
+      name : 'flotr:selecting',
       handler : function (child, selection) {
 
         var
