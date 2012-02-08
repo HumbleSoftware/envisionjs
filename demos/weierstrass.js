@@ -12,7 +12,9 @@ function example () {
 
       var
         a     = 2, // Weierstrass a 
-        data  = [],
+        dataX = [],
+        dataY = [],
+        data  = [dataX, dataY],
         step  = (max - min) / resolution,
         x     = min,
         y     = 0,
@@ -34,7 +36,8 @@ function example () {
           t = Math.PI * Math.pow(j, a);
           y += Math.sin(t * x) / t; 
         }
-        data.push([x, y]);
+        dataX.push(x);
+        dataY.push(y);
       }
       console.timeEnd('weier');
 
@@ -70,7 +73,9 @@ function example () {
 
     var
       count = 1e6,
-      data = [],
+      dataX = [],
+      dataY = [],
+      data = [dataX, dataY],
       a = 2, // Weierstrass a 
       step = count / 100,
       i = 0,
@@ -91,7 +96,8 @@ function example () {
           t = Math.PI * Math.pow(k, a);
           y += Math.sin(t * x) / t; 
         }
-        data.push([x, y]);
+        dataX.push(x);
+        dataY.push(y);
       }
       if (i == iMax - 1) {
         console.timeEnd('data generation');
