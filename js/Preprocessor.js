@@ -70,48 +70,71 @@ Preprocessor.prototype = {
   subsampleMinMax : function (resolution) {
 
     var
-      data    = this.data,
-      length  = data.length,
-      _length = length - 1,
-      newData = [],
-      unit    = resolution / length,
-      index   = Math.round(unit * 1),
-      iMin    = 1,
-      iMax    = 1,
-      min, max, datum, i, j;
+      data    = this.getData(),
+      length  = this.length(),
+      count   = (resolution - 2) / 2,
+      x       = data[0],
+      y       = data[1],
+      newX    = [],
+      newY    = [],
+      min     = Number.MAX_VALUE,
+      max     = -Number.MAX_VALUE,
+      minI    = 1,
+      maxI    = 1,
+      unit    = Math.floor(length / count),
+      position, min, max, datum, i, j;
 
     if (length > resolution) {
-      newData.push(data[0]);
-      for (i = 1; i < _length; i++) {
-        j = Math.round(unit * i);
 
-        // New index
-        if (j !== index) {
-          if (iMax === iMin) {
-            newData.push(data[iMin]);
-          } else {
-            newData.push(data[Math.min(iMin, iMax)], data[Math.max(iMin, iMax)]);
-          }
-          iMin = iMax = i;
-          min = max = data[i][1];
-          index = j;
-        }
+      newX.push(x[0]);
+      newY.push(y[0]);
 
-        // Old index
-        else {
-          datum = data[i][1];
-          if (datum < min) {
-            iMin = i;
-            min = datum;
+      position = unit;
+
+      for (i = 1; i < length - 1; i++) {
+
+        if (i === position) {
+
+          position += unit;
+
+          j = Math.min(maxI, minI);
+          newX.push(x[j]);
+          newY.push(y[j]);
+
+          j = Math.max(maxI, minI);
+          newX.push(x[j]);
+          newY.push(y[j]);
+
+          minI = i;
+          min = y[minI];
+          maxI = i;
+          max = y[maxI];
+
+        } else {
+          if (y[i] > max) {
+            max = y[i];
+            maxI = i;
           }
-          if (datum > max) {
-            iMax = i;
-            max = datum;
+
+          if (y[i] < min) {
+            min = y[i];
+            minI = i;
           }
         }
       }
-      newData.push(data[length-1]);
-      this.data = newData;
+
+      if (i < position) {
+        newX.push(x[minI]);
+        newY.push(min);
+        newX.push(x[maxI]);
+        newY.push(max);
+      }
+
+      // Last
+      newX.push(x[length-1]);
+      newY.push(y[length-1]);
+
+      this.setData([newX, newY]);
     }
 
     return this;
@@ -127,7 +150,6 @@ Preprocessor.prototype = {
       y       = data[1],
       newX    = [],
       newY    = [],
-      newData = [],
       i, index;
 
     if (length > resolution) {

@@ -200,4 +200,42 @@ describe('Preprocessor', function () {
       expect(preprocessor.getData()).toBe(data);
     });
   });
+
+  describe('MinMaxSubsample', function () {
+    var
+      length = 100,
+      data, preprocessor;
+
+    beforeEach(function () {
+      var
+        x = [],
+        y = [],
+        i;
+
+      for (i = 0; i < length; i++) {
+        x.push(i);
+        y.push(Math.sin(i/10));
+      }
+
+      data = [x, y];
+      preprocessor = new Preprocessor({ data : data });
+    });
+
+    afterEach(function () {
+      preprocessor = null;
+    });
+
+    it('subsamples data', function () {
+
+      preprocessor.subsampleMinMax(10);
+
+      var
+        data = preprocessor.getData(),
+        x = data[0],
+        y = data[1];
+
+      expect(Math.min.apply(Math, data[1])).toEqual(Math.min.apply(Math, y));
+      expect(Math.max.apply(Math, data[1])).toEqual(Math.max.apply(Math, y));
+    });
+  });
 });
