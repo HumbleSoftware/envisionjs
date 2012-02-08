@@ -8,6 +8,7 @@ function Preprocessor (options) {
     data;
 
   this.getData = function () {
+    if (this.bounded === false) bound(this);
     return data;
   }
 
@@ -28,6 +29,57 @@ function Preprocessor (options) {
   if (options.data) this.setData(options.data);
 }
 
+function getStartIndex (data, min) {
+
+  var
+    length = data.length,
+    i;
+
+  for (i = 0; i < length; i++) {
+    if (data[i] >= min) break;
+  }
+
+  return i;
+}
+
+function getEndIndex (data, max) {
+
+  var
+    i;
+
+  for (i = data.length; i--;) {
+    if (data[i] <= max) break;
+  }
+
+  return i;
+}
+
+function bound (that, data) {
+
+  delete that.bounded;
+
+  var
+    data    = that.getData(),
+    length  = that.length(),
+    min     = that.min,
+    max     = that.max,
+    x       = data[0],
+    y       = data[1],
+    index   = getStartIndex(x, min),
+    i       = index ? index : index - 1;
+
+  for (i; i < length; i++) {
+    if (x[i] > max) break;
+  }
+
+  that.setData([
+    x.slice(index, i),
+    y.slice(index, i)
+  ]);
+
+  return that;
+};
+
 Preprocessor.prototype = {
 
   length : function () {
@@ -38,30 +90,9 @@ Preprocessor.prototype = {
 
     if (!_.isNumber(min) || !_.isNumber(max)) return this;
 
-    var
-      data    = this.getData(),
-      length  = this.length(),
-      x       = data[0],
-      y       = data[1],
-      i, index;
-
-    for (i = 0; i < length; i++) {
-      if (x[i] >= min) break;
-    }
-
-    index = i;
-    if (i > 0) i--;
-
-    for (i; i < length; i++) {
-      if (x[i] > max) break;
-    }
-
-    this.setData([
-      x.slice(index, i),
-      y.slice(index, i)
-    ]);
-
-    return this;
+    this.min = min;
+    this.max = max;
+    this.bounded = false;
   },
 
   /**
