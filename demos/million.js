@@ -24,7 +24,7 @@ function example () {
   if (hash !== '#minmax') {
     // Fixed-interval subsampling:
     zoom.processData = summary.processData = function (o) {
-      o.datum
+      o.preprocessor
         .bound(o.min, o.max)
         .subsample(o.resolution);
     }
