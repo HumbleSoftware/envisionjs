@@ -120,34 +120,36 @@ Preprocessor.prototype = {
   subsample : function (resolution) {
 
     var
-      data    = this.data,
-      x       = data.x,
-      y       = data.y,
-      length  = data.length,
+      data    = this.getData(),
+      length  = this.length(),
+      unit    = length / resolution,
+      x       = data[0],
+      y       = data[1],
       newX    = [],
       newY    = [],
-      newData = {
-        x : newX,
-        y : newY
-      },
-      unit    = length / resolution,
-      i;
+      newData = [],
+      i, index;
 
     if (length > resolution) {
+
+      // First
       newX.push(x[0]);
       newY.push(y[0]);
+
       for (i = 1; i < resolution; i++) {
-        if (i * unit >= length)
+        if (i * unit >= length - unit)
           break;
-        newX.push(x[Math.round(i*unit)]);
-        newY.push(y[Math.round(i*unit)]);
+        index = Math.round(i * unit);
+        newX.push(x[index]);
+        newY.push(y[index]);
       }
+
+      // Last
       newX.push(x[length-1]);
       newY.push(y[length-1]);
-      this.data = newData;
-    }
 
-    newData.length = newX.length;
+      this.setData([newX, newY]);
+    }
 
     return this;
   }

@@ -129,4 +129,75 @@ describe('Preprocessor', function () {
       ]);
     });
   });
+
+  describe('Subsample', function () {
+
+    var
+      length = 10,
+      data, preprocessor;
+
+    beforeEach(function () {
+      var
+        x = [],
+        y = [],
+        i;
+
+      for (i = 0; i < length; i++) {
+        x.push(i);
+        y.push(10 - 1 - i);
+      }
+
+      data = [x, y];
+      preprocessor = new Preprocessor({ data : data });
+    });
+
+    afterEach(function () {
+      preprocessor = null;
+    });
+
+    it('subsamples data', function () {
+      preprocessor.subsample(5);
+      expect(preprocessor.length()).toBe(5);
+      expect(preprocessor.getData()).toEqual([
+        [0, 2, 4, 6, 9],
+        [9, 7, 5, 3, 0]
+      ]);
+    });
+
+    it('always includes endpoints', function () {
+      var
+        i, newData, newLength;
+      for (i = 0; i < 10; i++) {
+
+        preprocessor.setData(data);
+        preprocessor.subsample(i);
+
+        newData = preprocessor.getData();
+        newLength = preprocessor.length();
+
+        expect(newLength).toBeGreaterThan(1);
+        expect(newData[0][0]).toBe(data[0][0]);
+        expect(newData[1][0]).toBe(data[1][0]);
+        expect(newData[0][newLength - 1]).toBe(data[0][length - 1]);
+        expect(newData[1][newLength - 1]).toBe(data[1][length - 1]);
+      }
+    });
+
+    it('length equals resolution when resolution 2 or greather', function () {
+      var
+        i;
+
+      for (i = 2; i < length ; i++) {
+        preprocessor.setData(data);
+        preprocessor.subsample(i);
+        expect(preprocessor.length()).toBe(i);
+      }
+    });
+
+    it('does not subsample data not longer than resolution', function () {
+      preprocessor.subsample(length);
+      expect(preprocessor.length()).toBe(length);
+      expect(preprocessor.getData()).toBe(data);
+    });
+  });
 });
