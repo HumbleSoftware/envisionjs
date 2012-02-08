@@ -45,18 +45,31 @@ Child.prototype = {
       fData = data;
     } else {
       _.each(data, function (d, index) {
+        // TODO flotr
+        /*
         if (!_.isArray(d) && !_.isFunction(d)) {
           fData[index] = _.clone(d);
           fData[index] = this._processData(d.data);
         } else {
+        */
           fData[index] = this._processData(d);
-        }
+        //}
       }, this);
+    }
+
+    fData = fData[0];
+    var
+      flotrData = [],
+      x = fData.x,
+      y = fData.y,
+      i;
+    for (i = 0; i < fData.length; i++) {
+      flotrData.push([x[i], y[i]]);
     }
 
     if (!flotr) throw 'No graph submitted.';
 
-    this.flotr = Flotr.draw(node, fData, flotr);
+    this.flotr = Flotr.draw(node, [flotrData], flotr);
   },
 
   _processData : function (data) {

@@ -13,19 +13,26 @@ Data.prototype = {
     var
       data    = this.data,
       length  = data.length,
-      newData = [],
-      i;
+      x       = data.x,
+      y       = data.y,
+      newData = {},
+      i, index;
 
     for (i = 0; i < length; i++) {
-      if (data[i][0] >= min) break;
+      if (x[i] >= min) break;
     }
 
     if (i > 0) i--;
+    index = i;
 
     for (i; i < length; i++) {
-      newData.push(data[i]);
-      if (data[i][0] > max) break;
+      if (x[i] > max) break;
     }
+
+    // Slices
+    newData.x = x.slice(index, i);
+    newData.y = y.slice(index, i);
+    newData.length = newData.x.length;
 
     this.data = newData;
 
@@ -88,21 +95,33 @@ Data.prototype = {
 
     var
       data    = this.data,
+      x       = data.x,
+      y       = data.y,
       length  = data.length,
-      newData = [],
+      newX    = [],
+      newY    = [],
+      newData = {
+        x : newX,
+        y : newY
+      },
       unit    = length / resolution,
       i;
 
     if (length > resolution) {
-      newData.push(data[0]);
+      newX.push(x[0]);
+      newY.push(y[0]);
       for (i = 1; i < resolution; i++) {
         if (i * unit >= length)
           break;
-        newData.push(data[Math.round(i*unit)]);
+        newX.push(x[Math.round(i*unit)]);
+        newY.push(y[Math.round(i*unit)]);
       }
-      newData.push(data[length-1]);
+      newX.push(x[length-1]);
+      newY.push(y[length-1]);
       this.data = newData;
     }
+
+    newData.length = newX.length;
 
     return this;
   }
