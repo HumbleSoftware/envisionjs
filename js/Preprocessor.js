@@ -8,7 +8,7 @@ function Preprocessor (options) {
     data;
 
   this.getData = function () {
-    if (this.bounded === false) bound(this);
+    if (this.bounded) bound(this);
     return data;
   }
 
@@ -92,7 +92,9 @@ Preprocessor.prototype = {
 
     this.min = min;
     this.max = max;
-    this.bounded = false;
+    this.bounded = true;
+
+    return this;
   },
 
   /**
@@ -100,29 +102,34 @@ Preprocessor.prototype = {
    */
   subsampleMinMax : function (resolution) {
 
+    var bounded = this.bounded;
+    delete this.bounded;
+
     var
       data    = this.getData(),
       length  = this.length(),
-      count   = (resolution - 2) / 2,
       x       = data[0],
       y       = data[1],
+      start   = bounded ? getStartIndex(x, this.min) : 0,
+      end     = bounded ? getEndIndex(x, this.max) : length - 1,
+      count   = (resolution - 2) / 2,
       newX    = [],
       newY    = [],
       min     = Number.MAX_VALUE,
       max     = -Number.MAX_VALUE,
       minI    = 1,
       maxI    = 1,
-      unit    = Math.floor(length / count),
+      unit    = Math.floor((end - start)/ count),
       position, min, max, datum, i, j;
 
     if (length > resolution) {
 
-      newX.push(x[0]);
-      newY.push(y[0]);
+      newX.push(x[start]);
+      newY.push(y[start]);
 
-      position = unit;
+      position = start + unit;
 
-      for (i = 1; i < length - 1; i++) {
+      for (i = start; i < end; i++) {
 
         if (i === position) {
 
@@ -162,8 +169,8 @@ Preprocessor.prototype = {
       }
 
       // Last
-      newX.push(x[length-1]);
-      newY.push(y[length-1]);
+      newX.push(x[end]);
+      newY.push(y[end]);
 
       this.setData([newX, newY]);
     }
@@ -173,12 +180,17 @@ Preprocessor.prototype = {
 
   subsample : function (resolution) {
 
+    var bounded = this.bounded;
+    delete this.bounded;
+
     var
       data    = this.getData(),
       length  = this.length(),
-      unit    = length / resolution,
       x       = data[0],
       y       = data[1],
+      start   = bounded ? getStartIndex(x, this.min) : 0,
+      end     = bounded ? getEndIndex(x, this.max) : length - 1,
+      unit    = (end - start + 1) / resolution,
       newX    = [],
       newY    = [],
       i, index;
@@ -186,20 +198,19 @@ Preprocessor.prototype = {
     if (length > resolution) {
 
       // First
-      newX.push(x[0]);
-      newY.push(y[0]);
+      newX.push(x[start]);
+      newY.push(y[start]);
 
       for (i = 1; i < resolution; i++) {
-        if (i * unit >= length - unit)
-          break;
-        index = Math.round(i * unit);
+        if (i * unit >= end - unit) break;
+        index = Math.round(i * unit) + start;
         newX.push(x[index]);
         newY.push(y[index]);
       }
 
       // Last
-      newX.push(x[length-1]);
-      newY.push(y[length-1]);
+      newX.push(x[end]);
+      newY.push(y[end]);
 
       this.setData([newX, newY]);
     }
