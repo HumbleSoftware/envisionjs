@@ -38,7 +38,8 @@ function example () {
             return (n == this.max ? false : '$'+n);
           }
         }
-      }
+      },
+      processData : processData
     },
 
     volumeOptions = {
@@ -55,7 +56,8 @@ function example () {
           position: 'ne',
           trackDecimals: 0
         }
-      }
+      },
+      processData : processData
     },
 
     summaryOptions = {
@@ -96,6 +98,11 @@ function example () {
 
     vis, price, volume, summary, selection, hit, connection;
 
+  function processData (options) {
+    options.preprocessor
+      .bound(options.min, options.max)
+      .subsampleMinMax(800)
+  }
 
   // Application
 
