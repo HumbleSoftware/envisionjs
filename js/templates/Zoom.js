@@ -6,12 +6,14 @@ var
 
 function defaultsZoom () {
   return {
+    name : 'zoom',
     flotr : {}
   };
 }
 
 function defaultsSummary () {
   return {
+    name : 'summary',
     flotr : {
       handles : { show : true },
       selection : { mode : 'x'}
