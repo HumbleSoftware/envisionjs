@@ -35,7 +35,8 @@ function example () {
             return (n == this.max ? false : '$'+n);
           }
         }
-      }
+      },
+      skipPreprocess : true
     },
 
     volumeOptions = {
@@ -48,7 +49,8 @@ function example () {
           position: 'ne',
           trackDecimals: 0
         }
-      }
+      },
+      skipPreprocess : true
     },
 
     summaryOptions = {
@@ -67,7 +69,8 @@ function example () {
         grid : {
           verticalLines : false
         }
-      }
+      },
+      skipPreprocess : true
     },
 
     vis, price, volume, summary, selection, hit;
