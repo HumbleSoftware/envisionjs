@@ -51,6 +51,16 @@ div.controls>span {
   height: 200px;
 }
 
+/* Million */
+.million .humble-vis-child.summary {
+  height: 178px;
+  margin: 11px 0px
+}
+.million .humble-vis-child.zoom {
+  height: 100px;
+  margin: 50px 0px
+}
+
 /* Flotr */
 .flotr-handles-handle {
   background: #eee;
