@@ -24,6 +24,8 @@ function Preprocessor (options) {
     }
 
     data = newData;
+
+    return this;
   }
 
   if (options.data) this.setData(options.data);
@@ -78,8 +80,6 @@ function bound (that) {
     x.slice(start, end + 1),
     y.slice(start, end + 1)
   ]);
-
-  return that;
 };
 
 Preprocessor.prototype = {
