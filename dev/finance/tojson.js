@@ -56,4 +56,27 @@ function ajax () {
   });
 };
 
-console.log(ajax());
+function new_data () {
+  function to_new(data) {
+    var
+      x = [],
+      y = [],
+      newData = [x, y];
+
+    for (i = 0; i < data.length; i++) {
+      x.push(data[i][0]);
+      y.push(data[i][1]);
+    }
+
+    return newData;
+  }
+
+  return JSON.stringify({
+    summaryTicks : jsonData,
+    price : to_new(priceData),
+    volume : to_new(volumeData),
+    summary : to_new(summaryData)
+  });
+}
+
+console.log(new_data());
