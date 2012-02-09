@@ -42,7 +42,7 @@ Child.prototype = {
 
     data = this._getDataArray(data);
     if (o.skipPreprocess) {
-      fData = data;
+      flotrData = data;
     } else {
       _.each(data, function (d, index) {
         // TODO flotr
@@ -55,21 +55,22 @@ Child.prototype = {
           fData[index] = this._processData(d);
         //}
       }, this);
-    }
 
-    fData = fData[0];
-    var
-      flotrData = [],
-      x = fData[0],
-      y = fData[1],
-      i;
-    for (i = 0; i < x.length; i++) {
-      flotrData.push([x[i], y[i]]);
+      fData = fData[0];
+      var
+        flotrData = [],
+        x = fData[0],
+        y = fData[1],
+        i;
+      for (i = 0; i < x.length; i++) {
+        flotrData.push([x[i], y[i]]);
+      }
+      flotrData = [flotrData];
     }
 
     if (!flotr) throw 'No graph submitted.';
 
-    this.flotr = Flotr.draw(node, [flotrData], flotr);
+    this.flotr = Flotr.draw(node, flotrData, flotr);
   },
 
   _processData : function (data) {
