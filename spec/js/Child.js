@@ -53,6 +53,15 @@ describe('Child', function () {
       expect($div).toContain(S_CHILD + '.test');
     });
 
+    it('doesnt assign a name when name not present', function () {
+      var
+        child = new H.Child(),
+        name  = 'basename';
+      $div.addClass('basename');
+      child.render(div);
+      expect($div.attr('class')).toBe(name);
+    });
+
     it('assigns a height and width', function () {
       var
         height = 175,

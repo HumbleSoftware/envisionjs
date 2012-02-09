@@ -23,10 +23,9 @@ function Child (options) {
   options = options || {};
 
   var
-    name = options.name,
     node = bonzo.create(T_CHILD)[0];
 
-  if (name) bonzo(node).addClass(name);
+  bonzo(node).addClass(options.name || '');
 
   this.options = options;
   this.node = node;
@@ -52,7 +51,7 @@ Child.prototype = {
     if (!element) throw 'No element to render within.';
 
     bonzo(element)
-      .addClass(options.name)
+      .addClass(options.name || '')
       .append(this.node);
     this._setDimension('width');
     this._setDimension('height');
