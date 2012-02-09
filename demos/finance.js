@@ -3,12 +3,14 @@ function example () {
   // Configuraiton
   var
     H = humblevis,
+    D = financeData,
+    jsonData = D.summaryTicks,
 
     container = document.getElementById('demo'),
 
     priceOptions = {
       name    : 'price',
-      data    : priceData,
+      data    : D.price,
       flotr   : {
         'lite-lines' : {
           lineWidth : 1,
@@ -41,7 +43,7 @@ function example () {
 
     volumeOptions = {
       name    : 'volume',
-      data    : volumeData,
+      data    : D.volume,
       flotr   : {
         whiskers : {
           show : true 
@@ -58,7 +60,7 @@ function example () {
 
     summaryOptions = {
       name    : 'summary',
-      data    : priceData,
+      data    : D.price,
       flotr   : {
         'lite-lines' : {
           show : true,
