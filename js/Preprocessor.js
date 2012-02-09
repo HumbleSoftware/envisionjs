@@ -54,17 +54,17 @@ function getEndIndex (data, max) {
   return i;
 }
 
-function bound (that, data) {
+function bound (that) {
 
   delete that.bounded;
 
   var
     data    = that.getData(),
     length  = that.length(),
-    min     = that.min,
-    max     = that.max,
     x       = data[0],
     y       = data[1],
+    min     = that.min || 0,
+    max     = that.max || that.length(),
     index   = getStartIndex(x, min),
     i       = index ? index : index - 1;
 
@@ -119,10 +119,10 @@ Preprocessor.prototype = {
       max     = -Number.MAX_VALUE,
       minI    = 1,
       maxI    = 1,
-      unit    = Math.floor((end - start)/ count),
+      unit    = (end - start)/ count,
       position, min, max, datum, i, j;
 
-    if (length > resolution) {
+    if (end - start + 1 > resolution) {
 
       newX.push(x[start]);
       newY.push(y[start]);
@@ -131,7 +131,7 @@ Preprocessor.prototype = {
 
       for (i = start; i < end; i++) {
 
-        if (i === position) {
+        if (i === Math.round(position)) {
 
           position += unit;
 
@@ -173,6 +173,8 @@ Preprocessor.prototype = {
       newY.push(y[end]);
 
       this.setData([newX, newY]);
+    } else {
+      this.bounded = true;
     }
 
     return this;
