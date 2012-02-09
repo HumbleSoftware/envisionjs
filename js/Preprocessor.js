@@ -39,6 +39,9 @@ function getStartIndex (data, min) {
     if (data[i] >= min) break;
   }
 
+  // Include point outside range when not exact match
+  if (data[i] > min && i > 0) i--;
+
   return i;
 }
 
@@ -50,6 +53,9 @@ function getEndIndex (data, max) {
   for (i = data.length; i--;) {
     if (data[i] <= max) break;
   }
+
+  // Include point outside range when not exact match
+  if (data[i] < max && i > 0) i++;
 
   return i;
 }
@@ -65,16 +71,12 @@ function bound (that) {
     y       = data[1],
     min     = that.min || 0,
     max     = that.max || that.length(),
-    index   = getStartIndex(x, min),
-    i       = index ? index : index - 1;
-
-  for (i; i < length; i++) {
-    if (x[i] > max) break;
-  }
+    start   = getStartIndex(x, min),
+    end     = getEndIndex(x, max);
 
   that.setData([
-    x.slice(index, i),
-    y.slice(index, i)
+    x.slice(start, end + 1),
+    y.slice(start, end + 1)
   ]);
 
   return that;

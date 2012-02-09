@@ -128,6 +128,15 @@ describe('Preprocessor', function () {
         [9, 8, 7]
       ]);
     });
+
+    it('includes points outside the range if match not exact', function () {
+      preprocessor.bound(3.5, 6.5);
+      expect(preprocessor.length()).toBe(5);
+      expect(preprocessor.getData()).toEqual([
+        [3, 4, 5, 6, 7],
+        [6, 5, 4, 3, 2]
+      ]);
+    });
   });
 
   describe('Subsample', function () {
