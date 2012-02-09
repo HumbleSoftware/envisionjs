@@ -247,4 +247,32 @@ describe('Preprocessor', function () {
       expect(Math.max.apply(Math, data[1])).toEqual(Math.max.apply(Math, y));
     });
   });
+
+  describe('Chaining', function  () {
+
+    var
+      preprocessor;
+
+    beforeEach(function () {
+      preprocessor = new Preprocessor({
+        data : [[],[]]
+      });
+    });
+
+    it('chains setData', function () {
+      expect(preprocessor.setData([[],[]])).toBe(preprocessor);
+    });
+
+    it('chains bound', function () {
+      expect(preprocessor.bound(0, 1)).toBe(preprocessor);
+    });
+
+    it('chains subsample', function () {
+      expect(preprocessor.subsample(10)).toBe(preprocessor);
+    });
+
+    it('chains subsampleMinMax', function () {
+      expect(preprocessor.subsampleMinMax(0, 1)).toBe(preprocessor);
+    });
+  });
 });
