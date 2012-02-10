@@ -45,6 +45,12 @@
         min = options.min + 0.5,
         max = options.max + 0.5;
 
+      function left () {
+      }
+
+      function right () {
+      }
+
       context.clearRect(0, 0, width, height);
       if (min || max) {
         context.save();
@@ -56,16 +62,16 @@
         // Left
         if (min <= 1) {
           context.moveTo(0, height);
-          context.lineTo(0, 0);
+          context.lineTo(0, -0.5);
         } else {
           context.moveTo(min, height);
           context.quadraticCurveTo(min, half, Math.max(min - half, min / 2), half);
           context.lineTo(Math.min(half, min / 2), half);
-          context.quadraticCurveTo(0, half, 0, 0);
+          context.quadraticCurveTo(0, half, 0, -0.5);
         }
 
         // Top
-        context.lineTo(width, 0);
+        context.lineTo(width, -0.5);
 
         // Right
         if (max >= width - 1) {
