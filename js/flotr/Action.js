@@ -126,6 +126,30 @@ adapter = {
         return options;
       },
       consumer : function (child, selection) {
+
+        var
+          graph = child.api.flotr,
+          x = selection.x,
+          y = selection.y,
+          options = {};
+
+        if (x) {
+          options.x1 = x.min;
+          options.x2 = x.max;
+        }
+
+        if (y) {
+          options.y1 = y.min;
+          options.y2 = y.max;
+        }
+
+        graph.selection.setSelection(options);
+      }
+    },
+
+    zoom : {
+      consumer : function (child, selection) {
+
         var
           x = selection.data.x,
           y = selection.data.y,
