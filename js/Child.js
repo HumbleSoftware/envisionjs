@@ -70,6 +70,18 @@ Child.prototype = {
     return this.data;
   },
 
+  trigger : function () {
+    this.api.adapter.trigger.apply(this.api.adapter, arguments);
+  },
+
+  attach : function () {
+    this.api.adapter.attach.apply(this.api.adapter, arguments);
+  },
+
+  detach : function () {
+    this.api.adapter.detach.apply(this.api.adapter, arguments);
+  },
+
   _setDimension : function (attribute) {
     var
       node = this.node,

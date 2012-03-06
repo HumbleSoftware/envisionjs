@@ -82,10 +82,12 @@ Interaction.prototype = {
 
   _bindLeader : function (leader, action, options) {
     _.each(action.events, function (e) {
+
       var
         handler = e.handler || e,
         consumer = e.consumer || e;
-      leader.api.adapter.attach(leader, handler, _.bind(function (leader, result) {
+
+      leader.attach(leader, handler, _.bind(function (leader, result) {
 
         if (this.prevent[name]) return;
 
@@ -100,7 +102,7 @@ Interaction.prototype = {
 
             if (leader === follower) return; // Skip leader (recursion)
 
-            follower.api.adapter.trigger(follower, consumer, result);
+            follower.trigger(follower, consumer, result);
 
           }, this);
         } catch (e) {

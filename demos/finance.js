@@ -127,7 +127,7 @@ function example () {
     .follower(connection)
     .add(H.action.selection);
 
-  summary.api.adapter.trigger(summary, 'select', {
+  summary.trigger(summary, 'select', {
     data : {
       x : {
         min : 0,
