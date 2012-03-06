@@ -41,7 +41,6 @@ yepnope([
   '../lib/flotr2/js/plugins/labels.js',
   '../lib/flotr2/js/plugins/legend.js',
   '../lib/flotr2/js/plugins/titles.js',
-  '../lib/flotr2/js/types/gantt.js',
   '../js/flotr/lite-lines.js',
   '../js/flotr/whiskers.js',
 
