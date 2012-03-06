@@ -32,7 +32,6 @@ function Child (options) {
 
   if (options.flotr) {
     this.api = new V.flotr.Child(options);
-    this.api.adapter = V.flotr.adapter;
   } else if (options.drawing) {
     this.api = options.drawing;
   }
@@ -71,15 +70,15 @@ Child.prototype = {
   },
 
   trigger : function () {
-    this.api.adapter.trigger.apply(this.api.adapter, arguments);
+    this.api.trigger.apply(this.api, arguments);
   },
 
   attach : function () {
-    this.api.adapter.attach.apply(this.api.adapter, arguments);
+    this.api.attach.apply(this.api, arguments);
   },
 
   detach : function () {
-    this.api.adapter.detach.apply(this.api.adapter, arguments);
+    this.api.detach.apply(this.api, arguments);
   },
 
   _setDimension : function (attribute) {

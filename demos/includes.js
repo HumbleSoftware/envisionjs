@@ -58,8 +58,6 @@ yepnope([
   '../js/flotr/namespace.js',
   '../js/flotr/defaultOptions.js',
   '../js/flotr/Child.js',
-  '../js/flotr/Action.js',
-
 
   { complete : example }
 ]);

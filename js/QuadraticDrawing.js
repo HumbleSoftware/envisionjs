@@ -88,32 +88,30 @@
         context.restore();
       }
     },
-    adapter : {
-      trigger : function (child, name, options) {
-        if (name === 'zoom') {
-          this.zoom(child, options);
-        } else if (name === 'click') {
-          this.click(child);
-        }
-      },
-      zoom : function (child, options) {
-        var
-          x = options.x || {},
-          min = x.min,
-          max = x.max,
-          api = child.api;
-
-        child.draw(null, {
-          min : min,
-          max : max
-        });
-      },
-      click : function (child) {
-        child.draw(null, {
-          min : child.width / 2,
-          max : child.width / 2
-        });
+    trigger : function (child, name, options) {
+      if (name === 'zoom') {
+        this.zoom(child, options);
+      } else if (name === 'click') {
+        this.click(child);
       }
+    },
+    zoom : function (child, options) {
+      var
+        x = options.x || {},
+        min = x.min,
+        max = x.max,
+        api = child.api;
+
+      child.draw(null, {
+        min : min,
+        max : max
+      });
+    },
+    click : function (child) {
+      child.draw(null, {
+        min : child.width / 2,
+        max : child.width / 2
+      });
     }
   };
   humblevis.QuadraticDrawing = QuadraticDrawing;
