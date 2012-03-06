@@ -82,3 +82,17 @@ div#demo {
   height : 70px;
   margin-top: -1px;
 }
+
+@media screen and (max-width: 600px) {
+  .humble-vis-child.connection,
+  .humble-vis-child.summary {
+    width : 100%;
+  }
+  .humble-vis-child.price {
+    height: 120px;
+  }
+  .humble-vis-child.summary,
+  .humble-vis-child.volume {
+    height: 40px;
+  }
+}

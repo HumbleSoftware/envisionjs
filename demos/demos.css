@@ -91,3 +91,18 @@ div.controls>span {
 .flotr-handles-right {
   cursor: e-resize;
 }
+
+@media screen and (max-width: 600px) {
+  h3 {
+    margin: 12px 0px;
+    font-size: 24px;
+  }
+
+  div#content {
+    width: 90%;
+  }
+
+  .humble-vis-child {
+    width: 100%;
+  }
+}
