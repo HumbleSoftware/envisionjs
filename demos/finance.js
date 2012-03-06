@@ -127,7 +127,18 @@ function example () {
     .follower(connection)
     .add(H.action.selection);
 
-  summary.api.flotr.selection.setSelection({ y1 : 0, y2 : 0, x1 : 50, x2 : 150});
+  summary.api.adapter.trigger(summary, 'select', {
+    data : {
+      x : {
+        min : 0,
+        max : 100
+      },
+      y : {
+        min : 0,
+        max : 0
+      }
+    }
+  });
 
   hit
     .group([price, volume])
