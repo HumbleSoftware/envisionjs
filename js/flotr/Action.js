@@ -150,7 +150,7 @@ adapter = {
     },
 
     mouseout : {
-      name : 'mouseout',
+      name : 'flotr:mouseout',
       handler : function (child) {
       },
       consumer : function (child) {
