@@ -90,13 +90,13 @@
     },
     adapter : {
       trigger : function (child, name, options) {
-        if (name === 'select') {
-          this.select(child, options);
+        if (name === 'zoom') {
+          this.zoom(child, options);
         } else if (name === 'click') {
           this.click(child);
         }
       },
-      select : function (child, options) {
+      zoom : function (child, options) {
         var
           x = options.x || {},
           min = x.min,
