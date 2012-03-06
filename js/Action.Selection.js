@@ -2,7 +2,10 @@
 
 var selection = {
   events : [
-    'select',
+    {
+      handler : 'select',
+      consumer : 'zoom'
+    },
     'click'
   ]
 };
