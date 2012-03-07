@@ -3,16 +3,20 @@
     "DIST_DIR": "./",
     "vis": [
       "./js/Vis.js",
-      "./js/Data.js",
       "./js/Visualization.js",
+      "./js/Child.js",
       "./js/Interaction.js",
       "./js/Action.Selection.js",
       "./js/Action.Hit.js",
+      "./js/Preprocessor.js",
+      "./js/QuadraticDrawing.js",
       "./js/Templates.js",
+      "./js/templates/Zoom.js",
       "./js/flotr/namespace.js",
       "./js/flotr/defaultOptions.js",
       "./js/flotr/Child.js",
-      "./js/templates/Zoom.js"
+      "./js/flotr/lite-lines.js",
+      "./js/flotr/whiskers.js"
     ]
   }
 }
