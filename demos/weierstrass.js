@@ -29,7 +29,7 @@ function example () {
         iterations = 50;
       }
 
-      console.time('weier');
+      //console.time('weier');
       for (i = 0; i <= resolution; i++, x += step) {
         y = 0;
         for (j = 1; j < iterations; j++) {
@@ -39,7 +39,7 @@ function example () {
         dataX.push(x);
         dataY.push(y);
       }
-      console.timeEnd('weier');
+      //console.timeEnd('weier');
 
       return data;
     }
@@ -84,7 +84,7 @@ function example () {
       jMax = step * (i + 1),
       k, x, y, t;
 
-    console.time('data generation');
+    //console.time('data generation');
     weierstrassStep(i, jMax);
 
     function weierstrassStep (i, jMax) {
@@ -100,7 +100,7 @@ function example () {
         dataY.push(y);
       }
       if (i == iMax - 1) {
-        console.timeEnd('data generation');
+        //console.timeEnd('data generation');
         progress.innerHTML = 100;
         letsWomp();
       } else {
