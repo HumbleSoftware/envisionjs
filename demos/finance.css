@@ -1,6 +1,6 @@
 /* Vis */
 div#demo {
-  height: auto;
+  height: 430px;
   width: auto;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -84,6 +84,9 @@ div#demo {
 }
 
 @media screen and (max-width: 600px) {
+  div#demo {
+    height: 253px;
+  }
   .humble-vis-child.connection,
   .humble-vis-child.summary {
     width : 100%;
