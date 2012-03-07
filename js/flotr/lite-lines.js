@@ -6,7 +6,7 @@ Flotr.addType('lite-lines', {
     fill: false,           // => true to fill the area from the line to the x axis, false for (transparent) no fill
     fillBorder: false,     // => draw a border around the fill
     fillColor: null,       // => fill color
-    fillOpacity: 0.4,      // => opacity of the fill color, set to 1 for a solid fill, 0 hides the fill
+    fillOpacity: 0.4       // => opacity of the fill color, set to 1 for a solid fill, 0 hides the fill
   },
 
   /**
