@@ -138,7 +138,7 @@ function example () {
             volumeOptions.data = d.volume;
             jsonData = d.data;
             _.each(selection.followers, function (follower) {
-              follower.draw(null, o);
+              follower.trigger(follower, 'zoom', o);
             }, this);
           });
         }
@@ -169,6 +169,19 @@ function example () {
 
     hit.add(H.action.hit);
     hit.group([price, volume]);
+
+    summary.trigger(summary, 'select', {
+      data : {
+        x : {
+          min : 0,
+          max : 400
+        },
+        y : {
+          min : 0,
+          max : 0
+        }
+      }
+    });
   }
 }
 
