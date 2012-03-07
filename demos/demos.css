@@ -33,6 +33,11 @@ div.controls {
 div.controls>span {
     padding-left: 16px;
 }
+div#footer {
+  margin: 80px auto 20px auto;
+  text-align: center;
+  font-size: 14px;
+}
 
 /* Vis */
 .humble-vis-visualization {
@@ -100,6 +105,9 @@ div.controls>span {
 
   div#content {
     width: 90%;
+  }
+  div#footer {
+    margin: 40px 0px 20px 0px;
   }
 
   .humble-vis-child {
