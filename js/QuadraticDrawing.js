@@ -35,21 +35,18 @@
     draw : function (data, options, node) {
 
       if (!this.rendered) this.render(node);
-      options = options || {};
 
       var
         context = this.context,
         height = this.height,
         width = this.width,
         half = Math.round(height / 2) - .5,
-        min = options.min ? options.min + 0.5 : width / 2,
-        max = options.max ? options.max + 0.5 : width / 2;
+        min, max;
 
-      function left () {
-      }
+      options = options || { min : width / 2, max : width / 2};
 
-      function right () {
-      }
+      min = options.min + 0.5;
+      max = options.max + 0.5;
 
       context.clearRect(0, 0, width, height);
       if (min || max) {
