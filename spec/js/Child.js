@@ -3,7 +3,7 @@ describe('Child', function () {
   var
     CN_CHILD = 'humble-vis-child',
     S_CHILD = '.' + CN_CHILD,
-    H = humblevis;
+    H = envision;
 
   it('defines child', function () {
     expect(H.Child).toBeDefined();

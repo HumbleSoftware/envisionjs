@@ -43,7 +43,7 @@ function example () {
   }
 
   // Zoom template:
-  million = new humblevis.templates.Zoom({
+  million = new envision.templates.Zoom({
     container : container,
     summary : summary,
     zoom : zoom

@@ -45,7 +45,7 @@ yepnope([
   '../js/flotr/whiskers.js',
 
   // Visualization
-  '../js/Vis.js',
+  '../js/Envision.js',
   '../js/Visualization.js',
   '../js/Child.js',
   '../js/Interaction.js',

@@ -11,7 +11,7 @@ describe('Visualization', function () {
     S_VISUALIZATION   = '.' + CN_VISUALIZATION,
     S_CONTAINER       = '.' + CN_CONTAINER,
 
-    H = humblevis;
+    H = envision;
 
   it('defines visualization', function () {
     expect(H.Visualization).toBeDefined();

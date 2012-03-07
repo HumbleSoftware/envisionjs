@@ -45,7 +45,7 @@ function example () {
     }
 
     // Render Zoom template
-    new humblevis.templates.Zoom({
+    new envision.templates.Zoom({
       container : container,
       summary : {
         data : weierstrass,
@@ -113,7 +113,7 @@ function example () {
     // womp womp womp
     function letsWomp () {
       // Render Zoom template
-      new humblevis.templates.Zoom({
+      new envision.templates.Zoom({
         container : container,
         summary : {
           data : data

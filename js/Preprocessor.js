@@ -223,6 +223,6 @@ Preprocessor.prototype = {
   }
 };
 
-humblevis.Preprocessor = Preprocessor;
+envision.Preprocessor = Preprocessor;
 
 }());

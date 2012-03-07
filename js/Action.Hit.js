@@ -7,7 +7,7 @@ var hit = {
   ]
 };
 
-humblevis.action = humblevis.action || {};
-humblevis.action.hit = hit;
+envision.action = envision.action || {};
+envision.action.hit = hit;
 
 })();

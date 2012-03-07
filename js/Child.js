@@ -12,7 +12,7 @@
 
 var
 
-  V = humblevis,
+  V = envision,
 
   CN_CHILD = 'humble-vis-child',
 

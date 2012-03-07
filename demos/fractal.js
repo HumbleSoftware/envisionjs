@@ -77,7 +77,7 @@ function example () {
   var
     container = document.getElementById('demo'),
     E = Flotr.EventAdapter,
-    H = humblevis,
+    H = envision,
     fractalOptions = {
       data : [[-2, 1.2], [1, -1.2]],
       width : 598,

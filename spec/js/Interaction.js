@@ -1,7 +1,7 @@
 describe('Interaction', function () {
 
   var
-    H = humblevis;
+    H = envision;
 
   it('defines interaction', function () {
     expect(H.Interaction).toBeDefined();

@@ -1,1 +1,1 @@
-humblevis.templates = humblevis.templates || {};
+envision.templates = envision.templates || {};

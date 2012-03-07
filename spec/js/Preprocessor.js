@@ -1,6 +1,6 @@
 describe('Preprocessor', function () {
   var
-    H = humblevis,
+    H = envision,
     Preprocessor = H.Preprocessor;
 
   it('defines preprocessor', function () {

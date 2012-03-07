@@ -13,7 +13,7 @@
  */
 (function () {
 
-var H = humblevis;
+var H = envision;
 
 function Interaction(options) {
   this.options = options = options || {};

@@ -129,6 +129,6 @@ Visualization.prototype = {
   }
 };
 
-humblevis.Visualization = Visualization;
+envision.Visualization = Visualization;
 
 })();

@@ -111,5 +111,5 @@
       });
     }
   };
-  humblevis.QuadraticDrawing = QuadraticDrawing;
+  envision.QuadraticDrawing = QuadraticDrawing;
 })();

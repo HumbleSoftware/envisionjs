@@ -2,7 +2,7 @@ function example () {
 
   // Configuraiton
   var
-    H = humblevis,
+    H = envision,
     E = Flotr.EventAdapter,
 
     container = document.getElementById('demo'),
@@ -86,7 +86,7 @@ function example () {
 
     connectionOptions = {
       name : 'connection',
-      drawing : humblevis.QuadraticDrawing
+      drawing : envision.QuadraticDrawing
     },
 
     vis, price, volume, connection, summary, selection, hit;

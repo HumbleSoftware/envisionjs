@@ -5,7 +5,7 @@ src_files:
   - "lib/flotr2/flotr2.js"
   - "lib/bonzo/bonzo.min.js"
 # Vis source:
-  - "js/Vis.js"
+  - "js/Envision.js"
   - "js/Visualization.js"
   - "js/Child.js"
   - "js/Preprocessor.js"

@@ -10,7 +10,7 @@ var selection = {
   ]
 };
 
-humblevis.action = humblevis.action || {};
-humblevis.action.selection = selection;
+envision.action = envision.action || {};
+envision.action.selection = selection;
 
 })();

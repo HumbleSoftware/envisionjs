@@ -1,4 +1,4 @@
-humblevis = {};
+envision = {};
 
 (function () { 
 /**
@@ -131,7 +131,7 @@ Visualization.prototype = {
   }
 };
 
-humblevis.Visualization = Visualization;
+envision.Visualization = Visualization;
 
 })();
 
@@ -149,7 +149,7 @@ humblevis.Visualization = Visualization;
 
 var
 
-  V = humblevis,
+  V = envision,
 
   CN_CHILD = 'humble-vis-child',
 
@@ -250,7 +250,7 @@ V.Child = Child;
  */
 (function () {
 
-var H = humblevis;
+var H = envision;
 
 function Interaction(options) {
   this.options = options = options || {};
@@ -368,8 +368,8 @@ var selection = {
   ]
 };
 
-humblevis.action = humblevis.action || {};
-humblevis.action.selection = selection;
+envision.action = envision.action || {};
+envision.action.selection = selection;
 
 })();
 
@@ -382,8 +382,8 @@ var hit = {
   ]
 };
 
-humblevis.action = humblevis.action || {};
-humblevis.action.hit = hit;
+envision.action = envision.action || {};
+envision.action.hit = hit;
 
 })();
 
@@ -612,7 +612,7 @@ Preprocessor.prototype = {
   }
 };
 
-humblevis.Preprocessor = Preprocessor;
+envision.Preprocessor = Preprocessor;
 
 }());
 
@@ -729,15 +729,15 @@ humblevis.Preprocessor = Preprocessor;
       });
     }
   };
-  humblevis.QuadraticDrawing = QuadraticDrawing;
+  envision.QuadraticDrawing = QuadraticDrawing;
 })();
 
-humblevis.templates = humblevis.templates || {};
+envision.templates = envision.templates || {};
 
 (function () {
 
 var
-  V = humblevis,
+  V = envision,
   Zoom;
 
 function defaultsZoom () {
@@ -796,13 +796,13 @@ V.templates.Zoom = Zoom;
 
 })();
 
-humblevis.flotr = {};
+envision.flotr = {};
 
 /*
  * Flotr Default Options
  */
 
-humblevis.flotr.defaultOptions = {
+envision.flotr.defaultOptions = {
   grid : {
     outlineWidth : 0,
     labelMargin : 0,
@@ -844,7 +844,7 @@ humblevis.flotr.defaultOptions = {
 (function () { 
 
 var
-  V = humblevis,
+  V = envision,
   E = Flotr.EventAdapter,
   DEFAULTS = V.flotr.defaultOptions;
 

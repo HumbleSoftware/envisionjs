@@ -1,7 +1,7 @@
 (function () {
 
 var
-  V = humblevis,
+  V = envision,
   Zoom;
 
 function defaultsZoom () {

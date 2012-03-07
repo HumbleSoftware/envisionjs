@@ -11,7 +11,7 @@
 (function () { 
 
 var
-  V = humblevis,
+  V = envision,
   E = Flotr.EventAdapter,
   DEFAULTS = V.flotr.defaultOptions;
 

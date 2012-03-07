@@ -2,7 +2,7 @@ function example () {
 
   // Configuraiton
   var
-    H = humblevis,
+    H = envision,
     D = financeData,
     jsonData = D.summaryTicks,
 
@@ -93,7 +93,7 @@ function example () {
 
     connectionOptions = {
       name : 'connection',
-      drawing : humblevis.QuadraticDrawing
+      drawing : envision.QuadraticDrawing
     },
 
     vis, price, volume, summary, selection, hit, connection;

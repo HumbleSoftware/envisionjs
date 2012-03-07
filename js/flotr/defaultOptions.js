@@ -2,7 +2,7 @@
  * Flotr Default Options
  */
 
-humblevis.flotr.defaultOptions = {
+envision.flotr.defaultOptions = {
   grid : {
     outlineWidth : 0,
     labelMargin : 0,
