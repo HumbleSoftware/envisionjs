@@ -12,7 +12,9 @@ function example () {
     priceOptions = {
       name    : 'price',
       flotr   : {
-        lines : {
+        'lite-lines' : {
+          show : true,
+          lineWidth : 1,
           fill : true,
           fillOpacity : .2
         },
@@ -42,7 +44,9 @@ function example () {
     volumeOptions = {
       name    : 'volume',
       flotr   : {
-        bars : { show : true },
+        whiskers : {
+          show : true 
+        },
         mouse: {
           track: true,
           trackY: false,
@@ -56,13 +60,20 @@ function example () {
     summaryOptions = {
       name    : 'summary',
       flotr   : {
-        lines : {
+        'lite-lines' : {
+          show : true,
+          lineWidth : 1,
           fill : true,
-          fillOpacity : .2
+          fillOpacity : .2,
+          fillBorder : true
         },
         xaxis : {
           noTicks: 5,
           showLabels : true
+        },
+        yaxis : {
+          autoscale : true,
+          autoscaleMargin : .1
         },
         handles   : { show : true },
         selection : { mode : 'x'},
@@ -73,7 +84,12 @@ function example () {
       skipPreprocess : true
     },
 
-    vis, price, volume, summary, selection, hit;
+    connectionOptions = {
+      name : 'connection',
+      drawing : humblevis.QuadraticDrawing
+    },
+
+    vis, price, volume, connection, summary, selection, hit;
 
   // Data
   $.get('data/initial.json', function (data) {
@@ -90,6 +106,7 @@ function example () {
     vis = new H.Visualization();
     price = new H.Child(priceOptions);
     volume = new H.Child(volumeOptions);
+    connection = new H.Child(connectionOptions);
     summary = new H.Child(summaryOptions);
     selection = new H.Interaction({leader : summary});
     hit = new H.Interaction();
@@ -97,6 +114,7 @@ function example () {
     vis
       .add(price)
       .add(volume)
+      .add(connection)
       .add(summary)
       .render(container);
 
@@ -146,7 +164,8 @@ function example () {
 
     selection
       .follower(price)
-      .follower(volume);
+      .follower(volume)
+      .follower(connection);
 
     hit.add(H.action.hit);
     hit.group([price, volume]);
