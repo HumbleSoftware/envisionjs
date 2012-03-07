@@ -36,7 +36,11 @@ div.controls>span {
 div#footer {
   margin: 80px auto 20px auto;
   text-align: center;
-  font-size: 14px;
+  color: #666;
+  font-size: 12px;
+}
+div#footer a:visited {
+  color: #666;
 }
 
 /* Vis */
