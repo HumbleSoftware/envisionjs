@@ -1,7 +1,7 @@
 describe('Child', function () {
 
   var
-    CN_CHILD = 'humble-vis-child',
+    CN_CHILD = 'envision-child',
     S_CHILD = '.' + CN_CHILD,
     H = envision;
 

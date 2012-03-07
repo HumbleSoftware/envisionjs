@@ -44,28 +44,28 @@ div#footer a:visited {
 }
 
 /* Vis */
-.humble-vis-visualization {
+.envision-visualization {
   background: #eee;
 }
-.humble-vis-child-container {
+.envision-child-container {
   border-bottom: 4px solid white;
   border-top: 4px solid white;
   background: #fff;
 }
-.humble-vis-child-container+.humble-vis-child-container {
+.envision-child-container+.envision-child-container {
   margin-top: 1px;
 }
-.humble-vis-child {
+.envision-child {
   width: 598px;
   height: 200px;
 }
 
 /* Million */
-.million .humble-vis-child.summary {
+.million .envision-child.summary {
   height: 178px;
   margin: 11px 0px
 }
-.million .humble-vis-child.zoom {
+.million .envision-child.zoom {
   height: 100px;
   margin: 50px 0px
 }
@@ -114,15 +114,15 @@ div#footer a:visited {
     margin: 40px 0px 20px 0px;
   }
 
-  .humble-vis-child {
+  .envision-child {
     width: 100%;
     height: 118px;
   }
-  .million .humble-vis-child.summary {
+  .million .envision-child.summary {
     height: 100px;
     margin: 11px 0px
   }
-  .million .humble-vis-child.zoom {
+  .million .envision-child.zoom {
     height: 50px;
     margin: 32px 0px
   }

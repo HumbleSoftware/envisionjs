@@ -10,43 +10,43 @@ div#demo {
   border: none;
 }
 
-.humble-vis-visualization {
+.envision-visualization {
   background: #fff;
 }
 
-.humble-vis-child-container {
+.envision-child-container {
   border: 0px;
   border-left: 1px solid #fff;
   border-right: 1px solid #fff;
 }
-.humble-vis-child-container.price {
+.envision-child-container.price {
   border-top-right-radius: 5px;
   border-top-left-radius: 5px;
 }
-.humble-vis-child-container.price,
-.humble-vis-child-container.volume {
+.envision-child-container.price,
+.envision-child-container.volume {
   border: 1px solid #B6D9FF;
   padding-top: 8px;
 }
-.humble-vis-child-container.volume {
+.envision-child-container.volume {
   border-top: 0px solid #fff;
 }
-.humble-vis-child-container + .humble-vis-child-container {
+.envision-child-container + .envision-child-container {
   margin-top: 0px;
   background: #fff;
 }
-.humble-vis-child-container.connection,
-.humble-vis-child-container.summary {
+.envision-child-container.connection,
+.envision-child-container.summary {
   border: 0px;
 }
 
-.humble-vis-child.price .flotr-grid-label {
+.envision-child.price .flotr-grid-label {
   margin-left: 4px;
 }
-.humble-vis-child.volume .flotr-mouse-value {
+.envision-child.volume .flotr-mouse-value {
   display: none;
 }
-.humble-vis-child.summary .flotr-grid-label {
+.envision-child.summary .flotr-grid-label {
   margin-top: 6px;
 }
 
@@ -61,23 +61,23 @@ div#demo {
 	font-size: 12px;
 }
 
-.humble-vis-child.price {
+.envision-child.price {
   height : 240px;
 }
-.humble-vis-child.volume {
+.envision-child.volume {
   margin-top: 8px;
   background: #fff;
   height : 80px;
 }
-.humble-vis-child.connection {
+.envision-child.connection {
   width: 600px;
   height: 14px;
 }
-.humble-vis-child.connection canvas {
+.envision-child.connection canvas {
   background: #fff;
   z-index: 10;
 }
-.humble-vis-child.summary {
+.envision-child.summary {
   width: 600px;
   height : 70px;
   margin-top: -1px;
@@ -87,15 +87,15 @@ div#demo {
   div#demo {
     height: 253px;
   }
-  .humble-vis-child.connection,
-  .humble-vis-child.summary {
+  .envision-child.connection,
+  .envision-child.summary {
     width : 100%;
   }
-  .humble-vis-child.price {
+  .envision-child.price {
     height: 120px;
   }
-  .humble-vis-child.summary,
-  .humble-vis-child.volume {
+  .envision-child.summary,
+  .envision-child.volume {
     height: 40px;
   }
 }

@@ -7,11 +7,11 @@
  */
 
 var
-  CN_FIRST  = 'humble-vis-first',
-  CN_LAST   = 'humble-vis-last',
+  CN_FIRST  = 'envision-first',
+  CN_LAST   = 'envision-last',
 
-  T_VISUALIZATION   = '<div class="humble-vis-visualization"></div>';
-  T_CHILD_CONTAINER = '<div class="humble-vis-child-container"></div>';
+  T_VISUALIZATION   = '<div class="envision-visualization"></div>';
+  T_CHILD_CONTAINER = '<div class="envision-child-container"></div>';
 
 function Visualization (options) {
   this.options = options || {};

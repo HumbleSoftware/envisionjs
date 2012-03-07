@@ -14,7 +14,7 @@ var
 
   V = envision,
 
-  CN_CHILD = 'humble-vis-child',
+  CN_CHILD = 'envision-child',
 
   T_CHILD = '<div class="' + CN_CHILD + '"></div>';
 

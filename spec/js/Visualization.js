@@ -1,10 +1,10 @@
 describe('Visualization', function () {
 
   var
-    CN_FIRST          = 'humble-vis-first',
-    CN_LAST           = 'humble-vis-last',
-    CN_VISUALIZATION  = 'humble-vis-visualization',
-    CN_CONTAINER      = 'humble-vis-child-container',
+    CN_FIRST          = 'envision-first',
+    CN_LAST           = 'envision-last',
+    CN_VISUALIZATION  = 'envision-visualization',
+    CN_CONTAINER      = 'envision-child-container',
 
     S_FIRST           = '.' + CN_FIRST,
     S_LAST            = '.' + CN_LAST,
