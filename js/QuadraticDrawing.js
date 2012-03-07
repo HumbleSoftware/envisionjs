@@ -42,8 +42,8 @@
         height = this.height,
         width = this.width,
         half = Math.round(height / 2) - .5,
-        min = options.min + 0.5,
-        max = options.max + 0.5;
+        min = options.min ? options.min + 0.5 : width / 2,
+        max = options.max ? options.max + 0.5 : width / 2;
 
       function left () {
       }
