@@ -143,5 +143,12 @@ function example () {
   hit
     .group([price, volume])
     .add(H.action.hit);
+
+  bean.add(window, 'resize', function () {
+    price.draw();
+    volume.draw();
+    connection.draw();
+    summary.draw();
+  });
 }
 

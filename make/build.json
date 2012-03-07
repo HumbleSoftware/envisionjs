@@ -1,7 +1,7 @@
 {
   "JAVASCRIPT": {
     "DIST_DIR": "./",
-    "vis": [
+    "envision": [
       "./js/Vis.js",
       "./js/Visualization.js",
       "./js/Child.js",

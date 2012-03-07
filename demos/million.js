@@ -24,7 +24,7 @@ function example () {
 
   for (i = 0; i < 1e6; i++) {
     x.push(i/10000);
-    y.push(Math.sin(i/50000) + amplitude * Math.sin(i/50));
+    y.push(Math.sin(i/50000) + amplitude * Math.sin(i/25));
   }
 
   if (hash !== '#minmax') {
@@ -32,7 +32,7 @@ function example () {
     zoom.processData = summary.processData = function (o) {
       o.preprocessor
         .bound(o.min, o.max)
-        .subsample(o.resolution);
+        .subsample(1000);//o.resolution);
     }
   } else {
     zoom.processData = summary.processData = function (o) {

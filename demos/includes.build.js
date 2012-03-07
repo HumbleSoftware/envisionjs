@@ -28,7 +28,7 @@ yepnope([
     ]
   },
   'lib/bonzo/bonzo.min.js',
-  'vis.min.js',
+  'envision.min.js',
 
   { complete : example }
 ]);

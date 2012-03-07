@@ -1,4 +1,4 @@
-vis:
+envision:
 	smoosh make/build.json
 
 demo:
@@ -7,7 +7,7 @@ demo:
 	mkdir build
 	cp lib/flotr2/flotr2.min.js build/
 	cp lib/flotr2/js/plugins/handles.js build/
-	cp vis.min.js build/
+	cp envision.min.js build/
 	cp demos/index.html build/
 	cp demos/demos.css build/
 	cp demos/ajax.html build/
