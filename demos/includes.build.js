@@ -3,6 +3,9 @@ window.FlashCanvasOptions = {
 };
 yepnope([
 
+  'lib/jquery/jquery-1.7.1.min.js',
+
+  // IE
   {
     test : (navigator.appVersion.indexOf("MSIE") != -1  && parseFloat(navigator.appVersion.split("MSIE")[1]) < 9),
     yep : [
@@ -17,7 +20,7 @@ yepnope([
   },
 
   // Libs
-  'flotr2.min.js',
+  'flotr2-basic.min.js',
   {
     test : ('ontouchstart' in window),
     nope : [
