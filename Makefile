@@ -6,7 +6,6 @@ demo:
 	rm -rf build
 	mkdir build
 	cp lib/flotr2/flotr2.min.js build/
-	cp lib/flotr2/build/flotr2-basic.min.js build/
 	cp lib/flotr2/js/plugins/handles.js build/
 	cp vis.min.js build/
 	cp demos/index.html build/
@@ -22,6 +21,7 @@ demo:
 	cp demos/weierstrass.js build/
 	cp demos/includes.build.js build/includes.js
 	cp demos/ajax-loader.gif build/
+	cp demos/yepnope.js build/
 	cp -R demos/data build/
 	cp -R lib/ build/
 

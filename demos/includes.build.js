@@ -20,7 +20,7 @@ yepnope([
   },
 
   // Libs
-  'flotr2-basic.min.js',
+  'flotr2.min.js',
   {
     test : ('ontouchstart' in window),
     nope : [
