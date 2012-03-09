@@ -23,7 +23,7 @@ function getDefaults () {
           lineWidth : 1,
           show : true,
           fill : true,
-          fillOpacity : .2
+          fillOpacity : 0.2
         },
         mouse : {
           track: true,
@@ -65,7 +65,7 @@ function getDefaults () {
           show : true,
           lineWidth : 1,
           fill : true,
-          fillOpacity : .2,
+          fillOpacity : 0.2,
           fillBorder : true
         },
         xaxis : {
@@ -74,7 +74,7 @@ function getDefaults () {
         },
         yaxis : {
           autoscale : true,
-          autoscaleMargin : .1
+          autoscaleMargin : 0.1
         },
         handles : {
           show : true
