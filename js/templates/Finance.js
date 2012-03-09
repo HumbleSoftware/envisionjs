@@ -31,12 +31,6 @@ function getDefaults () {
           trackAll: true,
           sensibility: 1,
           trackDecimals: 4,
-          /*
-          trackFormatter: function (o) {
-            var data = jsonData[o.nearest.x];
-            return data.date + " Price: " + data.close + " Vol: " + data.volume;
-          },
-          */
           position: 'ne'
         },
         yaxis : { 
@@ -62,9 +56,7 @@ function getDefaults () {
         mouse: {
           track: true,
           trackY: false,
-          trackAll: true,
-          position: 'ne',
-          trackDecimals: 0
+          trackAll: true
         }
       },
       processData : processData
@@ -122,6 +114,16 @@ function Finance (options) {
   defaults.price.data = data.price;
   defaults.volume.data = data.volume;
   defaults.summary.data = data.summary;
+
+  defaults.price.flotr.mouse.trackFormatter = options.trackFormatter || function (o) {
+
+    var
+      index = o.index,
+      value = 'Price: $' + data.price[1][index] + ", Vol: " + data.volume[1][index],
+      day;
+
+    return value;
+  }
 
   price = new V.Child(defaults.price),
   volume = new V.Child(defaults.volume),
