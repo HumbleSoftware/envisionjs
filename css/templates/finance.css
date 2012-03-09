@@ -65,9 +65,8 @@
   div#demo {
     height: 253px;
   }
-  .envision-finance-connection .envision-child,
-  .envision-finance-summary .envision-child {
-    width : 100%;
+  .envision-finance {
+    width: 100%;
   }
   .envision-finance-price .envision-child {
     height: 120px;
