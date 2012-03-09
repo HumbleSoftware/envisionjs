@@ -128,10 +128,10 @@ function Finance (options) {
     return '$' + n;
   };
 
-  price = new V.Child(defaults.price),
-  volume = new V.Child(defaults.volume),
-  connection = new V.Child(defaults.connection),
-  summary = new V.Child(defaults.summary),
+  price = new V.Child(defaults.price);
+  volume = new V.Child(defaults.volume);
+  connection = new V.Child(defaults.connection);
+  summary = new V.Child(defaults.summary);
 
   // Render visualization
   vis
