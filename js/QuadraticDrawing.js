@@ -1,5 +1,9 @@
 (function () {
-  var QuadraticDrawing = {
+
+  function QuadraticDrawing () {
+  }
+
+  QuadraticDrawing.prototype = {
 
     height : null,
     width : null,
