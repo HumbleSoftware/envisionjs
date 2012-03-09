@@ -26,6 +26,19 @@ function example () {
     xTickFormatter : function (index) {
       var date = new Date(financeData.summaryTicks[index].date);
       return date.getFullYear() + '';
+    },
+    // An initial selection
+    selection : {
+      data : {
+        x : {
+          min : 0,
+          max : 100
+        },
+        y : {
+          min : 0,
+          max : 0
+        }
+      }
     }
   };
 
