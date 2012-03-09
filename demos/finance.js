@@ -31,12 +31,8 @@ function example () {
     selection : {
       data : {
         x : {
-          min : 0,
-          max : 100
-        },
-        y : {
-          min : 0,
-          max : 0
+          min : 100,
+          max : 200
         }
       }
     }
