@@ -48,9 +48,10 @@ describe('Child', function () {
 
     it('assigns a name', function () {
       var
-        child = new H.Child({name : 'test'});
+        name = 'test',
+        child = new H.Child({name : name});
       child.render(div);
-      expect($div).toContain(S_CHILD + '.test');
+      expect($div.attr('class')).toBe(name);
     });
 
     it('doesnt assign a name when name not present', function () {

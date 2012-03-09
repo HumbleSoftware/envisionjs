@@ -25,8 +25,6 @@ function Child (options) {
   var
     node = bonzo.create(T_CHILD)[0];
 
-  bonzo(node).addClass(options.name || '');
-
   this.options = options;
   this.node = node;
 
