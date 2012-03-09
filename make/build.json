@@ -10,14 +10,25 @@
       "./js/Action.Hit.js",
       "./js/Preprocessor.js",
       "./js/QuadraticDrawing.js",
-      "./js/Templates.js",
-      "./js/templates/Finance.js",
-      "./js/templates/Zoom.js",
       "./js/flotr/namespace.js",
       "./js/flotr/defaultOptions.js",
       "./js/flotr/Child.js",
       "./js/flotr/lite-lines.js",
       "./js/flotr/whiskers.js"
+    ],
+    "envision-templates": [
+      "./js/Templates.js",
+      "./js/templates/Finance.js",
+      "./js/templates/Zoom.js"
+    ]
+  },
+  "CSS": {
+    "DIST_DIR": "./",
+    "envision": [
+      "css/flotr.css"
+    ],
+    "envision-templates": [
+      "css/templates/finance.css"
     ]
   }
 }
