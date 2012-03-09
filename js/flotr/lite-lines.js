@@ -39,11 +39,13 @@ Flotr.addType('lite-lines', {
       yScale    = options.yScale,
       data      = options.data, 
       length    = data.length - 1,
-      x0        = xScale(data[0][0]),
-      y0        = yScale(data[0][1]),
-      zero      = yScale(0);
+      zero      = yScale(0),
+      x0, y0;
       
     if (length < 1) return;
+
+    x0 = xScale(data[0][0]);
+    y0 = yScale(data[0][1]);
 
     context.beginPath();
     context.moveTo(x0, y0);
