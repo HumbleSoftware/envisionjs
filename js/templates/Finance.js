@@ -17,8 +17,7 @@ function processData (options) {
 function getDefaults () {
   return {
     price : {
-      name : 'price',
-      //data : D.price,
+      name : 'envision-finance-price',
       flotr : {
         'lite-lines' : {
           lineWidth : 1,
@@ -32,29 +31,33 @@ function getDefaults () {
           trackAll: true,
           sensibility: 1,
           trackDecimals: 4,
+          /*
           trackFormatter: function (o) {
             var data = jsonData[o.nearest.x];
             return data.date + " Price: " + data.close + " Vol: " + data.volume;
           },
+          */
           position: 'ne'
         },
         yaxis : { 
-          noTicks : 3,
+          autoscale : true,
+          autoscaleMargin : 0.05,
+          noTicks : 4,
           showLabels : true,
           min : 0,
           tickFormatter : function (n) {
-            return (n == this.max ? false : '$'+n);
+            return '$' + n;
           }
         }
       },
       processData : processData
     },
     volume : {
-      name : 'volume',
-      //data : D.volume,
+      name : 'envision-finance-volume',
       flotr : {
         whiskers : {
-          show : true 
+          show : true,
+          lineWidth : 2
         },
         mouse: {
           track: true,
@@ -67,8 +70,7 @@ function getDefaults () {
       processData : processData
     },
     summary : {
-      name : 'summary',
-      //data : D.price,
+      name : 'envision-finance-summary',
       flotr : {
         'lite-lines' : {
           show : true,
@@ -79,10 +81,11 @@ function getDefaults () {
         },
         xaxis : {
           noTicks: 5,
-          showLabels : true,
+          showLabels : true/*,
           tickFormatter : function (n) {
             return jsonData[n].date.split(' ')[2];
           }
+          */
         },
         yaxis : {
           autoscale : true,
@@ -100,7 +103,7 @@ function getDefaults () {
       }
     },
     connection : {
-      name : 'connection',
+      name : 'envision-finance-connection',
       drawing : V.QuadraticDrawing
     }
   };
@@ -119,6 +122,7 @@ function Finance (options) {
   defaults.price.data = data.price;
   defaults.volume.data = data.volume;
   defaults.summary.data = data.summary;
+
   price = new V.Child(defaults.price),
   volume = new V.Child(defaults.volume),
   connection = new V.Child(defaults.connection),
@@ -130,7 +134,7 @@ function Finance (options) {
     .add(volume)
     .add(connection)
     .add(summary)
-    .render(container);
+    .render(options.container);
 
   // Define the selection zooming interaction
   selection
