@@ -42,37 +42,6 @@ div#footer a:visited {
   color: #666;
 }
 
-/* Flotr */
-.flotr-handles-handle {
-  background: #eee;
-  border: 1px solid #333;
-  position: absolute;
-  cursor: pointer;
-  border-radius: 3px;
-}
-.flotr-handles-handle,
-.flotr-grid-label {
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -o-user-select: none;
-  user-select: none;
-}
-.flotr-handles-drag {
-  height: 12px;
-  width: 6px;
-}
-.flotr-handles-scroll {
-  height: 6px;
-  cursor: move;
-}
-.flotr-handles-left {
-  cursor: w-resize;
-}
-.flotr-handles-right {
-  cursor: e-resize;
-}
-
 @media screen and (max-width: 600px) {
   h3 {
     margin: 12px 0px;
