@@ -24,12 +24,13 @@ Visualization.prototype = {
 
   render : function (element) {
 
-    var o = this.options;
+    var options = this.options;
 
-    element = element || o.element;
+    element = element || options.element;
     if (!element) throw 'No element to render within.';
 
     this.node = bonzo.create(T_VISUALIZATION)[0];
+    bonzo(this.node).addClass(options.name || '')
     this.container = element;
     bonzo(element).append(this.node);
 

@@ -139,6 +139,14 @@ describe('Visualization', function () {
       expect($div).toContain(S_VISUALIZATION);
     });
 
+    it('assigns a name', function () {
+      var
+        name = 'test',
+        vis = new H.Visualization({name : name});
+      vis.render(div);
+      expect($div).toContain(S_VISUALIZATION + '.' + name);
+    });
+
     it('renders a child', function () {
       var
         vis = new H.Visualization(),
