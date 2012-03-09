@@ -1,32 +1,32 @@
 /* Dimensions */
-.envision-child.envision-finance-price {
+.envision-finance-price .envision-child {
   height : 240px;
 }
-.envision-child.envision-finance-volume {
+.envision-finance-volume .envision-child {
   height : 80px;
 }
-.envision-child.envision-finance-connection {
+.envision-finance-connection .envision-child {
   width: 600px;
   height: 16px;
 }
-.envision-child.envision-finance-summary {
+.envision-finance-summary .envision-child {
   width: 600px;
   height : 70px;
   margin-top: -3px;
 }
 
 /* Bubble Borders */
-.envision-child-container.envision-finance-price,
-.envision-child-container.envision-finance-volume {
+.envision-finance-price,
+.envision-finance-volume {
   border: 1px solid #B6D9FF;
   padding-top: 8px;
   background: #fff;
 }
-.envision-child-container.envision-finance-price {
+.envision-finance-price {
   border-top-right-radius: 5px;
   border-top-left-radius: 5px;
 }
-.envision-child-container.envision-finance-volume {
+.envision-finance-volume {
   border-top: 0px;
 }
 
@@ -64,15 +64,15 @@
   div#demo {
     height: 253px;
   }
-  .envision-child.envision-finance-connection,
-  .envision-child.envision-finance-summary {
+  .envision-finance-connection .envision-child,
+  .envision-finance-summary .envision-child {
     width : 100%;
   }
-  .envision-child.envision-finance-price {
+  .envision-finance-price .envision-child {
     height: 120px;
   }
-  .envision-child.envision-finance-summary,
-  .envision-child.envision-finance-volume {
+  .envision-finance-summary .envision-child,
+  .envision-finance-volume .envision-child{
     height: 40px;
   }
 }
