@@ -54,6 +54,7 @@ yepnope([
   '../js/Preprocessor.js',
   '../js/QuadraticDrawing.js',
   '../js/Templates.js',
+  '../js/templates/Finance.js',
   '../js/templates/Zoom.js',
   '../js/flotr/namespace.js',
   '../js/flotr/defaultOptions.js',
