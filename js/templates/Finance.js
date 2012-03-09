@@ -38,10 +38,7 @@ function getDefaults () {
           autoscaleMargin : 0.05,
           noTicks : 4,
           showLabels : true,
-          min : 0,
-          tickFormatter : function (n) {
-            return '$' + n;
-          }
+          min : 0
         }
       },
       processData : processData
@@ -73,11 +70,7 @@ function getDefaults () {
         },
         xaxis : {
           noTicks: 5,
-          showLabels : true/*,
-          tickFormatter : function (n) {
-            return jsonData[n].date.split(' ')[2];
-          }
-          */
+          showLabels : true
         },
         yaxis : {
           autoscale : true,
@@ -111,6 +104,10 @@ function Finance (options) {
     hit = new V.Interaction(),
     price, volume, connection, summary;
 
+  if (options.defaults) {
+    defaults = Flotr.merge(defaults, options.defaults);
+  }
+
   defaults.price.data = data.price;
   defaults.volume.data = data.volume;
   defaults.summary.data = data.summary;
@@ -123,7 +120,13 @@ function Finance (options) {
       day;
 
     return value;
+  };
+  if (options.xTickFormatter) {
+    defaults.summary.flotr.xaxis.tickFormatter = options.xTickFormatter;
   }
+  defaults.price.flotr.yaxis.tickFormatter = options.yTickFormatter || function (n) {
+    return '$' + n;
+  };
 
   price = new V.Child(defaults.price),
   volume = new V.Child(defaults.volume),
