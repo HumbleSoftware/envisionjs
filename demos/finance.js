@@ -22,6 +22,10 @@ function example () {
       value = data.summaryTicks[index].date + ': $' + data.price[1][index] + ", Vol: " + data.volume[1][index];
 
       return value;
+    },
+    xTickFormatter : function (index) {
+      var date = new Date(financeData.summaryTicks[index].date);
+      return date.getFullYear() + '';
     }
   };
 
