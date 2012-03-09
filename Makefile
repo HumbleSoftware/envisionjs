@@ -1,5 +1,7 @@
 envision:
 	smoosh make/build.json
+	cat lib/bonzo/bonzo.min.js >> envision.js
+	cat lib/bonzo/bonzo.min.js >> envision.min.js
 
 demo:
 	smoosh make/build.json
