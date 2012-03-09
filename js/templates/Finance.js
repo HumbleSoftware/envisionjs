@@ -99,7 +99,7 @@ function Finance (options) {
   var
     data = options.data,
     defaults = getDefaults(),
-    vis = new V.Visualization(),
+    vis = new V.Visualization({name : 'envision-finance'}),
     selection = new V.Interaction(),
     hit = new V.Interaction(),
     price, volume, connection, summary;
