@@ -35,7 +35,6 @@ yepnope([
   '../lib/flotr2/js/types/points.js',
   '../lib/flotr2/js/plugins/selection.js',
   '../lib/flotr2/js/plugins/legend.js',
-  '../lib/flotr2/js/plugins/handles.js',
   '../lib/flotr2/js/plugins/hit.js',
   '../lib/flotr2/js/plugins/crosshair.js',
   '../lib/flotr2/js/plugins/labels.js',
@@ -43,6 +42,12 @@ yepnope([
   '../lib/flotr2/js/plugins/titles.js',
   '../js/flotr/lite-lines.js',
   '../js/flotr/whiskers.js',
+  {
+    test : ('ontouchstart' in window),
+    nope : [
+      '../lib/flotr2/js/plugins/handles.js'
+    ]
+  },
 
   // Visualization
   '../js/Envision.js',
