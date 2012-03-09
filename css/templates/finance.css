@@ -1,4 +1,7 @@
 /* Dimensions */
+.envision-finance {
+  width: 600px;
+}
 .envision-finance-price .envision-child {
   height : 240px;
 }
@@ -6,11 +9,9 @@
   height : 80px;
 }
 .envision-finance-connection .envision-child {
-  width: 600px;
   height: 16px;
 }
 .envision-finance-summary .envision-child {
-  width: 600px;
   height : 70px;
   margin-top: -3px;
 }
