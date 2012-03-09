@@ -147,7 +147,7 @@ function Finance (options) {
     .follower(volume)
     .follower(connection)
     .leader(summary)
-    .add(V.action.selection);
+    .add(V.action.selection, options.selectionCallback ? { callback : options.selectionCallback } : null);
 
   // Define the mouseover hit interaction
   hit
@@ -163,6 +163,9 @@ function Finance (options) {
   this.vis = vis;
   this.selection = selection;
   this.hit = hit;
+  this.price = price;
+  this.volume = volume;
+  this.summary = summary;
 }
 
 V.templates.Finance = Finance;
