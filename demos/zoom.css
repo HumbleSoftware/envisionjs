@@ -1,0 +1,48 @@
+div#demo {
+  border: 1px solid #99CCFF;
+}
+
+/* Vis */
+.envision-visualization {
+  background: #eee;
+}
+.envision-child-container {
+  border-bottom: 4px solid white;
+  border-top: 4px solid white;
+  background: #fff;
+}
+.envision-child-container+.envision-child-container {
+  margin-top: 1px;
+}
+.envision-child {
+  width: 598px;
+  height: 200px;
+}
+
+/* Million */
+.million .summary .envision-child {
+  height: 178px;
+  margin: 11px 0px
+}
+.million .zoom .envision-child {
+  height: 100px;
+  margin: 50px 0px
+}
+
+@media screen and (max-width: 600px) {
+  .envision-child {
+    width: 100%;
+    height: 118px;
+  }
+  .million .summary .envision-child {
+    height: 100px;
+    margin: 11px 0px
+  }
+  .million .zoom .envision-child {
+    height: 50px;
+    margin: 32px 0px
+  }
+  div#demo {
+    height: 253px;
+  }
+}

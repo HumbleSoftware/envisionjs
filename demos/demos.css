@@ -21,7 +21,6 @@ div#content {
   width: 600px;
 }
 div#demo {
-  border: 1px solid #99CCFF;
   height: 417px;
   background: url('ajax-loader.gif') #fff center center no-repeat;
 }
@@ -41,33 +40,6 @@ div#footer {
 }
 div#footer a:visited {
   color: #666;
-}
-
-/* Vis */
-.envision-visualization {
-  background: #eee;
-}
-.envision-child-container {
-  border-bottom: 4px solid white;
-  border-top: 4px solid white;
-  background: #fff;
-}
-.envision-child-container+.envision-child-container {
-  margin-top: 1px;
-}
-.envision-child {
-  width: 598px;
-  height: 200px;
-}
-
-/* Million */
-.million .envision-child.summary {
-  height: 178px;
-  margin: 11px 0px
-}
-.million .envision-child.zoom {
-  height: 100px;
-  margin: 50px 0px
 }
 
 /* Flotr */
@@ -112,21 +84,5 @@ div#footer a:visited {
   }
   div#footer {
     margin: 40px 0px 20px 0px;
-  }
-
-  .envision-child {
-    width: 100%;
-    height: 118px;
-  }
-  .million .envision-child.summary {
-    height: 100px;
-    margin: 11px 0px
-  }
-  .million .envision-child.zoom {
-    height: 50px;
-    margin: 32px 0px
-  }
-  div#demo {
-    height: 253px;
   }
 }
