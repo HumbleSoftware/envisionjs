@@ -1,0 +1,31 @@
+/* Flotr */
+.flotr-handles-handle {
+  background: #eee;
+  border: 1px solid #333;
+  position: absolute;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.flotr-handles-handle,
+.flotr-grid-label {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+.flotr-handles-drag {
+  height: 12px;
+  width: 6px;
+}
+.flotr-handles-scroll {
+  height: 6px;
+  cursor: move;
+}
+.flotr-handles-left {
+  cursor: w-resize;
+}
+.flotr-handles-right {
+  cursor: e-resize;
+}
+
