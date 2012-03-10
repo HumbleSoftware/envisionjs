@@ -3,17 +3,17 @@
   width: 600px;
 }
 .envision-finance-price .envision-child {
-  height : 240px;
+  height : 200px;
 }
 .envision-finance-volume .envision-child {
-  height : 80px;
+  height : 60px;
 }
 .envision-finance-connection .envision-child {
   height: 16px;
 }
 .envision-finance-summary .envision-child {
   height : 70px;
-  margin-top: -3px;
+  margin-top: -2px;
 }
 
 /* Bubble Borders */
