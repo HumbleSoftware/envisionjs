@@ -13,11 +13,11 @@ var
   CN_LAST   = 'envision-last',
 
   T_VISUALIZATION   = '<div class="envision-visualization"></div>';
-  T_CHILD_CONTAINER = '<div class="envision-child-container"></div>';
+  T_COMPONENT_CONTAINER = '<div class="envision-component-container"></div>';
 
 function Visualization (options) {
   this.options = options || {};
-  this.children = [];
+  this.components = [];
   this.node = null;
   this.rendered = false;
 }
@@ -36,8 +36,8 @@ Visualization.prototype = {
     this.container = element;
     bonzo(element).append(this.node);
 
-    _.each(this.children, function (child) {
-      this._renderChild(child);
+    _.each(this.components, function (component) {
+      this._renderComponent(component);
     }, this);
     this._updateClasses();
 
@@ -46,78 +46,78 @@ Visualization.prototype = {
     return this;
   },
 
-  add : function (child) {
-    this.children.push(child);
+  add : function (component) {
+    this.components.push(component);
     if (this.rendered) {
-      this._renderChild(child);
+      this._renderComponent(component);
       this._updateClasses();
     }
     return this;
   },
 
-  remove : function (child) {
+  remove : function (component) {
     var
-      children  = this.children,
-      index     = this.indexOf(child);
+      components  = this.components,
+      index     = this.indexOf(component);
     if (index !== -1) {
-      children.splice(index, 1);
-      bonzo(child.container).remove();
+      components.splice(index, 1);
+      bonzo(component.container).remove();
       this._updateClasses();
     }
     return this;
   },
 
-  setPosition : function (child, newIndex) {
+  setPosition : function (component, newIndex) {
     var
-      children  = this.children;
-    if (newIndex >= 0 && newIndex < children.length && this.remove(child)) {
+      components  = this.components;
+    if (newIndex >= 0 && newIndex < components.length && this.remove(component)) {
       if (this.rendered) {
-        if (newIndex === children.length)
-          this.node.appendChild(child.container);
+        if (newIndex === components.length)
+          this.node.appendChild(component.container);
         else
-          this.node.insertBefore(child.container, children[newIndex].container);
+          this.node.insertBefore(component.container, components[newIndex].container);
       }
-      children.splice(newIndex, 0, child);
+      components.splice(newIndex, 0, component);
       this._updateClasses();
     }
     return this;
   },
 
-  indexOf : function (child) {
-    return _.indexOf(this.children, child);
+  indexOf : function (component) {
+    return _.indexOf(this.components, component);
   },
 
-  getChild : function (index) {
-    var children = this.children;
-    if (index < children.length) return children[index];
+  getComponent : function (index) {
+    var components = this.components;
+    if (index < components.length) return components[index];
   },
 
-  isFirst : function (child) {
-    return (this.indexOf(child) === 0 ? true : false);
+  isFirst : function (component) {
+    return (this.indexOf(component) === 0 ? true : false);
   },
 
-  isLast : function (child) {
-    return (this.indexOf(child) === this.children.length - 1 ? true : false);
+  isLast : function (component) {
+    return (this.indexOf(component) === this.components.length - 1 ? true : false);
   },
 
-  _renderChild : function (child) {
+  _renderComponent : function (component) {
     var
-      childContainer = bonzo.create(T_CHILD_CONTAINER)[0];
+      container = bonzo.create(T_COMPONENT_CONTAINER)[0];
 
-    bonzo(this.node).append(childContainer);
-    child.render(childContainer);
+    bonzo(this.node).append(container);
+    component.render(container);
   },
 
   _updateClasses : function () {
 
     var
-      children  = this.children,
+      components  = this.components,
       first     = 0,
-      last      = children.length -1,
+      last      = components.length -1,
       node;
 
-    _.each(children, function (child, index) {
-      node = bonzo(child.container);
+    _.each(components, function (component, index) {
+      node = bonzo(component.container);
 
       if (index === first)
         node.addClass(CN_FIRST);
@@ -137,9 +137,9 @@ envision.Visualization = Visualization;
 })();
 
 /**
- * Child Class
+ * Component Class
  *
- * Defines a visualization child.
+ * Defines a visualization component.
  *
  * Options:
  *  height - Integer
@@ -152,28 +152,28 @@ var
 
   V = envision,
 
-  CN_CHILD = 'envision-child',
+  CN_COMPONENT = 'envision-component',
 
-  T_CHILD = '<div class="' + CN_CHILD + '"></div>';
+  T_COMPONENT = '<div class="' + CN_COMPONENT + '"></div>';
 
-function Child (options) {
+function Component (options) {
 
   options = options || {};
 
   var
-    node = bonzo.create(T_CHILD)[0];
+    node = bonzo.create(T_COMPONENT)[0];
 
   this.options = options;
   this.node = node;
 
   if (options.flotr) {
-    this.api = new V.flotr.Child(options);
+    this.api = new V.adapters.flotr.Child(options);
   } else if (options.drawing) {
-    this.api = options.drawing;
+    this.api = new options.drawing(options.drawingOptions);
   }
 }
 
-Child.prototype = {
+Component.prototype = {
 
   render : function (element) {
 
@@ -230,20 +230,20 @@ Child.prototype = {
   }
 };
 
-V.Child = Child;
+V.Component = Component;
 
 })();
 
 /**
  * Interaction Class
  *
- * Defines an interaction between visualization children.
+ * Defines an interaction between components.
  *
  * An interaction has leaders, followers, and actions.  Leaders fire events which
  * are reacted to by followers as defined by actions.
  *
  * Options:
- *  leader - Child or children to lead the interaction
+ *  leader - Component(s) to lead the interaction
  *  event - Event to interact with
  *
  */
@@ -283,26 +283,26 @@ Interaction.prototype = {
     return this.actions;
   },
 
-  leader : function (child) {
+  leader : function (component) {
 
-    this.leaders.push(child);
+    this.leaders.push(component);
 
     _.each(this.actions, function (action, i) {
-      this._bindLeader(child, action, this.actionOptions[i]);
+      this._bindLeader(component, action, this.actionOptions[i]);
     }, this);
     return this;
   },
 
-  follower : function (child) {
-    this.followers.push(child);
+  follower : function (component) {
+    this.followers.push(component);
     return this;
   },
 
-  group : function (children) {
-    if (!_.isArray(children)) children = [children];
-    _.each(children, function (child) {
-      this.leader(child);
-      this.follower(child);
+  group : function (components) {
+    if (!_.isArray(components)) components = [components];
+    _.each(components, function (component) {
+      this.leader(component);
+      this.follower(component);
     }, this);
     return this;
   },
@@ -352,37 +352,6 @@ Interaction.prototype = {
 };
 
 H.Interaction = Interaction;
-
-})();
-
-(function () {
-
-var selection = {
-  events : [
-    {
-      handler : 'select',
-      consumer : 'zoom'
-    },
-    'click'
-  ]
-};
-
-envision.action = envision.action || {};
-envision.action.selection = selection;
-
-})();
-
-(function () {
-
-var hit = {
-  events : [
-    'hit',
-    'mouseout'
-  ]
-};
-
-envision.action = envision.action || {};
-envision.action.hit = hit;
 
 })();
 
@@ -615,133 +584,42 @@ envision.Preprocessor = Preprocessor;
 
 }());
 
-(function () {
+/**
+ * Actions namespace.  Actions are configurations for 
+ * common use cases when building Interactions.
+ */
+envision.actions = envision.actions || {};
 
-  function QuadraticDrawing () {
-  }
+envision.actions.hit = {
+  events : [
+    'hit',
+    'mouseout'
+  ]
+};
 
-  QuadraticDrawing.prototype = {
-
-    height : null,
-    width : null,
-    rendered : false,
-
-    render : function (node) {
-      var
-        canvas = document.createElement('canvas'),//bonzo.create('<canvas></canvas>')[0],
-        offset = bonzo(node).offset();
-
-      this.height = offset.height;
-      this.width = offset.width;
-
-      bonzo(canvas)
-        .attr('height', offset.height)
-        .attr('width', offset.width)
-        .css({
-          position : 'absolute',
-          top : '0px',
-          left : '0px'
-        });
-
-      node.appendChild(canvas);
-      bonzo(node).css({
-        position : 'relative'
-      });
-
-      if (typeof FlashCanvas !== 'undefined') FlashCanvas.initElement(canvas);
-      this.context = canvas.getContext('2d');
-      this.rendered = true;
+envision.actions.selection =  {
+  events : [
+    {
+      handler : 'select',
+      consumer : 'zoom'
     },
+    'click'
+  ]
+};
 
-    draw : function (data, options, node) {
+/**
+ * Adapters namespace.  These are component adapters for external
+ * librares.  Envision.js ships with a Flotr2 adapter.
+ */
+envision.adapters = envision.adapters || {};
 
-      if (!this.rendered) this.render(node);
-
-      var
-        context = this.context,
-        height = this.height,
-        width = this.width,
-        half = Math.round(height / 2) - .5,
-        min, max;
-
-      options = options || { min : width / 2, max : width / 2};
-
-      min = options.min + 0.5;
-      max = options.max + 0.5;
-
-      context.clearRect(0, 0, width, height);
-      if (min || max) {
-        context.save();
-        context.strokeStyle = '#B6D9FF';
-        context.fillOpacity = .5;
-        context.fillStyle = 'rgba(182, 217, 255, .4)';
-        context.beginPath();
-
-        // Left
-        if (min <= 1) {
-          context.moveTo(0, height);
-          context.lineTo(0, -0.5);
-        } else {
-          context.moveTo(min, height);
-          context.quadraticCurveTo(min, half, Math.max(min - half, min / 2), half);
-          context.lineTo(Math.min(half, min / 2), half);
-          context.quadraticCurveTo(0, half, 0, -0.5);
-        }
-
-        // Top
-        context.lineTo(width, -0.5);
-
-        // Right
-        if (max >= width - 1) {
-          context.lineTo(max, height);
-        } else {
-          context.quadraticCurveTo(width, half, Math.max(width - half, width - (width - max) / 2), half);
-          context.lineTo(Math.min(max + half, width - (width - max) / 2), half);
-          context.quadraticCurveTo(max, half, max, height);
-        }
-
-        context.stroke();
-        context.closePath();
-        context.fill();
-        context.restore();
-      }
-    },
-    trigger : function (child, name, options) {
-      if (name === 'zoom') {
-        this.zoom(child, options);
-      } else if (name === 'click') {
-        this.click(child);
-      }
-    },
-    zoom : function (child, options) {
-      var
-        x = options.x || {},
-        min = x.min,
-        max = x.max,
-        api = child.api;
-
-      child.draw(null, {
-        min : min,
-        max : max
-      });
-    },
-    click : function (child) {
-      child.draw(null, {
-        min : child.width / 2,
-        max : child.width / 2
-      });
-    }
-  };
-  envision.QuadraticDrawing = QuadraticDrawing;
-})();
-
-envision.flotr = {};
+envision.adapters.flotr = {};
 
 /*
  * Flotr Default Options
  */
 
-envision.flotr.defaultOptions = {
+envision.adapters.flotr.defaultOptions = {
   grid : {
     outlineWidth : 0,
     labelMargin : 0,
@@ -771,21 +649,15 @@ envision.flotr.defaultOptions = {
 };
 
 /**
- * Child Class
- *
- * Defines a visualization child.
- *
- * Options:
- *  height - Integer
- *  width - Integer
- *  flotr - A set of flotr options
+ * Flotr Adapter
  */
 (function () { 
 
 var
   V = envision,
+  A = envision.adapters,
   E = Flotr.EventAdapter,
-  DEFAULTS = V.flotr.defaultOptions;
+  DEFAULTS = A.flotr.defaultOptions;
 
 function Child (options) {
   this.options = options || {};
@@ -900,7 +772,7 @@ Child.prototype = {
     }
   },
 
-  attach : function (child, name, callback) {
+  attach : function (component, name, callback) {
 
     var
       event = this.events[name] || {},
@@ -909,13 +781,13 @@ Child.prototype = {
 
     if (handler) {
 
-      return E.observe(child.node, name, function () {
+      return E.observe(component.node, name, function () {
 
         var
-          args = [child].concat(Array.prototype.slice.call(arguments)),
+          args = [component].concat(Array.prototype.slice.call(arguments)),
           result = handler.apply(this, args);
 
-        return callback.apply(null, [child, result]);
+        return callback.apply(null, [component, result]);
 
       });
     } else {
@@ -923,29 +795,29 @@ Child.prototype = {
     }
   },
 
-  detach : function (child, name, callback) {
-    return E.stopObserve(child.node, name, handler);
+  detach : function (component, name, callback) {
+    return E.stopObserve(component.node, name, handler);
   },
 
-  trigger : function (child, name, options) {
+  trigger : function (component, name, options) {
 
     var
       event = this.events[name],
       consumer = event.consumer || false;
 
-    return consumer ? consumer.apply(this, [child, options]) : false;
+    return consumer ? consumer.apply(this, [component, options]) : false;
   },
 
   events : {
 
     hit : {
       name : 'flotr:hit',
-      handler : function (child, hit) {
+      handler : function (component, hit) {
 
         var
           x = hit.x,
           y = hit.y,
-          graph = child.api.flotr,
+          graph = component.api.flotr,
           options;
 
         // Normalized hit:
@@ -961,10 +833,10 @@ Child.prototype = {
 
         return options;
       },
-      consumer : function (child, hit) {
+      consumer : function (component, hit) {
 
         var
-          graph = child.api.flotr,
+          graph = component.api.flotr,
           o;
 
         // TODO this is a hack;
@@ -982,11 +854,11 @@ Child.prototype = {
 
     select : {
       name : 'flotr:selecting',
-      handler : function (child, selection) {
+      handler : function (component, selection) {
 
         var
-          mode = child.options.flotr.selection.mode,
-          axes = child.api.flotr.axes,
+          mode = component.options.flotr.selection.mode,
+          axes = component.api.flotr.axes,
           datax, datay, x, y, options;
 
         if (mode.indexOf('x') !== -1) {
@@ -1019,10 +891,10 @@ Child.prototype = {
 
         return options;
       },
-      consumer : function (child, selection) {
+      consumer : function (component, selection) {
 
         var
-          graph = child.api.flotr,
+          graph = component.api.flotr,
           axes = graph.axes,
           data = selection.data || {},
           options = {},
@@ -1056,7 +928,7 @@ Child.prototype = {
     },
 
     zoom : {
-      consumer : function (child, selection) {
+      consumer : function (component, selection) {
 
         var
           x = selection.data.x,
@@ -1077,26 +949,26 @@ Child.prototype = {
           };
         }
 
-        child.draw(null, options);
+        component.draw(null, options);
       }
     },
 
     mouseout : {
       name : 'flotr:mouseout',
-      handler : function (child) {
+      handler : function (component) {
       },
-      consumer : function (child) {
-        child.api.flotr.hit.clearHit();
+      consumer : function (component) {
+        component.api.flotr.hit.clearHit();
       }
     },
 
     click : {
       name : 'flotr:click',
-      handler : function (child) {
+      handler : function (component) {
 
         var
-          min = child.api.flotr.axes.x.min,
-          max = child.api.flotr.axes.x.max;
+          min = component.api.flotr.axes.x.min,
+          max = component.api.flotr.axes.x.max;
 
         return {
           data : {
@@ -1106,12 +978,12 @@ Child.prototype = {
             }
           },
           x : {
-            min : child.api.flotr.axes.x.d2p(min),
-            max : child.api.flotr.axes.x.d2p(max)
+            min : component.api.flotr.axes.x.d2p(min),
+            max : component.api.flotr.axes.x.d2p(max)
           }
         };
       },
-      consumer : function (child, selection) {
+      consumer : function (component, selection) {
 
         var
           x = selection.data.x,
@@ -1132,13 +1004,13 @@ Child.prototype = {
           };
         }
 
-        child.draw(null, options);
+        component.draw(null, options);
       }
     }
   }
 };
 
-V.flotr.Child = Child;
+A.flotr.Child = Child;
 
 })();
 
@@ -1319,6 +1191,132 @@ Flotr.addType('whiskers', {
     context.restore();
   }
 });
+
+/**
+ * Components namespace.  These are standalone, custom components
+ * APIs for widgets, decorations, flair.
+ */
+envision.components = envision.components || {};
+
+(function () {
+
+  function QuadraticDrawing (options) {
+    this.options = options || {};
+  }
+
+  QuadraticDrawing.prototype = {
+
+    height : null,
+    width : null,
+    rendered : false,
+
+    render : function (node) {
+      var
+        canvas = document.createElement('canvas'),//bonzo.create('<canvas></canvas>')[0],
+        offset = bonzo(node).offset();
+
+      this.height = offset.height;
+      this.width = offset.width;
+
+      bonzo(canvas)
+        .attr('height', offset.height)
+        .attr('width', offset.width)
+        .css({
+          position : 'absolute',
+          top : '0px',
+          left : '0px'
+        });
+
+      node.appendChild(canvas);
+      bonzo(node).css({
+        position : 'relative'
+      });
+
+      if (typeof FlashCanvas !== 'undefined') FlashCanvas.initElement(canvas);
+      this.context = canvas.getContext('2d');
+      this.rendered = true;
+    },
+
+    draw : function (data, options, node) {
+
+      if (!this.rendered) this.render(node);
+
+      var
+        context = this.context,
+        height = this.height,
+        width = this.width,
+        half = Math.round(height / 2) - .5,
+        min, max;
+
+      options = options || { min : width / 2, max : width / 2};
+
+      min = options.min + 0.5;
+      max = options.max + 0.5;
+
+      context.clearRect(0, 0, width, height);
+      if (min || max) {
+        context.save();
+        context.strokeStyle = this.options.strokeStyle || '#B6D9FF';
+        context.fillStyle = this.options.fillStyle || 'rgba(182, 217, 255, .4)';
+        context.beginPath();
+
+        // Left
+        if (min <= 1) {
+          context.moveTo(0, height);
+          context.lineTo(0, -0.5);
+        } else {
+          context.moveTo(min, height);
+          context.quadraticCurveTo(min, half, Math.max(min - half, min / 2), half);
+          context.lineTo(Math.min(half, min / 2), half);
+          context.quadraticCurveTo(0, half, 0, -0.5);
+        }
+
+        // Top
+        context.lineTo(width, -0.5);
+
+        // Right
+        if (max >= width - 1) {
+          context.lineTo(max, height);
+        } else {
+          context.quadraticCurveTo(width, half, Math.max(width - half, width - (width - max) / 2), half);
+          context.lineTo(Math.min(max + half, width - (width - max) / 2), half);
+          context.quadraticCurveTo(max, half, max, height);
+        }
+
+        context.stroke();
+        context.closePath();
+        context.fill();
+        context.restore();
+      }
+    },
+    trigger : function (component, name, options) {
+      if (name === 'zoom') {
+        this.zoom(component, options);
+      } else if (name === 'click') {
+        this.click(component);
+      }
+    },
+    zoom : function (component, options) {
+      var
+        x = options.x || {},
+        min = x.min,
+        max = x.max,
+        api = component.api;
+
+      component.draw(null, {
+        min : min,
+        max : max
+      });
+    },
+    click : function (component) {
+      component.draw(null, {
+        min : component.width / 2,
+        max : component.width / 2
+      });
+    }
+  };
+  envision.components.QuadraticDrawing = QuadraticDrawing;
+})();
 /*!
   * Bonzo: DOM Utility (c) Dustin Diaz 2011
   * https://github.com/ded/bonzo

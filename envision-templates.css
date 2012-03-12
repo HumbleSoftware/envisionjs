@@ -2,16 +2,16 @@
 .envision-finance {
   width: 600px;
 }
-.envision-finance-price .envision-child {
+.envision-finance-price .envision-component {
   height : 200px;
 }
-.envision-finance-volume .envision-child {
+.envision-finance-volume .envision-component {
   height : 60px;
 }
-.envision-finance-connection .envision-child {
+.envision-finance-connection .envision-component {
   height: 16px;
 }
-.envision-finance-summary .envision-child {
+.envision-finance-summary .envision-component {
   height : 70px;
   margin-top: -2px;
 }
@@ -20,7 +20,6 @@
 .envision-finance-price,
 .envision-finance-volume {
   border: 1px solid #B6D9FF;
-  padding-top: 8px;
   background: #fff;
 }
 .envision-finance-price {
@@ -47,6 +46,9 @@
 .envision-finance-price .flotr-grid-label.first {
   margin-top: -6px;
 }
+.envision-finance-price .flotr-grid-label.last {
+  margin-top: 6px;
+}
 
 /* X-Axis Labels */
 .envision-finance-summary .flotr-grid-label {
@@ -68,11 +70,46 @@
   .envision-finance {
     width: 100%;
   }
-  .envision-finance-price .envision-child {
+  .envision-finance-price .envision-component {
     height: 120px;
   }
-  .envision-finance-summary .envision-child,
-  .envision-finance-volume .envision-child{
+  .envision-finance-summary .envision-component,
+  .envision-finance-volume .envision-component {
     height: 40px;
   }
 }
+
+/* Dimensions */
+.envision-timeseries {
+  width: auto;
+}
+.envision-timeseries-detail .envision-component {
+  height: 200px;
+}
+.envision-timeseries-connection .envision-component {
+  height: 16px;
+}
+.envision-timeseries-summary .envision-component {
+  height: 80px;
+}
+
+/* Bubble Borders */
+.envision-timeseries-detail {
+  padding-top: 7px;
+  border: 1px solid #B6D9FF;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom: 0px;
+  background : #e2f0ff;
+}
+
+/* Connection overlay */
+.envision-timeseries-connection canvas {
+  z-index: 10;
+  background: #fff;
+}
+.envision-timeseries-summary .envision-component {
+  margin-top: -2px;
+}
+
+

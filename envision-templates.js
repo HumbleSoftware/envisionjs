@@ -1,3 +1,11 @@
+/**
+ * Templates namespace.
+ *
+ * Templates are pre-built interactive visualizations fitting common
+ * use-cases.  These include several components together with 
+ * interactions and configuration for each.  They may have their own
+ * custom configuration options as well.
+ */
 envision.templates = envision.templates || {};
 
 (function () {
@@ -56,6 +64,10 @@ function getDefaults () {
           track: true,
           trackY: false,
           trackAll: true
+        },
+        yaxis : {
+          autoscale : true,
+          autoscaleMargin : .5 
         }
       },
       processData : processData
@@ -91,7 +103,7 @@ function getDefaults () {
     },
     connection : {
       name : 'envision-finance-connection',
-      drawing : new V.QuadraticDrawing()
+      drawing : V.components.QuadraticDrawing
     }
   };
 }
@@ -130,10 +142,10 @@ function Finance (options) {
     return '$' + n;
   };
 
-  price = new V.Child(defaults.price);
-  volume = new V.Child(defaults.volume);
-  connection = new V.Child(defaults.connection);
-  summary = new V.Child(defaults.summary);
+  price = new V.Component(defaults.price);
+  volume = new V.Component(defaults.volume);
+  connection = new V.Component(defaults.connection);
+  summary = new V.Component(defaults.summary);
 
   // Render visualization
   vis
@@ -149,12 +161,12 @@ function Finance (options) {
     .follower(volume)
     .follower(connection)
     .leader(summary)
-    .add(V.action.selection, options.selectionCallback ? { callback : options.selectionCallback } : null);
+    .add(V.actions.selection, options.selectionCallback ? { callback : options.selectionCallback } : null);
 
   // Define the mouseover hit interaction
   hit
     .group([price, volume])
-    .add(V.action.hit);
+    .add(V.actions.hit);
 
   // Optional initial selection
   if (options.selection) {
@@ -171,6 +183,86 @@ function Finance (options) {
 }
 
 V.templates.Finance = Finance;
+
+})();
+
+(function () {
+
+var
+  V = envision;
+
+function getDefaults () {
+  return {
+    detail : {
+      name : 'envision-timeseries-detail',
+      flotr : {
+
+      }
+    },
+    summary : {
+      name : 'envision-timeseries-summary',
+      flotr : {
+        handles : {
+          show : true
+        },
+        selection : {
+          mode : 'x'
+        },
+        yaxis : {
+          autoscale : true,
+          autoscaleMargin : 0.1
+        }
+      }
+    },
+    connection : {
+      name : 'envision-timeseries-connection',
+      drawing : V.components.QuadraticDrawing
+    }
+  };
+}
+
+function TimeSeries (options) {
+
+  var
+    data = options.data,
+    defaults = getDefaults(),
+    vis = new V.Visualization({name : 'envision-finance'}),
+    selection = new V.Interaction(),
+    detail, summary, connection;
+
+  // Fill Defaults
+  if (options.defaults) {
+    defaults = Flotr.merge(defaults, options.defaults);
+  }
+  defaults.detail.data = data.detail;
+  defaults.summary.data = data.summary;
+
+  // Build Components
+  detail = new V.Component(defaults.detail);
+  connection = new V.Component(defaults.connection);
+  summary = new V.Component(defaults.summary);
+
+  // Render visualization
+  vis
+    .add(detail)
+    .add(connection)
+    .add(summary)
+    .render(options.container);
+
+  // Selection action
+  selection
+    .add(V.actions.selection)
+    .follower(detail)
+    .follower(connection)
+    .leader(summary);
+
+  this.vis = vis;
+  this.selection = selection;
+  this.detail = detail;
+  this.summary = summary;
+};
+
+V.templates.TimeSeries = TimeSeries;
 
 })();
 
@@ -207,15 +299,15 @@ Zoom = function (options) {
 
   var
     vis = new V.Visualization(),
-    zoom = new V.Child(getDefaults(options.zoom || {}, defaultsZoom())),
-    summary = new V.Child(getDefaults(options.summary || {}, defaultsSummary())),
+    zoom = new V.Component(getDefaults(options.zoom || {}, defaultsZoom())),
+    summary = new V.Component(getDefaults(options.summary || {}, defaultsSummary())),
     interaction = new V.Interaction({leader : summary});
 
   vis
     .add(zoom)
     .add(summary);
 
-  interaction.add(V.action.selection);
+  interaction.add(V.actions.selection);
   interaction.follower(zoom);
 
   this.vis = vis;
