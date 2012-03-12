@@ -54,6 +54,10 @@ function getDefaults () {
           track: true,
           trackY: false,
           trackAll: true
+        },
+        yaxis : {
+          autoscale : true,
+          autoscaleMargin : .5 
         }
       },
       processData : processData
