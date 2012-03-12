@@ -33,14 +33,6 @@ function getDefaults () {
   };
 }
 
-/*
-function getDefaults (options, defaults) {
-  var o = _.defaults(options, defaults);
-  o.flotr = _.defaults(o.flotr, defaults.flotr);
-  return o;
-}
-*/
-
 function TimeSeries (options) {
 
   var
@@ -50,12 +42,14 @@ function TimeSeries (options) {
     selection = new V.Interaction(),
     detail, summary, connection;
 
+  // Fill Defaults
   if (options.defaults) {
     defaults = Flotr.merge(defaults, options.defaults);
   }
-
   defaults.detail.data = data.detail;
   defaults.summary.data = data.summary;
+
+  // Build Components
   detail = new V.Child(defaults.detail);
   connection = new V.Child(defaults.connection);
   summary = new V.Child(defaults.summary);
