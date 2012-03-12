@@ -1,6 +1,7 @@
 (function () {
 
-  function QuadraticDrawing () {
+  function QuadraticDrawing (options) {
+    this.options = options || {};
   }
 
   QuadraticDrawing.prototype = {
@@ -55,9 +56,8 @@
       context.clearRect(0, 0, width, height);
       if (min || max) {
         context.save();
-        context.strokeStyle = '#B6D9FF';
-        context.fillOpacity = .5;
-        context.fillStyle = 'rgba(182, 217, 255, .4)';
+        context.strokeStyle = this.options.strokeStyle || '#B6D9FF';
+        context.fillStyle = this.options.fillStyle || 'rgba(182, 217, 255, .4)';
         context.beginPath();
 
         // Left
