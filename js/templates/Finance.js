@@ -93,7 +93,7 @@ function getDefaults () {
     },
     connection : {
       name : 'envision-finance-connection',
-      drawing : V.QuadraticDrawing
+      drawing : V.components.QuadraticDrawing
     }
   };
 }

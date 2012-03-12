@@ -115,5 +115,5 @@
       });
     }
   };
-  envision.QuadraticDrawing = QuadraticDrawing;
+  envision.components.QuadraticDrawing = QuadraticDrawing;
 })();

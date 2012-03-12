@@ -28,7 +28,7 @@ function getDefaults () {
     },
     connection : {
       name : 'envision-timeseries-connection',
-      drawing : V.QuadraticDrawing
+      drawing : V.components.QuadraticDrawing
     }
   };
 }
