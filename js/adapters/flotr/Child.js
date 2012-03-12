@@ -5,8 +5,9 @@
 
 var
   V = envision,
+  A = envision.adapters,
   E = Flotr.EventAdapter,
-  DEFAULTS = V.flotr.defaultOptions;
+  DEFAULTS = A.flotr.defaultOptions;
 
 function Child (options) {
   this.options = options || {};
@@ -359,6 +360,6 @@ Child.prototype = {
   }
 };
 
-V.flotr.Child = Child;
+A.flotr.Child = Child;
 
 })();

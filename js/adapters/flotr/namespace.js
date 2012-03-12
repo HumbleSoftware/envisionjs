@@ -1,0 +1,1 @@
+envision.adapters.flotr = {};

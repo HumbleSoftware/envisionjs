@@ -2,7 +2,7 @@
  * Flotr Default Options
  */
 
-envision.flotr.defaultOptions = {
+envision.adapters.flotr.defaultOptions = {
   grid : {
     outlineWidth : 0,
     labelMargin : 0,

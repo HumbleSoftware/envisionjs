@@ -11,11 +11,11 @@
       "./js/Preprocessor.js",
       "./js/components/namespace.js",
       "./js/components/QuadraticDrawing.js",
-      "./js/flotr/namespace.js",
-      "./js/flotr/defaultOptions.js",
-      "./js/flotr/Child.js",
-      "./js/flotr/lite-lines.js",
-      "./js/flotr/whiskers.js"
+      "./js/adapters/flotr/namespace.js",
+      "./js/adapters/flotr/defaultOptions.js",
+      "./js/adapters/flotr/Child.js",
+      "./js/adapters/flotr/lite-lines.js",
+      "./js/adapters/flotr/whiskers.js"
     ],
     "envision-templates": [
       "./js/Templates.js",

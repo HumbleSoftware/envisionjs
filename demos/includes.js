@@ -40,8 +40,6 @@ yepnope([
   '../lib/flotr2/js/plugins/labels.js',
   '../lib/flotr2/js/plugins/legend.js',
   '../lib/flotr2/js/plugins/titles.js',
-  '../js/flotr/lite-lines.js',
-  '../js/flotr/whiskers.js',
   {
     test : ('ontouchstart' in window),
     nope : [
@@ -63,9 +61,12 @@ yepnope([
   '../js/templates/Finance.js',
   '../js/templates/TimeSeries.js',
   '../js/templates/Zoom.js',
-  '../js/flotr/namespace.js',
-  '../js/flotr/defaultOptions.js',
-  '../js/flotr/Child.js',
+  '../js/adapters/namespace.js',
+  '../js/adapters/flotr/namespace.js',
+  '../js/adapters/flotr/defaultOptions.js',
+  '../js/adapters/flotr/Child.js',
+  '../js/adapters/flotr/lite-lines.js',
+  '../js/adapters/flotr/whiskers.js',
 
   { complete : example }
 ]);

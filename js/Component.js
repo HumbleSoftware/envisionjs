@@ -29,7 +29,7 @@ function Component (options) {
   this.node = node;
 
   if (options.flotr) {
-    this.api = new V.flotr.Child(options);
+    this.api = new V.adapters.flotr.Child(options);
   } else if (options.drawing) {
     this.api = new options.drawing(options.drawingOptions);
   }
