@@ -1,0 +1,34 @@
+/* Dimensions */
+.envision-timeseries {
+  width: auto;
+}
+.envision-timeseries-detail .envision-child {
+  height: 200px;
+}
+.envision-timeseries-connection .envision-child {
+  height: 16px;
+}
+.envision-timeseries-summary .envision-child {
+  height: 80px;
+}
+
+/* Bubble Borders */
+.envision-timeseries-detail {
+  padding-top: 7px;
+  border: 1px solid #B6D9FF;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom: 0px;
+  background : #e2f0ff;
+}
+
+/* Connection overlay */
+.envision-timeseries-connection canvas {
+  z-index: 10;
+  background: #fff;
+}
+.envision-timeseries-summary .envision-child {
+  margin-top: -2px;
+}
+
+
