@@ -2,13 +2,13 @@
 .envision-timeseries {
   width: auto;
 }
-.envision-timeseries-detail .envision-child {
+.envision-timeseries-detail .envision-component {
   height: 200px;
 }
-.envision-timeseries-connection .envision-child {
+.envision-timeseries-connection .envision-component {
   height: 16px;
 }
-.envision-timeseries-summary .envision-child {
+.envision-timeseries-summary .envision-component {
   height: 80px;
 }
 
@@ -27,7 +27,7 @@
   z-index: 10;
   background: #fff;
 }
-.envision-timeseries-summary .envision-child {
+.envision-timeseries-summary .envision-component {
   margin-top: -2px;
 }
 

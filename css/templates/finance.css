@@ -2,16 +2,16 @@
 .envision-finance {
   width: 600px;
 }
-.envision-finance-price .envision-child {
+.envision-finance-price .envision-component {
   height : 200px;
 }
-.envision-finance-volume .envision-child {
+.envision-finance-volume .envision-component {
   height : 60px;
 }
-.envision-finance-connection .envision-child {
+.envision-finance-connection .envision-component {
   height: 16px;
 }
-.envision-finance-summary .envision-child {
+.envision-finance-summary .envision-component {
   height : 70px;
   margin-top: -2px;
 }
@@ -70,11 +70,11 @@
   .envision-finance {
     width: 100%;
   }
-  .envision-finance-price .envision-child {
+  .envision-finance-price .envision-component {
     height: 120px;
   }
-  .envision-finance-summary .envision-child,
-  .envision-finance-volume .envision-child{
+  .envision-finance-summary .envision-component,
+  .envision-finance-volume .envision-component {
     height: 40px;
   }
 }

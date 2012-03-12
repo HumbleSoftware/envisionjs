@@ -50,9 +50,9 @@ function TimeSeries (options) {
   defaults.summary.data = data.summary;
 
   // Build Components
-  detail = new V.Child(defaults.detail);
-  connection = new V.Child(defaults.connection);
-  summary = new V.Child(defaults.summary);
+  detail = new V.Component(defaults.detail);
+  connection = new V.Component(defaults.connection);
+  summary = new V.Component(defaults.summary);
 
   // Render visualization
   vis

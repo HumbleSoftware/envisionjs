@@ -89,29 +89,29 @@
         context.restore();
       }
     },
-    trigger : function (child, name, options) {
+    trigger : function (component, name, options) {
       if (name === 'zoom') {
-        this.zoom(child, options);
+        this.zoom(component, options);
       } else if (name === 'click') {
-        this.click(child);
+        this.click(component);
       }
     },
-    zoom : function (child, options) {
+    zoom : function (component, options) {
       var
         x = options.x || {},
         min = x.min,
         max = x.max,
-        api = child.api;
+        api = component.api;
 
-      child.draw(null, {
+      component.draw(null, {
         min : min,
         max : max
       });
     },
-    click : function (child) {
-      child.draw(null, {
-        min : child.width / 2,
-        max : child.width / 2
+    click : function (component) {
+      component.draw(null, {
+        min : component.width / 2,
+        max : component.width / 2
       });
     }
   };

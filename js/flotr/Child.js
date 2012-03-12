@@ -1,12 +1,5 @@
 /**
- * Child Class
- *
- * Defines a visualization child.
- *
- * Options:
- *  height - Integer
- *  width - Integer
- *  flotr - A set of flotr options
+ * Flotr Adapter
  */
 (function () { 
 
@@ -128,7 +121,7 @@ Child.prototype = {
     }
   },
 
-  attach : function (child, name, callback) {
+  attach : function (component, name, callback) {
 
     var
       event = this.events[name] || {},
@@ -137,13 +130,13 @@ Child.prototype = {
 
     if (handler) {
 
-      return E.observe(child.node, name, function () {
+      return E.observe(component.node, name, function () {
 
         var
-          args = [child].concat(Array.prototype.slice.call(arguments)),
+          args = [component].concat(Array.prototype.slice.call(arguments)),
           result = handler.apply(this, args);
 
-        return callback.apply(null, [child, result]);
+        return callback.apply(null, [component, result]);
 
       });
     } else {
@@ -151,29 +144,29 @@ Child.prototype = {
     }
   },
 
-  detach : function (child, name, callback) {
-    return E.stopObserve(child.node, name, handler);
+  detach : function (component, name, callback) {
+    return E.stopObserve(component.node, name, handler);
   },
 
-  trigger : function (child, name, options) {
+  trigger : function (component, name, options) {
 
     var
       event = this.events[name],
       consumer = event.consumer || false;
 
-    return consumer ? consumer.apply(this, [child, options]) : false;
+    return consumer ? consumer.apply(this, [component, options]) : false;
   },
 
   events : {
 
     hit : {
       name : 'flotr:hit',
-      handler : function (child, hit) {
+      handler : function (component, hit) {
 
         var
           x = hit.x,
           y = hit.y,
-          graph = child.api.flotr,
+          graph = component.api.flotr,
           options;
 
         // Normalized hit:
@@ -189,10 +182,10 @@ Child.prototype = {
 
         return options;
       },
-      consumer : function (child, hit) {
+      consumer : function (component, hit) {
 
         var
-          graph = child.api.flotr,
+          graph = component.api.flotr,
           o;
 
         // TODO this is a hack;
@@ -210,11 +203,11 @@ Child.prototype = {
 
     select : {
       name : 'flotr:selecting',
-      handler : function (child, selection) {
+      handler : function (component, selection) {
 
         var
-          mode = child.options.flotr.selection.mode,
-          axes = child.api.flotr.axes,
+          mode = component.options.flotr.selection.mode,
+          axes = component.api.flotr.axes,
           datax, datay, x, y, options;
 
         if (mode.indexOf('x') !== -1) {
@@ -247,10 +240,10 @@ Child.prototype = {
 
         return options;
       },
-      consumer : function (child, selection) {
+      consumer : function (component, selection) {
 
         var
-          graph = child.api.flotr,
+          graph = component.api.flotr,
           axes = graph.axes,
           data = selection.data || {},
           options = {},
@@ -284,7 +277,7 @@ Child.prototype = {
     },
 
     zoom : {
-      consumer : function (child, selection) {
+      consumer : function (component, selection) {
 
         var
           x = selection.data.x,
@@ -305,26 +298,26 @@ Child.prototype = {
           };
         }
 
-        child.draw(null, options);
+        component.draw(null, options);
       }
     },
 
     mouseout : {
       name : 'flotr:mouseout',
-      handler : function (child) {
+      handler : function (component) {
       },
-      consumer : function (child) {
-        child.api.flotr.hit.clearHit();
+      consumer : function (component) {
+        component.api.flotr.hit.clearHit();
       }
     },
 
     click : {
       name : 'flotr:click',
-      handler : function (child) {
+      handler : function (component) {
 
         var
-          min = child.api.flotr.axes.x.min,
-          max = child.api.flotr.axes.x.max;
+          min = component.api.flotr.axes.x.min,
+          max = component.api.flotr.axes.x.max;
 
         return {
           data : {
@@ -334,12 +327,12 @@ Child.prototype = {
             }
           },
           x : {
-            min : child.api.flotr.axes.x.d2p(min),
-            max : child.api.flotr.axes.x.d2p(max)
+            min : component.api.flotr.axes.x.d2p(min),
+            max : component.api.flotr.axes.x.d2p(max)
           }
         };
       },
-      consumer : function (child, selection) {
+      consumer : function (component, selection) {
 
         var
           x = selection.data.x,
@@ -360,7 +353,7 @@ Child.prototype = {
           };
         }
 
-        child.draw(null, options);
+        component.draw(null, options);
       }
     }
   }

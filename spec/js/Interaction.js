@@ -11,36 +11,36 @@ describe('Interaction', function () {
     expect(new H.Interaction()).toBeDefined();
   });
 
-  it('makes a child a leader', function () {
+  it('makes a component a leader', function () {
     var
       interaction = new H.Interaction(),
-      child = new MockChild();
-    interaction.leader(child);
-    expect(interaction.leaders).toContain(child);
+      component = new MockComponent();
+    interaction.leader(component);
+    expect(interaction.leaders).toContain(component);
   });
 
-  it('makes a child a follower', function () {
+  it('makes a component a follower', function () {
     var
       interaction = new H.Interaction(),
-      child = new MockChild();
-    interaction.follower(child);
-    expect(interaction.followers).toContain(child);
+      component = new MockComponent();
+    interaction.follower(component);
+    expect(interaction.followers).toContain(component);
   });
 
-  it('makes a group from one child', function () {
+  it('makes a group from one component', function () {
     var
       interaction = new H.Interaction(),
-      child = new MockChild();
-    interaction.group(child);
-    expect(interaction.leaders).toContain(child);
-    expect(interaction.followers).toContain(child);
+      component = new MockComponent();
+    interaction.group(component);
+    expect(interaction.leaders).toContain(component);
+    expect(interaction.followers).toContain(component);
   });
 
   it('makes a group from multiple', function () {
     var
       interaction = new H.Interaction(),
-      a = new MockChild(),
-      b = new MockChild();
+      a = new MockComponent(),
+      b = new MockComponent();
     interaction.group(a);
     interaction.group(b);
     expect(interaction.leaders).toContain(a);
@@ -51,27 +51,27 @@ describe('Interaction', function () {
 
   describe('Chaining', function () {
     var
-      interaction, child;
+      interaction, component;
 
     beforeEach(function () {
       interaction = new H.Interaction();
-      child = new MockChild();
+      component = new MockComponent();
     });
     afterEach(function () {
       interaction = null;
-      child = null;
+      component = null;
     });
 
     it('chains leader', function () {
-      expect(interaction.leader(child)).toBe(interaction);
+      expect(interaction.leader(component)).toBe(interaction);
     });
 
     it('chains follower', function () {
-      expect(interaction.follower(child)).toBe(interaction);
+      expect(interaction.follower(component)).toBe(interaction);
     });
 
     it('chains group', function () {
-      expect(interaction.group(child)).toBe(interaction);
+      expect(interaction.group(component)).toBe(interaction);
     });
   });
 

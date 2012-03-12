@@ -11,11 +11,11 @@ var
   CN_LAST   = 'envision-last',
 
   T_VISUALIZATION   = '<div class="envision-visualization"></div>';
-  T_CHILD_CONTAINER = '<div class="envision-child-container"></div>';
+  T_COMPONENT_CONTAINER = '<div class="envision-component-container"></div>';
 
 function Visualization (options) {
   this.options = options || {};
-  this.children = [];
+  this.components = [];
   this.node = null;
   this.rendered = false;
 }
@@ -34,8 +34,8 @@ Visualization.prototype = {
     this.container = element;
     bonzo(element).append(this.node);
 
-    _.each(this.children, function (child) {
-      this._renderChild(child);
+    _.each(this.components, function (component) {
+      this._renderComponent(component);
     }, this);
     this._updateClasses();
 
@@ -44,78 +44,78 @@ Visualization.prototype = {
     return this;
   },
 
-  add : function (child) {
-    this.children.push(child);
+  add : function (component) {
+    this.components.push(component);
     if (this.rendered) {
-      this._renderChild(child);
+      this._renderComponent(component);
       this._updateClasses();
     }
     return this;
   },
 
-  remove : function (child) {
+  remove : function (component) {
     var
-      children  = this.children,
-      index     = this.indexOf(child);
+      components  = this.components,
+      index     = this.indexOf(component);
     if (index !== -1) {
-      children.splice(index, 1);
-      bonzo(child.container).remove();
+      components.splice(index, 1);
+      bonzo(component.container).remove();
       this._updateClasses();
     }
     return this;
   },
 
-  setPosition : function (child, newIndex) {
+  setPosition : function (component, newIndex) {
     var
-      children  = this.children;
-    if (newIndex >= 0 && newIndex < children.length && this.remove(child)) {
+      components  = this.components;
+    if (newIndex >= 0 && newIndex < components.length && this.remove(component)) {
       if (this.rendered) {
-        if (newIndex === children.length)
-          this.node.appendChild(child.container);
+        if (newIndex === components.length)
+          this.node.appendChild(component.container);
         else
-          this.node.insertBefore(child.container, children[newIndex].container);
+          this.node.insertBefore(component.container, components[newIndex].container);
       }
-      children.splice(newIndex, 0, child);
+      components.splice(newIndex, 0, component);
       this._updateClasses();
     }
     return this;
   },
 
-  indexOf : function (child) {
-    return _.indexOf(this.children, child);
+  indexOf : function (component) {
+    return _.indexOf(this.components, component);
   },
 
-  getChild : function (index) {
-    var children = this.children;
-    if (index < children.length) return children[index];
+  getComponent : function (index) {
+    var components = this.components;
+    if (index < components.length) return components[index];
   },
 
-  isFirst : function (child) {
-    return (this.indexOf(child) === 0 ? true : false);
+  isFirst : function (component) {
+    return (this.indexOf(component) === 0 ? true : false);
   },
 
-  isLast : function (child) {
-    return (this.indexOf(child) === this.children.length - 1 ? true : false);
+  isLast : function (component) {
+    return (this.indexOf(component) === this.components.length - 1 ? true : false);
   },
 
-  _renderChild : function (child) {
+  _renderComponent : function (component) {
     var
-      childContainer = bonzo.create(T_CHILD_CONTAINER)[0];
+      container = bonzo.create(T_COMPONENT_CONTAINER)[0];
 
-    bonzo(this.node).append(childContainer);
-    child.render(childContainer);
+    bonzo(this.node).append(container);
+    component.render(container);
   },
 
   _updateClasses : function () {
 
     var
-      children  = this.children,
+      components  = this.components,
       first     = 0,
-      last      = children.length -1,
+      last      = components.length -1,
       node;
 
-    _.each(children, function (child, index) {
-      node = bonzo(child.container);
+    _.each(components, function (component, index) {
+      node = bonzo(component.container);
 
       if (index === first)
         node.addClass(CN_FIRST);

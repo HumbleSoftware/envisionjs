@@ -31,8 +31,8 @@ Zoom = function (options) {
 
   var
     vis = new V.Visualization(),
-    zoom = new V.Child(getDefaults(options.zoom || {}, defaultsZoom())),
-    summary = new V.Child(getDefaults(options.summary || {}, defaultsSummary())),
+    zoom = new V.Component(getDefaults(options.zoom || {}, defaultsZoom())),
+    summary = new V.Component(getDefaults(options.summary || {}, defaultsSummary())),
     interaction = new V.Interaction({leader : summary});
 
   vis

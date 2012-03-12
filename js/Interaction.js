@@ -1,13 +1,13 @@
 /**
  * Interaction Class
  *
- * Defines an interaction between visualization children.
+ * Defines an interaction between components.
  *
  * An interaction has leaders, followers, and actions.  Leaders fire events which
  * are reacted to by followers as defined by actions.
  *
  * Options:
- *  leader - Child or children to lead the interaction
+ *  leader - Component(s) to lead the interaction
  *  event - Event to interact with
  *
  */
@@ -47,26 +47,26 @@ Interaction.prototype = {
     return this.actions;
   },
 
-  leader : function (child) {
+  leader : function (component) {
 
-    this.leaders.push(child);
+    this.leaders.push(component);
 
     _.each(this.actions, function (action, i) {
-      this._bindLeader(child, action, this.actionOptions[i]);
+      this._bindLeader(component, action, this.actionOptions[i]);
     }, this);
     return this;
   },
 
-  follower : function (child) {
-    this.followers.push(child);
+  follower : function (component) {
+    this.followers.push(component);
     return this;
   },
 
-  group : function (children) {
-    if (!_.isArray(children)) children = [children];
-    _.each(children, function (child) {
-      this.leader(child);
-      this.follower(child);
+  group : function (components) {
+    if (!_.isArray(components)) components = [components];
+    _.each(components, function (component) {
+      this.leader(component);
+      this.follower(component);
     }, this);
     return this;
   },

@@ -4,7 +4,7 @@ describe('Visualization', function () {
     CN_FIRST          = 'envision-first',
     CN_LAST           = 'envision-last',
     CN_VISUALIZATION  = 'envision-visualization',
-    CN_CONTAINER      = 'envision-child-container',
+    CN_CONTAINER      = 'envision-component-container',
 
     S_FIRST           = '.' + CN_FIRST,
     S_LAST            = '.' + CN_LAST,
@@ -23,47 +23,47 @@ describe('Visualization', function () {
     expect(vis).toBeDefined();
   });
 
-  it('has children member', function () {
+  it('has components member', function () {
     var
       vis = new H.Visualization();
-    expect(vis.children).toBeDefined();
-    expect(vis.children.length).toEqual(0);
+    expect(vis.components).toBeDefined();
+    expect(vis.components.length).toEqual(0);
   });
 
-  it('adds a child', function () {
+  it('adds a component', function () {
     var
       vis = new H.Visualization(),
-      child = new MockChild();
-    vis.add(child);
-    expect(vis.children).toContain(child);
+      component = new MockComponent();
+    vis.add(component);
+    expect(vis.components).toContain(component);
   });
 
-  it('removes a child', function () {
+  it('removes a component', function () {
     var
       vis = new H.Visualization(),
-      child = new MockChild();
-    vis.remove(child);
-    expect(vis.children).not.toContain(child);
+      component = new MockComponent();
+    vis.remove(component);
+    expect(vis.components).not.toContain(component);
   });
 
-  it('adds children', function () {
+  it('adds components', function () {
     var
       vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild();
+      a = new MockComponent(),
+      b = new MockComponent();
 
     vis.add(a);
     vis.add(b);
 
-    expect(vis.children).toContain(a);
-    expect(vis.children).toContain(b);
+    expect(vis.components).toContain(a);
+    expect(vis.components).toContain(b);
   });
 
-  it('gets a childs index', function () {
+  it('gets a component\'s index', function () {
     var
       vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild();
+      a = new MockComponent(),
+      b = new MockComponent();
 
     vis.add(a);
     vis.add(b);
@@ -72,12 +72,12 @@ describe('Visualization', function () {
     expect(vis.indexOf(b)).toBe(1);
   });
 
-  it('reorders children', function () {
+  it('reorders components', function () {
     var
       vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild(),
-      c = new MockChild();
+      a = new MockComponent(),
+      b = new MockComponent(),
+      c = new MockComponent();
 
     vis.add(a);
     vis.add(b);
@@ -92,9 +92,9 @@ describe('Visualization', function () {
   it('fails to reorder when index out of bounds', function () {
     var
       vis = new H.Visualization(),
-      a = new MockChild(),
-      b = new MockChild(),
-      c = new MockChild();
+      a = new MockComponent(),
+      b = new MockComponent(),
+      c = new MockComponent();
 
     vis.add(a);
     vis.add(b);
@@ -147,23 +147,23 @@ describe('Visualization', function () {
       expect($div).toContain(S_VISUALIZATION + '.' + name);
     });
 
-    it('renders a child', function () {
+    it('renders a component', function () {
       var
         vis = new H.Visualization(),
-        child = new MockChild();
+        component = new MockComponent();
 
-      vis.add(child);
+      vis.add(component);
       vis.render(div);
 
       expect($div).toContain(S_CONTAINER + S_FIRST + S_LAST);
     });
 
-    it('renders children', function () {
+    it('renders components', function () {
       var
         vis = new H.Visualization(),
-        a = new MockChild(),
-        b = new MockChild(),
-        c = new MockChild();
+        a = new MockComponent(),
+        b = new MockComponent(),
+        c = new MockComponent();
 
       vis.add(a);
       vis.add(b);
@@ -180,11 +180,11 @@ describe('Visualization', function () {
       expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
     });
 
-    it('adds new children rendering dynamically', function () {
+    it('adds new components rendering dynamically', function () {
       var
         vis = new H.Visualization(),
-        a = new MockChild(),
-        b = new MockChild();
+        a = new MockComponent(),
+        b = new MockComponent();
 
       vis.render(div);
       vis.add(a);
@@ -196,23 +196,23 @@ describe('Visualization', function () {
       expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
     });
 
-    it('removes a rendered child', function () {
+    it('removes a rendered component', function () {
       var
         vis = new H.Visualization(),
-        child = new MockChild();
+        component = new MockComponent();
 
-      vis.add(child);
+      vis.add(component);
       vis.render(div);
-      vis.remove(child);
+      vis.remove(component);
 
       expect($div).not.toContain(S_CONTAINER);
     });
 
-    it('removes the first child', function () {
+    it('removes the first component', function () {
       var
         vis = new H.Visualization(),
-        a = new MockChild(),
-        b = new MockChild();
+        a = new MockComponent(),
+        b = new MockComponent();
 
       vis.add(a);
       vis.add(b);
@@ -224,11 +224,11 @@ describe('Visualization', function () {
       expect($(a.container)).not.toBe($(b.container));
     });
 
-    it('removes the last child', function () {
+    it('removes the last component', function () {
       var
         vis = new H.Visualization(),
-        a = new MockChild(),
-        b = new MockChild();
+        a = new MockComponent(),
+        b = new MockComponent();
 
       vis.add(a);
       vis.add(b);
@@ -240,12 +240,12 @@ describe('Visualization', function () {
       expect($(a.container)).not.toBe($(b.container));
     });
 
-    it('reorders rendered children', function () {
+    it('reorders rendered components', function () {
       var
         vis = new H.Visualization(),
-        a = new MockChild(),
-        b = new MockChild(),
-        c = new MockChild();
+        a = new MockComponent(),
+        b = new MockComponent(),
+        c = new MockComponent();
 
       vis.add(a);
       vis.add(b);
@@ -267,35 +267,35 @@ describe('Visualization', function () {
 
   describe('Chaining', function () {
     var
-      vis, child;
+      vis, component;
 
     beforeEach(function () {
       vis = new H.Visualization();
-      child = new MockChild();
+      component = new MockComponent();
     });
     afterEach(function () {
       vis = null;
-      child = null;
+      component = null;
     });
 
     it('chains add', function () {
-      expect(vis.add(child)).toBe(vis);
+      expect(vis.add(component)).toBe(vis);
     });
 
     it('chains remove', function () {
       expect(
         vis
-          .add(child)
-          .remove(child)
+          .add(component)
+          .remove(component)
       ).toBe(vis);
     });
 
     it('chains setPosition', function () {
       expect(
         vis
-          .add(child)
-          .remove(child)
-          .setPosition(child, 0)
+          .add(component)
+          .remove(component)
+          .setPosition(component, 0)
       ).toBe(vis);
     });
 

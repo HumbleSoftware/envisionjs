@@ -1,7 +1,7 @@
 /**
- * Child Class
+ * Component Class
  *
- * Defines a visualization child.
+ * Defines a visualization component.
  *
  * Options:
  *  height - Integer
@@ -14,16 +14,16 @@ var
 
   V = envision,
 
-  CN_CHILD = 'envision-child',
+  CN_COMPONENT = 'envision-component',
 
-  T_CHILD = '<div class="' + CN_CHILD + '"></div>';
+  T_COMPONENT = '<div class="' + CN_COMPONENT + '"></div>';
 
-function Child (options) {
+function Component (options) {
 
   options = options || {};
 
   var
-    node = bonzo.create(T_CHILD)[0];
+    node = bonzo.create(T_COMPONENT)[0];
 
   this.options = options;
   this.node = node;
@@ -35,7 +35,7 @@ function Child (options) {
   }
 }
 
-Child.prototype = {
+Component.prototype = {
 
   render : function (element) {
 
@@ -92,6 +92,6 @@ Child.prototype = {
   }
 };
 
-V.Child = Child;
+V.Component = Component;
 
 })();

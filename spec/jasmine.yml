@@ -7,14 +7,14 @@ src_files:
 # Vis source:
   - "js/Envision.js"
   - "js/Visualization.js"
-  - "js/Child.js"
+  - "js/Component.js"
   - "js/Preprocessor.js"
   - "js/Interaction.js"
 helper_files:
-  - "MockChild.js"
+  - "MockComponent.js"
 spec_files:
   - "js/Visualization.js"
-  - "js/Child.js"
+  - "js/Component.js"
   - "js/Preprocessor.js"
   - "js/Interaction.js"
 src_dir: "."

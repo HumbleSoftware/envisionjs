@@ -1,18 +1,18 @@
-describe('Child', function () {
+describe('Component', function () {
 
   var
-    CN_CHILD = 'envision-child',
-    S_CHILD = '.' + CN_CHILD,
+    CN_COMPONENT = 'envision-component',
+    S_COMPONENT = '.' + CN_COMPONENT,
     H = envision;
 
-  it('defines child', function () {
-    expect(H.Child).toBeDefined();
+  it('defines component', function () {
+    expect(H.Component).toBeDefined();
   });
 
-  it('creates a child', function () {
+  it('creates a component', function () {
     var
-      child = new H.Child();
-    expect(child).toBeDefined();
+      component = new H.Component();
+    expect(component).toBeDefined();
   });
 
   describe('Render', function () {
@@ -34,32 +34,32 @@ describe('Child', function () {
 
     it('renders', function () {
       var
-        child = new H.Child();
-      child.render(div);
-      expect($div).toContain(S_CHILD);
+        component = new H.Component();
+      component.render(div);
+      expect($div).toContain(S_COMPONENT);
     });
 
     it('renders inside a configured element', function () {
       var
-        child = new H.Child({element : div});
-      child.render();
-      expect($div).toContain(S_CHILD);
+        component = new H.Component({element : div});
+      component.render();
+      expect($div).toContain(S_COMPONENT);
     });
 
     it('assigns a name', function () {
       var
         name = 'test',
-        child = new H.Child({name : name});
-      child.render(div);
+        component = new H.Component({name : name});
+      component.render(div);
       expect($div.attr('class')).toBe(name);
     });
 
     it('doesnt assign a name when name not present', function () {
       var
-        child = new H.Child(),
+        component = new H.Component(),
         name  = 'basename';
       $div.addClass('basename');
-      child.render(div);
+      component.render(div);
       expect($div.attr('class')).toBe(name);
     });
 
@@ -67,10 +67,10 @@ describe('Child', function () {
       var
         height = 175,
         width = 250,
-        child = new H.Child({height : height, width: width}),
+        component = new H.Component({height : height, width: width}),
         node;
-      child.render(div);
-      node = $div.find(S_CHILD);
+      component.render(div);
+      node = $div.find(S_COMPONENT);
       expect(node.width()).toBe(width);
       expect(node.height()).toBe(height);
     });
@@ -79,10 +79,10 @@ describe('Child', function () {
       var
         height = 175,
         width = 250,
-        child = new H.Child({height : height, width: width});
-      child.render(div);
-      expect(child.width).toBeDefined();
-      expect(child.height).toBeDefined();
+        component = new H.Component({height : height, width: width});
+      component.render(div);
+      expect(component.width).toBeDefined();
+      expect(component.height).toBeDefined();
     });
   });
 });
