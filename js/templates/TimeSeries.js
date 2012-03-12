@@ -63,7 +63,7 @@ function TimeSeries (options) {
 
   // Selection action
   selection
-    .add(V.action.selection)
+    .add(V.actions.selection)
     .follower(detail)
     .follower(connection)
     .leader(summary);

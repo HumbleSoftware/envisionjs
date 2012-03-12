@@ -117,5 +117,5 @@ function example () {
     }
   };
 
-  zoom.add(H.action.selection, zoomConfig);
+  zoom.add(H.actions.selection, zoomConfig);
 }

@@ -39,7 +39,7 @@ Zoom = function (options) {
     .add(zoom)
     .add(summary);
 
-  interaction.add(V.action.selection);
+  interaction.add(V.actions.selection);
   interaction.follower(zoom);
 
   this.vis = vis;

@@ -151,12 +151,12 @@ function Finance (options) {
     .follower(volume)
     .follower(connection)
     .leader(summary)
-    .add(V.action.selection, options.selectionCallback ? { callback : options.selectionCallback } : null);
+    .add(V.actions.selection, options.selectionCallback ? { callback : options.selectionCallback } : null);
 
   // Define the mouseover hit interaction
   hit
     .group([price, volume])
-    .add(V.action.hit);
+    .add(V.actions.hit);
 
   // Optional initial selection
   if (options.selection) {

@@ -6,16 +6,18 @@
       "./js/Visualization.js",
       "./js/Component.js",
       "./js/Interaction.js",
-      "./js/Action.Selection.js",
-      "./js/Action.Hit.js",
       "./js/Preprocessor.js",
-      "./js/components/namespace.js",
-      "./js/components/QuadraticDrawing.js",
+      "./js/actions/namespace.js",
+      "./js/actions/hit.js",
+      "./js/actions/selection.js",
+      "./js/adapters/namespace.js",
       "./js/adapters/flotr/namespace.js",
       "./js/adapters/flotr/defaultOptions.js",
       "./js/adapters/flotr/Child.js",
       "./js/adapters/flotr/lite-lines.js",
-      "./js/adapters/flotr/whiskers.js"
+      "./js/adapters/flotr/whiskers.js",
+      "./js/components/namespace.js",
+      "./js/components/QuadraticDrawing.js"
     ],
     "envision-templates": [
       "./js/Templates.js",
