@@ -20,7 +20,7 @@
       "./js/components/QuadraticDrawing.js"
     ],
     "envision-templates": [
-      "./js/Templates.js",
+      "./js/templates/namespace.js",
       "./js/templates/Finance.js",
       "./js/templates/TimeSeries.js",
       "./js/templates/Zoom.js"

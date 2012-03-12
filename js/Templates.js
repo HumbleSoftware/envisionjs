@@ -1,1 +1,0 @@
-envision.templates = envision.templates || {};

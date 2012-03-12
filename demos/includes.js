@@ -53,7 +53,7 @@ yepnope([
   '../js/Component.js',
   '../js/Interaction.js',
   '../js/Preprocessor.js',
-  '../js/Templates.js',
+  '../js/templates/namespace.js',
   '../js/templates/Finance.js',
   '../js/templates/TimeSeries.js',
   '../js/templates/Zoom.js',
