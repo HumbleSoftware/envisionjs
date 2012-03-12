@@ -226,7 +226,7 @@ function TimeSeries (options) {
   var
     data = options.data,
     defaults = getDefaults(),
-    vis = new V.Visualization({name : 'envision-finance'}),
+    vis = new V.Visualization({name : 'envision-timeseries'}),
     selection = new V.Interaction(),
     detail, summary, connection;
 
