@@ -2,6 +2,7 @@
   "JAVASCRIPT": {
     "DIST_DIR": "./",
     "envision": [
+      "./js/license.js",
       "./js/Envision.js",
       "./js/Visualization.js",
       "./js/Component.js",
@@ -20,6 +21,7 @@
       "./js/components/QuadraticDrawing.js"
     ],
     "envision-templates": [
+      "./js/license.js",
       "./js/templates/namespace.js",
       "./js/templates/Finance.js",
       "./js/templates/TimeSeries.js",
