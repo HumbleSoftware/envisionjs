@@ -139,6 +139,13 @@ describe('Visualization', function () {
       expect($div).toContain(S_VISUALIZATION);
     });
 
+    it('sets envision data attribute', function () {
+      var
+        vis = new H.Visualization();
+      vis.render(div);
+      expect(bonzo(div).data('envision')).toBe(vis);
+    });
+
     it('assigns a name', function () {
       var
         name = 'test',

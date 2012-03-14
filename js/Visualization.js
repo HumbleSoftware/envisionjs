@@ -33,6 +33,7 @@ Visualization.prototype = {
     bonzo(this.node).addClass(options.name || '')
     this.container = element;
     bonzo(element).append(this.node);
+    bonzo(element).data('envision', this);
 
     _.each(this.components, function (component) {
       this._renderComponent(component);
