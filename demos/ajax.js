@@ -72,7 +72,7 @@ function example () {
           finance.price.options.data = data.fetched.price;
           finance.volume.options.data = data.fetched.volume;
           _.each(finance.selection.followers, function (follower) {
-            follower.trigger(follower, 'zoom', o);
+            follower.trigger('zoom', o);
           }, this);
         });
       }
