@@ -13,6 +13,7 @@ src_files:
 helper_files:
   - "MockComponent.js"
 spec_files:
+  - "js/Envision.js"
   - "js/Visualization.js"
   - "js/Component.js"
   - "js/Preprocessor.js"
