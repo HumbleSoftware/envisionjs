@@ -30,8 +30,12 @@ function Component (options) {
 
   if (options.flotr) {
     this.api = new V.adapters.flotr.Child(options);
-  } else if (options.drawing) {
-    this.api = new options.drawing(options.drawingOptions);
+  } else if (options.adapter) {
+    this.api = options.adapter;
+  } else if (options.adapterConstructor) {
+    this.api = new options.adapterConstructor(options.adapterOptions);
+  } else if (options.adapterCallback) {
+    this.api = options.adapterCallback.call(null, options.adapterOptions);
   }
 }
 

@@ -3,6 +3,7 @@ describe('Component', function () {
   var
     CN_COMPONENT = 'envision-component',
     S_COMPONENT = '.' + CN_COMPONENT,
+    mocks = { MockAdapter : MockAdapter },
     H = envision;
 
   it('defines component', function () {
@@ -92,5 +93,47 @@ describe('Component', function () {
       expect(component.width).toBeDefined();
       expect(component.height).toBeDefined();
     });
+
   });
+
+  describe('Adapter Integration', function () {
+
+    it('takes a built adapter', function () {
+      var
+        component = new H.Component({adapter : new mocks.MockAdapter()});
+      expect(component.api).toBeDefined();
+    });
+
+    it('takes an adapter constructor function', function () {
+      var
+        adapterOptions = { 'a' : 'b' },
+        component;
+      spyOn(mocks, 'MockAdapter').andCallThrough();
+      component = new H.Component({
+        adapterConstructor : mocks.MockAdapter,
+        adapterOptions : adapterOptions
+      });
+      expect(mocks.MockAdapter).toHaveBeenCalledWith(adapterOptions);
+      expect(component.api).toBeDefined();
+    });
+
+    it('takes an adapter callback', function () {
+      var
+        api = new MockAdapter(),
+        adapterOptions = { 'a' : 'b' },
+        options, component;
+      options = {
+        adapterCallback : function () {
+          return api;
+        },
+        adapterOptions : adapterOptions
+      }
+      spyOn(options, 'adapterCallback').andCallThrough();
+      component = new H.Component(options);
+      expect(options.adapterCallback).toHaveBeenCalledWith(adapterOptions);
+      expect(component.api).toBe(api);
+    });
+
+  });
+
 });
