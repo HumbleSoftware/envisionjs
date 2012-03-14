@@ -57,7 +57,7 @@ Visualization.prototype = {
   remove : function (component) {
     var
       components  = this.components,
-      index     = this.indexOf(component);
+      index = this.indexOf(component);
     if (index !== -1) {
       components.splice(index, 1);
       bonzo(component.container).remove();
@@ -97,6 +97,13 @@ Visualization.prototype = {
 
   isLast : function (component) {
     return (this.indexOf(component) === this.components.length - 1 ? true : false);
+  },
+
+  destroy : function () {
+    _.each(this.components, function (component) {
+      component.destroy();
+    });
+    bonzo(this.container).empty();
   },
 
   _renderComponent : function (component) {
