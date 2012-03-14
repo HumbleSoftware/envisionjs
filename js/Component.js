@@ -79,6 +79,11 @@ Component.prototype = {
     this.api.detach.apply(this.api, arguments);
   },
 
+  destroy : function () {
+    if (this.api && this.api.destroy) this.api.destroy();
+    bonzo(this.container).empty();
+  },
+
   _setDimension : function (attribute) {
     var
       node = this.node,

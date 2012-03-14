@@ -46,6 +46,14 @@ describe('Component', function () {
       expect($div).toContain(S_COMPONENT);
     });
 
+    it('destroys', function () {
+      var
+        component = new H.Component();
+      component.render(div);
+      component.destroy();
+      expect($div).not.toContain(S_COMPONENT);
+    });
+
     it('assigns a name', function () {
       var
         name = 'test',
