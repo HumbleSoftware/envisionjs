@@ -134,6 +134,48 @@ describe('Component', function () {
       expect(component.api).toBe(api);
     });
 
+    it('attaches event listeners', function () {
+      var
+        options = {'a' : 'b'},
+        adapter = new mocks.MockAdapter(),
+        component = new H.Component({adapter : adapter});
+
+      spyOn(adapter, 'attach');
+      component.attach('select', options);
+      expect(adapter.attach).toHaveBeenCalledWith(component, 'select', options);
+    });
+
+    it('detaches event listeners', function () {
+      var
+        adapter = new mocks.MockAdapter(),
+        component = new H.Component({adapter : adapter});
+
+      spyOn(adapter, 'detach');
+      component.detach('select');
+      expect(adapter.detach).toHaveBeenCalledWith(component, 'select');
+    });
+
+    it('trigers events', function () {
+      var
+        options = {'a' : 'b'},
+        adapter = new mocks.MockAdapter(),
+        component = new H.Component({adapter : adapter});
+
+      spyOn(adapter, 'trigger');
+      component.trigger('select', options);
+      expect(adapter.trigger).toHaveBeenCalledWith(component, 'select', options);
+    });
+
+    it('destroys the adapter', function () {
+      var
+        adapter = new mocks.MockAdapter(),
+        component = new H.Component({adapter : adapter});
+
+      spyOn(adapter, 'destroy');
+      component.destroy();
+      expect(adapter.destroy).toHaveBeenCalled();
+    });
+
   });
 
 });

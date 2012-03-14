@@ -72,15 +72,15 @@ Component.prototype = {
   },
 
   trigger : function () {
-    this.api.trigger.apply(this.api, arguments);
+    this.api.trigger.apply(this.api, Array.prototype.concat.apply([this], arguments));
   },
 
   attach : function () {
-    this.api.attach.apply(this.api, arguments);
+    this.api.attach.apply(this.api, Array.prototype.concat.apply([this], arguments));
   },
 
   detach : function () {
-    this.api.detach.apply(this.api, arguments);
+    this.api.detach.apply(this.api, Array.prototype.concat.apply([this], arguments));
   },
 
   destroy : function () {
