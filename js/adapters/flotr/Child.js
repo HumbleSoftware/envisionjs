@@ -31,10 +31,11 @@ Child.prototype = {
 
     if (flotr) {
       flotr = Flotr.clone(flotr);
-      _.extend(o.flotr, flotr);
-      this._flotrDefaultOptions(flotr);
+      flotr = Flotr.merge(o.flotr, flotr);
+    } else {
+      flotr = o.flotr;
     }
-    flotr = o.flotr;
+
     o.data = data;
     min = flotr.xaxis.min;
     max = flotr.xaxis.max;
@@ -51,7 +52,7 @@ Child.prototype = {
           fData[index] = this._processData(d.data);
         } else {
         */
-          fData[index] = this._processData(d);
+          fData[index] = this._processData(d, flotr);
         //}
       }, this);
 
@@ -72,13 +73,13 @@ Child.prototype = {
     this.flotr = Flotr.draw(node, flotrData, flotr);
   },
 
-  _processData : function (data) {
+  _processData : function (data, flotr) {
 
     var
       options     = this.options,
       process     = options.processData,
       resolution  = options.width,
-      axis        = options.flotr.xaxis,
+      axis        = flotr.xaxis,
       min         = axis.min,
       max         = axis.max,
       preprocessor;
