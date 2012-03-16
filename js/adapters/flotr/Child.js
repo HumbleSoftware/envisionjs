@@ -209,43 +209,7 @@ Child.prototype = {
 
     select : {
       name : 'flotr:selecting',
-      handler : function (component, selection) {
-
-        var
-          mode = component.options.flotr.selection.mode,
-          axes = component.api.flotr.axes,
-          datax, datay, x, y, options;
-
-        if (mode.indexOf('x') !== -1) {
-          datax = {};
-          datax.min = selection.x1;
-          datax.max = selection.x2;
-          x = {};
-          x.min = axes.x.d2p(selection.x1);
-          x.max = axes.x.d2p(selection.x2);
-        }
-
-        if (mode.indexOf('y') !== -1) {
-          datay = {};
-          datay.min = selection.y1;
-          datay.max = selection.y2;
-          y = {};
-          y.min = axes.y.d2p(selection.y1);
-          y.max = axes.y.d2p(selection.y2);
-        }
-
-        // Normalized selection:
-        options = {
-          data : {
-            x : datax,
-            y : datay
-          },
-          x : x,
-          y : y
-        }
-
-        return options;
-      },
+      handler : selectHandler,
       consumer : function (component, selection) {
 
         var
@@ -283,6 +247,12 @@ Child.prototype = {
     },
 
     zoom : {
+      name : 'flotr:select',
+      handler : function (component, selection) {
+        var options = selectHandler(component, selection);
+        component.trigger('zoom', options);
+        return options;
+      },
       consumer : function (component, selection) {
 
         var
@@ -374,6 +344,44 @@ Child.prototype = {
     }
   }
 };
+
+function selectHandler (component, selection) {
+
+  var
+    mode = component.options.flotr.selection.mode,
+    axes = component.api.flotr.axes,
+    datax, datay, x, y, options;
+
+  if (mode.indexOf('x') !== -1) {
+    datax = {};
+    datax.min = selection.x1;
+    datax.max = selection.x2;
+    x = {};
+    x.min = axes.x.d2p(selection.x1);
+    x.max = axes.x.d2p(selection.x2);
+  }
+
+  if (mode.indexOf('y') !== -1) {
+    datay = {};
+    datay.min = selection.y1;
+    datay.max = selection.y2;
+    y = {};
+    y.min = axes.y.d2p(selection.y1);
+    y.max = axes.y.d2p(selection.y2);
+  }
+
+  // Normalized selection:
+  options = {
+    data : {
+      x : datax,
+      y : datay
+    },
+    x : x,
+    y : y
+  }
+
+  return options;
+}
 
 A.flotr.Child = Child;
 
