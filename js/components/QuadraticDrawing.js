@@ -12,7 +12,7 @@
 
     render : function (node) {
       var
-        canvas = document.createElement('canvas'),//bonzo.create('<canvas></canvas>')[0],
+        canvas = document.createElement('canvas'),
         offset = bonzo(node).offset();
 
       this.height = offset.height;
