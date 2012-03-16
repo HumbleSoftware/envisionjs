@@ -92,8 +92,8 @@
     trigger : function (component, name, options) {
       if (name === 'zoom') {
         this.zoom(component, options);
-      } else if (name === 'click') {
-        this.click(component);
+      } else if (name === 'reset') {
+        this.reset(component);
       }
     },
     zoom : function (component, options) {
@@ -108,7 +108,7 @@
         max : max
       });
     },
-    click : function (component) {
+    reset : function (component) {
       component.draw(null, {
         min : component.width / 2,
         max : component.width / 2

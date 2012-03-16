@@ -317,6 +317,16 @@ Child.prototype = {
       }
     },
 
+    reset : {
+      name : 'flotr:click',
+      handler : function (component) {
+        component.draw();
+      },
+      consumer : function (component) {
+        component.draw();
+      }
+    },
+
     click : {
       name : 'flotr:click',
       handler : function (component) {
