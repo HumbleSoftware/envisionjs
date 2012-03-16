@@ -60,6 +60,7 @@ yepnope([
   '../js/actions/namespace.js',
   '../js/actions/hit.js',
   '../js/actions/selection.js',
+  '../js/actions/zoom.js',
   '../js/adapters/namespace.js',
   '../js/adapters/flotr/namespace.js',
   '../js/adapters/flotr/defaultOptions.js',
