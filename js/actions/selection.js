@@ -4,6 +4,9 @@ envision.actions.selection =  {
       handler : 'select',
       consumer : 'zoom'
     },
-    'click'
+    {
+        handler : 'click',
+        consumer : 'reset'
+    }
   ]
 };
