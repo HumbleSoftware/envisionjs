@@ -7,7 +7,9 @@ function example () {
     x = [],
     y = [],
     data = [x, y],
-    detail = {},
+    detail = {
+      flotr : {}
+    },
     summary = {},
     options,
     million;
@@ -44,6 +46,14 @@ function example () {
       detail : data,
       summary : data
     },
+    selection : {
+      data : {
+        x : {
+          min : 9,
+          max : 20 
+        }
+      }
+    },
     defaults : {
       detail : detail,
       summary : summary
@@ -52,4 +62,26 @@ function example () {
 
   // TimeSeries template:
   million = new envision.templates.TimeSeries(options);
+
+  // Animate
+  offset = 0;
+  function updateSelection () {
+
+    offset += 0.2;
+
+    million.summary.trigger(million.summary, 'select', {
+      data : {
+        x : {
+          min : 9,
+          max : 20 - offset
+        }
+      }
+    });
+
+    if (20 - offset - 9 > 1) {
+      setTimeout(updateSelection, 50);
+    }
+  }
+
+  updateSelection();
 }
