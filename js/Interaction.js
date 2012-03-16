@@ -87,7 +87,7 @@ Interaction.prototype = {
         handler = e.handler || e,
         consumer = e.consumer || e;
 
-      leader.attach(leader, handler, _.bind(function (leader, result) {
+      leader.attach(handler, _.bind(function (leader, result) {
 
         if (this.prevent[name]) return;
 
@@ -102,7 +102,7 @@ Interaction.prototype = {
 
             if (leader === follower) return; // Skip leader (recursion)
 
-            follower.trigger(follower, consumer, result);
+            follower.trigger(consumer, result);
 
           }, this);
         } catch (e) {

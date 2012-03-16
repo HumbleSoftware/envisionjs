@@ -3,6 +3,7 @@ describe('Component', function () {
   var
     CN_COMPONENT = 'envision-component',
     S_COMPONENT = '.' + CN_COMPONENT,
+    mocks = { MockAdapter : MockAdapter },
     H = envision;
 
   it('defines component', function () {
@@ -46,6 +47,14 @@ describe('Component', function () {
       expect($div).toContain(S_COMPONENT);
     });
 
+    it('destroys', function () {
+      var
+        component = new H.Component();
+      component.render(div);
+      component.destroy();
+      expect($div).not.toContain(S_COMPONENT);
+    });
+
     it('assigns a name', function () {
       var
         name = 'test',
@@ -84,5 +93,89 @@ describe('Component', function () {
       expect(component.width).toBeDefined();
       expect(component.height).toBeDefined();
     });
+
   });
+
+  describe('Adapter Integration', function () {
+
+    it('takes a built adapter', function () {
+      var
+        component = new H.Component({adapter : new mocks.MockAdapter()});
+      expect(component.api).toBeDefined();
+    });
+
+    it('takes an adapter constructor function', function () {
+      var
+        adapterOptions = { 'a' : 'b' },
+        component;
+      spyOn(mocks, 'MockAdapter').andCallThrough();
+      component = new H.Component({
+        adapterConstructor : mocks.MockAdapter,
+        adapterOptions : adapterOptions
+      });
+      expect(mocks.MockAdapter).toHaveBeenCalledWith(adapterOptions);
+      expect(component.api).toBeDefined();
+    });
+
+    it('takes an adapter callback', function () {
+      var
+        api = new MockAdapter(),
+        adapterOptions = { 'a' : 'b' },
+        options, component;
+      options = {
+        adapterCallback : function () {
+          return api;
+        },
+        adapterOptions : adapterOptions
+      }
+      spyOn(options, 'adapterCallback').andCallThrough();
+      component = new H.Component(options);
+      expect(options.adapterCallback).toHaveBeenCalledWith(adapterOptions);
+      expect(component.api).toBe(api);
+    });
+
+    it('attaches event listeners', function () {
+      var
+        options = {'a' : 'b'},
+        adapter = new mocks.MockAdapter(),
+        component = new H.Component({adapter : adapter});
+
+      spyOn(adapter, 'attach');
+      component.attach('select', options);
+      expect(adapter.attach).toHaveBeenCalledWith(component, 'select', options);
+    });
+
+    it('detaches event listeners', function () {
+      var
+        adapter = new mocks.MockAdapter(),
+        component = new H.Component({adapter : adapter});
+
+      spyOn(adapter, 'detach');
+      component.detach('select');
+      expect(adapter.detach).toHaveBeenCalledWith(component, 'select');
+    });
+
+    it('trigers events', function () {
+      var
+        options = {'a' : 'b'},
+        adapter = new mocks.MockAdapter(),
+        component = new H.Component({adapter : adapter});
+
+      spyOn(adapter, 'trigger');
+      component.trigger('select', options);
+      expect(adapter.trigger).toHaveBeenCalledWith(component, 'select', options);
+    });
+
+    it('destroys the adapter', function () {
+      var
+        adapter = new mocks.MockAdapter(),
+        component = new H.Component({adapter : adapter});
+
+      spyOn(adapter, 'destroy');
+      component.destroy();
+      expect(adapter.destroy).toHaveBeenCalled();
+    });
+
+  });
+
 });

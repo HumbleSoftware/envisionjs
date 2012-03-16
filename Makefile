@@ -1,32 +1,36 @@
 envision:
-	smoosh make/build.json
-	cat lib/bonzo/bonzo.min.js >> envision.js
-	echo ";" >> envision.min.js
-	cat lib/bonzo/bonzo.min.js >> envision.min.js
-
-demo:
-	smoosh make/build.json
 	rm -rf build
 	mkdir build
-	cp lib/flotr2/flotr2.min.js build/
-	cp lib/flotr2/js/plugins/handles.js build/
-	cp envision.min.js build/
-	cp demos/index.html build/
-	cp demos/demos.css build/
-	cp demos/ajax.html build/
-	cp demos/ajax.js build/
-	cp demos/finance.html build/
-	cp demos/finance.css build/
-	cp demos/finance.js build/
-	cp demos/million.html build/
-	cp demos/million.js build/
-	cp demos/weierstrass.html build/
-	cp demos/weierstrass.js build/
-	cp demos/includes.build.js build/includes.js
-	cp demos/ajax-loader.gif build/
-	cp demos/yepnope.js build/
-	cp -R demos/data build/
-	cp -R lib/ build/
+	smoosh make/build.json
+	cat lib/bonzo/bonzo.min.js > envision.js
+	cat build/envision.js >> envision.js
+	cat lib/bonzo/bonzo.min.js > envision.min.js
+	echo ";" >> envision.min.js
+	cat build/envision.min.js >> envision.min.js
+	cp build/envision-templates.js .
+	cp build/envision-templates.min.js .
+
+demo: envision
+	mkdir build/demos
+	cp lib/flotr2/flotr2.min.js build/demos
+	cp lib/flotr2/js/plugins/handles.js build/demos
+	cp envision.min.js build/demos
+	cp demos/index.html build/demos
+	cp demos/demos.css build/demos
+	cp demos/ajax.html build/demos
+	cp demos/ajax.js build/demos
+	cp demos/finance.html build/demos
+	cp demos/finance.css build/demos
+	cp demos/finance.js build/demos
+	cp demos/million.html build/demos
+	cp demos/million.js build/demos
+	cp demos/weierstrass.html build/demos
+	cp demos/weierstrass.js build/demos
+	cp demos/includes.build.js build/demos/includes.js
+	cp demos/ajax-loader.gif build/demos
+	cp demos/yepnope.js build/demos
+	cp -R demos/data build/demos
+	cp -R lib/ build/demos
 
 test:
 	jasmine-headless-webkit -j spec/jasmine.yml -c

@@ -1,6 +1,6 @@
 {
   "JAVASCRIPT": {
-    "DIST_DIR": "./",
+    "DIST_DIR": "./build",
     "envision": [
       "./js/license.js",
       "./js/Envision.js",

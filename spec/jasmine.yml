@@ -11,8 +11,10 @@ src_files:
   - "js/Preprocessor.js"
   - "js/Interaction.js"
 helper_files:
+  - "MockAdapter.js"
   - "MockComponent.js"
 spec_files:
+  - "js/Envision.js"
   - "js/Visualization.js"
   - "js/Component.js"
   - "js/Preprocessor.js"

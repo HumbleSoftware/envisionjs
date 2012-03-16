@@ -30,8 +30,12 @@ function Component (options) {
 
   if (options.flotr) {
     this.api = new V.adapters.flotr.Child(options);
-  } else if (options.drawing) {
-    this.api = new options.drawing(options.drawingOptions);
+  } else if (options.adapter) {
+    this.api = options.adapter;
+  } else if (options.adapterConstructor) {
+    this.api = new options.adapterConstructor(options.adapterOptions);
+  } else if (options.adapterCallback) {
+    this.api = options.adapterCallback.call(null, options.adapterOptions);
   }
 }
 
@@ -68,15 +72,20 @@ Component.prototype = {
   },
 
   trigger : function () {
-    this.api.trigger.apply(this.api, arguments);
+    this.api.trigger.apply(this.api, Array.prototype.concat.apply([this], arguments));
   },
 
   attach : function () {
-    this.api.attach.apply(this.api, arguments);
+    this.api.attach.apply(this.api, Array.prototype.concat.apply([this], arguments));
   },
 
   detach : function () {
-    this.api.detach.apply(this.api, arguments);
+    this.api.detach.apply(this.api, Array.prototype.concat.apply([this], arguments));
+  },
+
+  destroy : function () {
+    if (this.api && this.api.destroy) this.api.destroy();
+    bonzo(this.container).empty();
   },
 
   _setDimension : function (attribute) {

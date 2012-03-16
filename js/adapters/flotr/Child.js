@@ -17,6 +17,10 @@ function Child (options) {
 
 Child.prototype = {
 
+  destroy : function () {
+    this.flotr.destroy();
+  },
+
   draw : function (data, flotr, node) {
 
     var

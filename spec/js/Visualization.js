@@ -139,6 +139,13 @@ describe('Visualization', function () {
       expect($div).toContain(S_VISUALIZATION);
     });
 
+    it('sets envision data attribute', function () {
+      var
+        vis = new H.Visualization();
+      vis.render(div);
+      expect(bonzo(div).data('envision')).toBe(vis);
+    });
+
     it('assigns a name', function () {
       var
         name = 'test',
@@ -178,6 +185,32 @@ describe('Visualization', function () {
       expect($div).toContain(S_CONTAINER + S_LAST);
       expect($(c.container)).toBe(S_CONTAINER + S_LAST);
       expect($div.find(S_FIRST)).not.toBe($div.find(S_LAST));
+    });
+
+    it('destroys', function () {
+      var
+        vis = new H.Visualization(),
+        a = new MockComponent(),
+        b = new MockComponent();
+
+      spyOn(a, 'destroy');
+      spyOn(b, 'destroy');
+
+      vis.add(a);
+      vis.add(b);
+      vis.render(div);
+      vis.destroy();
+
+      expect(a.destroy).toHaveBeenCalled();
+      expect(b.destroy).toHaveBeenCalled();
+    });
+
+    it('destroys components', function () {
+      var
+        vis = new H.Visualization();
+      vis.render(div);
+      vis.destroy();
+      expect($div).not.toContain(S_VISUALIZATION);
     });
 
     it('adds new components rendering dynamically', function () {

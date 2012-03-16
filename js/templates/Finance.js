@@ -93,7 +93,7 @@ function getDefaults () {
     },
     connection : {
       name : 'envision-finance-connection',
-      drawing : V.components.QuadraticDrawing
+      adapterConstructor : V.components.QuadraticDrawing
     }
   };
 }
@@ -160,7 +160,7 @@ function Finance (options) {
 
   // Optional initial selection
   if (options.selection) {
-    summary.trigger(summary, 'select', options.selection);
+    summary.trigger('select', options.selection);
   }
 
   // Members
