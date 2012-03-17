@@ -25,7 +25,7 @@ Child.prototype = {
 
     var
       o           = this.options,
-      fData       = [];
+      flotrData   = [];
 
     data = data || o.data;
 
@@ -45,27 +45,22 @@ Child.prototype = {
       flotrData = data;
     } else {
       _.each(data, function (d, index) {
-        // TODO flotr
-        /*
-        if (!_.isArray(d) && !_.isFunction(d)) {
-          fData[index] = _.clone(d);
-          fData[index] = this._processData(d.data);
-        } else {
-        */
-          fData[index] = this._processData(d, flotr);
-        //}
-      }, this);
 
-      fData = fData[0];
-      var
-        flotrData = [],
-        x = fData[0],
-        y = fData[1],
-        i;
-      for (i = 0; i < x.length; i++) {
-        flotrData.push([x[i], y[i]]);
-      }
-      flotrData = [flotrData];
+        var
+          processed = this._processData(d, flotr),
+          x = processed[0],
+          y = processed[1],
+          data = [],
+          i;
+
+        // Transform for Flotr
+        for (i = 0; i < x.length; i++) {
+          data.push([x[i], y[i]]);
+        }
+
+        flotrData.push(data);
+
+      }, this);
     }
 
     if (!flotr) throw 'No graph submitted.';
