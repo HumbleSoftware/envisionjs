@@ -262,6 +262,11 @@ function TimeSeries (options) {
     .follower(connection)
     .leader(summary);
 
+  // Optional initial selection
+  if (options.selection) {
+    summary.trigger('select', options.selection);
+  }
+
   this.vis = vis;
   this.selection = selection;
   this.detail = detail;

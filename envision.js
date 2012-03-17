@@ -649,7 +649,25 @@ envision.actions.selection =  {
       handler : 'select',
       consumer : 'zoom'
     },
-    'click'
+    // Reset on click, avoids re-drawing the leader.
+    {
+        handler : 'click',
+        consumer : 'reset'
+    }
+  ]
+};
+
+envision.actions.zoom =  {
+  events : [
+    // Zoom on the followers as selecting
+    {
+      handler : 'select',
+      consumer : 'zoom'
+    },
+    // Zoom on the leader after mouseup
+    'zoom',
+    // Reset all on click
+    'reset'
   ]
 };
 
@@ -727,10 +745,11 @@ Child.prototype = {
 
     if (flotr) {
       flotr = Flotr.clone(flotr);
-      _.extend(o.flotr, flotr);
-      this._flotrDefaultOptions(flotr);
+      flotr = Flotr.merge(o.flotr, flotr);
+    } else {
+      flotr = o.flotr;
     }
-    flotr = o.flotr;
+
     o.data = data;
     min = flotr.xaxis.min;
     max = flotr.xaxis.max;
@@ -747,7 +766,7 @@ Child.prototype = {
           fData[index] = this._processData(d.data);
         } else {
         */
-          fData[index] = this._processData(d);
+          fData[index] = this._processData(d, flotr);
         //}
       }, this);
 
@@ -768,13 +787,13 @@ Child.prototype = {
     this.flotr = Flotr.draw(node, flotrData, flotr);
   },
 
-  _processData : function (data) {
+  _processData : function (data, flotr) {
 
     var
       options     = this.options,
       process     = options.processData,
       resolution  = options.width,
-      axis        = options.flotr.xaxis,
+      axis        = flotr.xaxis,
       min         = axis.min,
       max         = axis.max,
       preprocessor;
@@ -904,43 +923,7 @@ Child.prototype = {
 
     select : {
       name : 'flotr:selecting',
-      handler : function (component, selection) {
-
-        var
-          mode = component.options.flotr.selection.mode,
-          axes = component.api.flotr.axes,
-          datax, datay, x, y, options;
-
-        if (mode.indexOf('x') !== -1) {
-          datax = {};
-          datax.min = selection.x1;
-          datax.max = selection.x2;
-          x = {};
-          x.min = axes.x.d2p(selection.x1);
-          x.max = axes.x.d2p(selection.x2);
-        }
-
-        if (mode.indexOf('y') !== -1) {
-          datay = {};
-          datay.min = selection.y1;
-          datay.max = selection.y2;
-          y = {};
-          y.min = axes.y.d2p(selection.y1);
-          y.max = axes.y.d2p(selection.y2);
-        }
-
-        // Normalized selection:
-        options = {
-          data : {
-            x : datax,
-            y : datay
-          },
-          x : x,
-          y : y
-        }
-
-        return options;
-      },
+      handler : selectHandler,
       consumer : function (component, selection) {
 
         var
@@ -978,6 +961,12 @@ Child.prototype = {
     },
 
     zoom : {
+      name : 'flotr:select',
+      handler : function (component, selection) {
+        var options = selectHandler(component, selection);
+        component.trigger('zoom', options);
+        return options;
+      },
       consumer : function (component, selection) {
 
         var
@@ -1009,6 +998,16 @@ Child.prototype = {
       },
       consumer : function (component) {
         component.api.flotr.hit.clearHit();
+      }
+    },
+
+    reset : {
+      name : 'flotr:click',
+      handler : function (component) {
+        component.draw();
+      },
+      consumer : function (component) {
+        component.draw();
       }
     },
 
@@ -1059,6 +1058,44 @@ Child.prototype = {
     }
   }
 };
+
+function selectHandler (component, selection) {
+
+  var
+    mode = component.options.flotr.selection.mode,
+    axes = component.api.flotr.axes,
+    datax, datay, x, y, options;
+
+  if (mode.indexOf('x') !== -1) {
+    datax = {};
+    datax.min = selection.x1;
+    datax.max = selection.x2;
+    x = {};
+    x.min = axes.x.d2p(selection.x1);
+    x.max = axes.x.d2p(selection.x2);
+  }
+
+  if (mode.indexOf('y') !== -1) {
+    datay = {};
+    datay.min = selection.y1;
+    datay.max = selection.y2;
+    y = {};
+    y.min = axes.y.d2p(selection.y1);
+    y.max = axes.y.d2p(selection.y2);
+  }
+
+  // Normalized selection:
+  options = {
+    data : {
+      x : datax,
+      y : datay
+    },
+    x : x,
+    y : y
+  }
+
+  return options;
+}
 
 A.flotr.Child = Child;
 
@@ -1262,7 +1299,7 @@ envision.components = envision.components || {};
 
     render : function (node) {
       var
-        canvas = document.createElement('canvas'),//bonzo.create('<canvas></canvas>')[0],
+        canvas = document.createElement('canvas'),
         offset = bonzo(node).offset();
 
       this.height = offset.height;
@@ -1342,8 +1379,8 @@ envision.components = envision.components || {};
     trigger : function (component, name, options) {
       if (name === 'zoom') {
         this.zoom(component, options);
-      } else if (name === 'click') {
-        this.click(component);
+      } else if (name === 'reset') {
+        this.reset(component);
       }
     },
     zoom : function (component, options) {
@@ -1358,7 +1395,7 @@ envision.components = envision.components || {};
         max : max
       });
     },
-    click : function (component) {
+    reset : function (component) {
       component.draw(null, {
         min : component.width / 2,
         max : component.width / 2
