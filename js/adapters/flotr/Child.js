@@ -47,18 +47,26 @@ Child.prototype = {
       _.each(data, function (d, index) {
 
         var
-          processed = this._processData(d, flotr),
+          isObject = !_.isArray(d),
+          unprocessed = isObject ? d.data : d,
+          processed = this._processData(unprocessed, flotr),
           x = processed[0],
           y = processed[1],
           data = [],
-          i;
+          o, i;
 
         // Transform for Flotr
         for (i = 0; i < x.length; i++) {
           data.push([x[i], y[i]]);
         }
 
-        flotrData.push(data);
+        if (isObject) {
+          o = _.extend({}, d);
+          o.data = data;
+          flotrData.push(o);
+        } else {
+          flotrData.push(data);
+        }
 
       }, this);
     }
