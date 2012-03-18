@@ -68,11 +68,11 @@
           context.moveTo(min, height);
           context.quadraticCurveTo(min, half, Math.max(min - half, min / 2), half);
           context.lineTo(Math.min(half, min / 2), half);
-          context.quadraticCurveTo(0, half, 0, -0.5);
+          context.quadraticCurveTo(0, half, 0.5, -0.5);
         }
 
         // Top
-        context.lineTo(width, -0.5);
+        context.lineTo(width - 0.5, -0.5);
 
         // Right
         if (max >= width - 1) {
