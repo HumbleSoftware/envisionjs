@@ -1,5 +1,26 @@
+// Preprocessor Class
 (function () {
 
+/**
+ * @summary Data preprocessor.
+ *
+ * @description  Data can be preprocessed before it is rendered by an adapter.
+ *
+ * This has several important performance considerations.  If data will be 
+ * rendered repeatedly or on slower browsers, it will be faster after being
+ * optimized.
+ *
+ * First, data outside the boundaries does not need to be rendered.  Second,
+ * the resolution of the data only needs to be at most the number of pixels
+ * in the width of the visualization.
+ *
+ * Performing these optimizations will limit memory overhead, important
+ * for garbage collection and performance on old browsers, as well as drawing
+ * overhead, important for mobile devices, old browsers and large data sets.
+ *
+ * @memberof envision
+ * @class
+ */
 function Preprocessor (options) {
 
   options = options || {};
@@ -7,11 +28,17 @@ function Preprocessor (options) {
   var
     data;
 
+  /**
+   * Returns data.
+   */
   this.getData = function () {
     if (this.bounded) bound(this);
     return data;
   }
 
+  /**
+   * Set the data object.
+   */
   this.setData = function (newData) {
     var
       i, length;
@@ -84,10 +111,21 @@ function bound (that) {
 
 Preprocessor.prototype = {
 
+  /**
+   * Returns the length of the data set.
+   *
+   * @return {Number} Length of the data set.
+   */
   length : function () {
     return this.getData()[0].length;
   },
 
+  /**
+   * Bounds the data set at within a range.
+   *
+   * @param {Number} min
+   * @param {Number} max
+   */
   bound : function (min, max) {
 
     if (!_.isNumber(min) || !_.isNumber(max)) return this;
@@ -100,7 +138,13 @@ Preprocessor.prototype = {
   },
 
   /**
-   * Sample using min and max.
+   * Subsample data using MinMax.
+   *
+   * MinMax will display the extrema of the subsample intervals.  This is
+   * slower than regular interval subsampling but necessary for data that 
+   * is very non-homogenous.
+   *
+   * @param {Number} resolution
    */
   subsampleMinMax : function (resolution) {
 
@@ -182,6 +226,14 @@ Preprocessor.prototype = {
     return this;
   },
 
+  /**
+   * Subsample data at a regular interval for resolution.
+   *
+   * This is the fastest subsampling and good for monotonic data and fairly
+   * homogenous data (not a lot of up and down).
+   *
+   * @param {Number} resolution
+   */
   subsample : function (resolution) {
 
     var bounded = this.bounded;

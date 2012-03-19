@@ -1,20 +1,33 @@
-/**
- * Interaction Class
- *
- * Defines an interaction between components.
- *
- * An interaction has leaders, followers, and actions.  Leaders fire events which
- * are reacted to by followers as defined by actions.
- *
- * Options:
- *  leader - Component(s) to lead the interaction
- *  event - Event to interact with
- *
- */
+// Interaction Class
 (function () {
 
 var H = envision;
 
+/**
+ * @summary Defines an interaction between components.
+ *
+ * @description  This class defines interactions in which actions are triggered
+ * by leader components and reacted to by follower components.  These actions
+ * are defined as configurable mappings of trigger events and event consumers.
+ * It is up to the adapter to implement the triggers and consumers.
+ *
+ * A component may be both a leader and a follower.  A leader which is a 
+ * follower will react to actions triggered by other leaders, but will safely
+ * not react to its own.  This allows for groups of components to perform a
+ * common action.
+ *
+ * Optionally, actions may be supplied with a callback executed before the 
+ * action is consumed.  This allows for quick custom functionality to be added
+ * and is how advanced data management (ie. live Ajax data) may be implemented.
+ *
+ * This class follow an observer mediator pattern.
+ *
+ * @param {envision.Component|Array} [leader]  Component(s) to lead the
+ * interaction
+ *
+ * @memberof envision
+ * @class
+ */
 function Interaction(options) {
   this.options = options = options || {};
   this.actions = [];
@@ -23,14 +36,9 @@ function Interaction(options) {
   this.leaders = [];
   this.prevent = {};
 
-  //this._initOptions();
-  //if (!options.leader) throw 'No leader.';
-
   if (options.leader) {
     this.leader(options.leader);
   }
-
-  //this.leaders = (_.isArray(options.leader) ? options.leader : [options.leader]);
 }
 
 Interaction.prototype = {
@@ -47,6 +55,11 @@ Interaction.prototype = {
     return this.actions;
   },
 
+  /**
+   * Add a component as an interaction leader.
+   *
+   * @param {envision.Component} component
+   */
   leader : function (component) {
 
     this.leaders.push(component);
@@ -57,11 +70,21 @@ Interaction.prototype = {
     return this;
   },
 
+  /**
+   * Add a component as an interaction leader.
+   *
+   * @param {envision.Component} component
+   */
   follower : function (component) {
     this.followers.push(component);
     return this;
   },
 
+  /**
+   * Adds an array of components as both followers and leaders.
+   *
+   * @param {Array} components  An array of components
+   */
   group : function (components) {
     if (!_.isArray(components)) components = [components];
     _.each(components, function (component) {
@@ -71,6 +94,16 @@ Interaction.prototype = {
     return this;
   },
 
+  /**
+   * Adds an action to the interaction.
+   *
+   * The action may be optionally configured with the options argument.
+   * Currently the accepts a callback member, invoked after an action
+   * is triggered and before it is consumed by followers.
+   *
+   * @param {Object} action
+   * @param {Object} [options]
+   */
   add : function (action, options) {
     this.actions.push(action);
     this.actionOptions.push(options);

@@ -1,5 +1,6 @@
 /**
- * Envision Namespace
+ * The Envision namespace.
+ * @namespace
  */
 envision = {
 
