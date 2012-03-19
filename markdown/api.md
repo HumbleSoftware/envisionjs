@@ -39,7 +39,7 @@ Render the component.
 If no element is submitted, the component will
 render in the element configured in the constructor.
 
-##### `draw ([data][options])`
+##### `draw ([data], [options])`
 Draw the component.
 
 ##### `trigger ()`
@@ -105,7 +105,7 @@ destroy the component.
 
 This method is chainable.
 
-##### `setPosition (componentnewIndex)`
+##### `setPosition (component, newIndex)`
 Reorders a component.
 
 This method is chainable.
@@ -158,7 +158,7 @@ Set the data object.
 ##### `length ()`
 Returns the length of the data set.
 
-##### `bound (minmax)`
+##### `bound (min, max)`
 Bounds the data set at within a range.
 
 ##### `subsampleMinMax (resolution)`
@@ -211,7 +211,7 @@ Add a component as an interaction leader.
 ##### `group (components)`
 Adds an array of components as both followers and leaders.
 
-##### `add (action[options])`
+##### `add (action, [options])`
 Adds an action to the interaction.
 
 The action may be optionally configured with the options argument.
