@@ -34,3 +34,11 @@ demo: envision
 
 test:
 	jasmine-headless-webkit -j spec/jasmine.yml -c
+
+readme: api-doc
+	cat markdown/head.md > README.md
+	cat markdown/api.md >> README.md
+	cat markdown/footer.md >> README.md
+
+api-doc:
+	jsdoc -t templates/markdown js/ > markdown/api.md
