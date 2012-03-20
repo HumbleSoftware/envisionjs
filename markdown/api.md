@@ -28,8 +28,7 @@ when using the native data format for an adapter.
 instantiated by the component.
 * `adapterCallback` An callback invoked by the component
 returning an adapter.
-* `adapterOptions` Options passed to the adapter constructor
-or function.
+* `config` Configuration for the adapter.
 
 #### Methods:
 
