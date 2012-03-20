@@ -8,11 +8,19 @@ function getDefaults () {
     detail : {
       name : 'envision-timeseries-detail',
       config : {
+        'lite-lines' : {
+            lineWidth : 1,
+            show : true
+        }
       }
     },
     summary : {
       name : 'envision-timeseries-summary',
       config : {
+        'lite-lines' : {
+            lineWidth : 1,
+            show : true
+        },
         handles : {
           show : true
         },
