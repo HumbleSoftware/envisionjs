@@ -52,7 +52,7 @@ null,function(a,b){return"');"+b.replace(/\\'/g,"'").replace(/[\r\n\t]/g," ")+"_
  *  drag - Left and Right drag handles
  *  scroll - Scrolling handle
  */
-(function(){function b(){var b=this.options,c=this.handles,d=this.el,e,f;if(!b.selection.mode||!b.handles.show||"ontouchstart"in d)return;c.initialized=!0,container=a.node('<div class="flotr-handles"></div>'),b=b.handles,b.drag&&(f=a.node('<div class="flotr-handles-handle flotr-handles-drag flotr-handles-right"></div>'),e=a.node('<div class="flotr-handles-handle flotr-handles-drag flotr-handles-left"></div>'),a.insert(container,f),a.insert(container,e),a.hide(e),a.hide(f),c.left=e,c.right=f,this._observe(e,"mousedown",function(){c.moveHandler=i}),this._observe(f,"mousedown",function(){c.moveHandler=j})),b.scroll&&(scroll=a.node('<div class="flotr-handles-handle flotr-handles-scroll"></div>'),a.insert(container,scroll),a.hide(scroll),c.scroll=scroll,this._observe(scroll,"mousedown",function(){c.moveHandler=k})),this._observe(document,"mouseup",function(){c.moveHandler=null}),a.insert(d,container)}function c(a){if(!this.handles.initialized)return;var b=this.handles,c=this.options.handles,f=b.left,g=b.right,h=b.scroll;c&&(c.drag&&(d(this,f,a.x1),d(this,g,a.x2)),c.scroll&&e(this,h,a.x1,a.x2))}function d(b,c,d){a.show(c);var e=a.size(c),f=Math.round(b.axes.x.d2p(d)-e.width/2),g=(b.plotHeight-e.height)/2;a.setStyles(c,{left:f+"px",top:g+"px"})}function e(b,c,d,e){a.show(c);var f=a.size(c),g=Math.round(b.axes.x.d2p(d)),h=b.plotHeight-f.height/2,i=b.axes.x.d2p(e)-b.axes.x.d2p(d);a.setStyles(c,{left:g+"px",top:h+"px",width:i+"px"})}function f(){if(!this.handles.initialized)return;var b=this.handles;b&&(a.hide(b.left),a.hide(b.right),a.hide(b.scroll))}function g(a,b){if(!this.handles.initialized)return;if(!this.handles.moveHandler)return;var c=b.dX,d=this.selection.selection,e=this.selection.getArea();moveHandler=this.handles.moveHandler,moveHandler(e,c),h(e),this.selection.setSelection(e)}function h(a){a.x1>a.x2&&(moveHandler==i?moveHandler=j:moveHandler==j&&(moveHandler=i))}function i(a,b){a.x1+=b}function j(a,b){a.x2+=b}function k(a,b){a.x1+=b,a.x2+=b}var a=Flotr.DOM;Flotr.addPlugin("handles",{options:{show:!1,drag:!0,scroll:!0},callbacks:{"flotr:afterinit":b,"flotr:select":c,"flotr:mousedown":f,"flotr:mousemove":g}})})();
+(function(){function b(){var b=this.options,c=this.handles,d=this.el,e,f;if(!b.selection.mode||!b.handles.show||"ontouchstart"in d)return;c.initialized=!0,container=a.node('<div class="flotr-handles"></div>'),b=b.handles,b.drag&&(f=a.node('<div class="flotr-handles-handle flotr-handles-drag flotr-handles-right"></div>'),e=a.node('<div class="flotr-handles-handle flotr-handles-drag flotr-handles-left"></div>'),a.insert(container,f),a.insert(container,e),a.hide(e),a.hide(f),c.left=e,c.right=f,this._observe(e,"mousedown",function(){c.moveHandler=i}),this._observe(f,"mousedown",function(){c.moveHandler=j})),b.scroll&&(scroll=a.node('<div class="flotr-handles-handle flotr-handles-scroll"></div>'),a.insert(container,scroll),a.hide(scroll),c.scroll=scroll,this._observe(scroll,"mousedown",function(){c.moveHandler=k})),this._observe(document,"mouseup",function(){c.moveHandler=null}),a.insert(d,container)}function c(a){if(!this.handles.initialized)return;var b=this.handles,c=this.options.handles,f=b.left,g=b.right,h=b.scroll;c&&(c.drag&&(d(this,f,a.x1),d(this,g,a.x2)),c.scroll&&e(this,h,a.x1,a.x2))}function d(b,c,d){a.show(c);var e=a.size(c),f=Math.round(b.axes.x.d2p(d)-e.width/2),g=(b.plotHeight-e.height)/2;a.setStyles(c,{left:f+"px",top:g+"px"})}function e(b,c,d,e){a.show(c);var f=a.size(c),g=Math.round(b.axes.x.d2p(d)),h=b.plotHeight-f.height/2,i=b.axes.x.d2p(e)-b.axes.x.d2p(d);a.setStyles(c,{left:g+"px",top:h+"px",width:i+"px"})}function f(){if(!this.handles.initialized)return;var b=this.handles;b&&(a.hide(b.left),a.hide(b.right),a.hide(b.scroll))}function g(a,b){if(!this.handles.initialized)return;if(!this.handles.moveHandler)return;var c=b.dX,d=this.selection.selection,e=this.selection.getArea(),f=this.handles;f.moveHandler(e,c),h(e,f),this.selection.setSelection(e)}function h(a,b){var c=b.moveHandler;a.x1>a.x2&&(c==i?c=j:c==j&&(c=i),b.moveHandler=c)}function i(a,b){a.x1+=b}function j(a,b){a.x2+=b}function k(a,b){a.x1+=b,a.x2+=b}var a=Flotr.DOM;Flotr.addPlugin("handles",{options:{show:!1,drag:!0,scroll:!0},callbacks:{"flotr:afterinit":b,"flotr:select":c,"flotr:mousedown":f,"flotr:mousemove":g}})})();
 /*!
   * Bonzo: DOM Utility (c) Dustin Diaz 2011
   * https://github.com/ded/bonzo
@@ -345,8 +345,7 @@ var
  * instantiated by the component.
  * @param {Function} [adapterCallback]  An callback invoked by the component
  * returning an adapter.
- * @param {Object} [adapterOptions]  Options passed to the adapter constructor
- * or function.
+ * @param {Object} [config]  Configuration for the adapter.
  *
  * @memberof envision
  * @class
@@ -361,14 +360,14 @@ function Component (options) {
   this.options = options;
   this.node = node;
 
-  if (options.flotr) {
-    this.api = new V.adapters.flotr.Child(options);
-  } else if (options.adapter) {
+  if (options.adapter) {
     this.api = options.adapter;
   } else if (options.adapterConstructor) {
-    this.api = new options.adapterConstructor(options.adapterOptions);
+    this.api = new options.adapterConstructor(options.config);
   } else if (options.adapterCallback) {
-    this.api = options.adapterCallback.call(null, options.adapterOptions);
+    this.api = options.adapterCallback.call(null, options.config);
+  } else if (options.config) {
+    this.api = new V.adapters.flotr.Child(options.config || {});
   }
 }
 
@@ -399,7 +398,7 @@ Component.prototype = {
     this._setDimension('height');
     this.container = element;
 
-    this.draw(options.data, options.flotr);
+    this.draw(options.data, options.config);
   },
 
   /**
@@ -410,12 +409,8 @@ Component.prototype = {
    */
   draw : function (data, options) {
     if (this.api) {
-      this.api.draw(data, options, this.node);
+      this.api.draw(data || this.options.data, options, this.node, this.options.skipPreprocess);
     }
-  },
-
-  getData : function () {
-    return this.data;
   },
 
   /**
@@ -517,18 +512,6 @@ function Interaction(options) {
 }
 
 Interaction.prototype = {
-
-  getLeaders : function () {
-    return this.leaders; 
-  },
-
-  getFollowers : function () {
-    return this.followers; 
-  },
-
-  getActions : function () {
-    return this.actions;
-  },
 
   /**
    * Add a component as an interaction leader.
@@ -963,7 +946,7 @@ envision.adapters.flotr = {};
  * Flotr Default Options
  */
 
-envision.adapters.flotr.defaultOptions = {
+envision.adapters.defaultOptions = {
   grid : {
     outlineWidth : 0,
     labelMargin : 0,
@@ -1001,7 +984,7 @@ var
   V = envision,
   A = envision.adapters,
   E = Flotr.EventAdapter,
-  DEFAULTS = A.flotr.defaultOptions;
+  DEFAULTS = A.defaultOptions;
 
 function Child (options) {
   this.options = options || {};
@@ -1015,7 +998,7 @@ Child.prototype = {
     this.flotr.destroy();
   },
 
-  draw : function (data, flotr, node) {
+  draw : function (data, flotr, node, skipPreprocess) {
 
     var
       o           = this.options,
@@ -1025,9 +1008,9 @@ Child.prototype = {
 
     if (flotr) {
       flotr = Flotr.clone(flotr);
-      flotr = Flotr.merge(o.flotr, flotr);
+      flotr = Flotr.merge(o, flotr);
     } else {
-      flotr = o.flotr;
+      flotr = o;
     }
 
     o.data = data;
@@ -1035,7 +1018,7 @@ Child.prototype = {
     max = flotr.xaxis.max;
 
     data = this._getDataArray(data);
-    if (o.skipPreprocess) {
+    if (skipPreprocess) {
       flotrData = data;
     } else {
       _.each(data, function (d, index) {
@@ -1110,7 +1093,7 @@ Child.prototype = {
 
   _flotrDefaultOptions : function (options) {
 
-    var o = options || this.options.flotr,
+    var o = options || this.options,
       i;
 
     for (i in DEFAULTS) {
@@ -1345,7 +1328,7 @@ Child.prototype = {
 function selectHandler (component, selection) {
 
   var
-    mode = component.options.flotr.selection.mode,
+    mode = component.options.config.selection.mode,
     axes = component.api.flotr.axes,
     datax, datay, x, y, options;
 
@@ -1718,7 +1701,7 @@ function getDefaults () {
   return {
     price : {
       name : 'envision-finance-price',
-      flotr : {
+      config : {
         'lite-lines' : {
           lineWidth : 1,
           show : true,
@@ -1745,7 +1728,7 @@ function getDefaults () {
     },
     volume : {
       name : 'envision-finance-volume',
-      flotr : {
+      config : {
         whiskers : {
           show : true,
           lineWidth : 2
@@ -1764,7 +1747,7 @@ function getDefaults () {
     },
     summary : {
       name : 'envision-finance-summary',
-      flotr : {
+      config : {
         'lite-lines' : {
           show : true,
           lineWidth : 1,
@@ -1816,7 +1799,7 @@ function Finance (options) {
   defaults.volume.data = data.volume;
   defaults.summary.data = data.summary;
 
-  defaults.price.flotr.mouse.trackFormatter = options.trackFormatter || function (o) {
+  defaults.price.config.mouse.trackFormatter = options.trackFormatter || function (o) {
 
     var
       index = o.index,
@@ -1826,9 +1809,9 @@ function Finance (options) {
     return value;
   };
   if (options.xTickFormatter) {
-    defaults.summary.flotr.xaxis.tickFormatter = options.xTickFormatter;
+    defaults.summary.config.xaxis.tickFormatter = options.xTickFormatter;
   }
-  defaults.price.flotr.yaxis.tickFormatter = options.yTickFormatter || function (n) {
+  defaults.price.config.yaxis.tickFormatter = options.yTickFormatter || function (n) {
     return '$' + n;
   };
 
@@ -1885,13 +1868,12 @@ function getDefaults () {
   return {
     detail : {
       name : 'envision-timeseries-detail',
-      flotr : {
-
+      config : {
       }
     },
     summary : {
       name : 'envision-timeseries-summary',
-      flotr : {
+      config : {
         handles : {
           show : true
         },
@@ -1969,15 +1951,14 @@ var
 
 function defaultsZoom () {
   return {
-    name : 'zoom',
-    flotr : {}
+    name : 'zoom'
   };
 }
 
 function defaultsSummary () {
   return {
     name : 'summary',
-    flotr : {
+    config : {
       handles : { show : true },
       selection : { mode : 'x'}
     }
