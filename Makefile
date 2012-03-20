@@ -4,17 +4,17 @@ envision:
 	smoosh make/build.json
 	# envision.js
 	cat lib/flotr2/flotr2.min.js > envision.js
-	echo ";" >> envision.min.js
+	echo ";" >> envision.js
 	cat lib/bonzo/bonzo.min.js >> envision.js
 	cat build/envision.js >> envision.js
+	echo ";" >> envision.js
 	# envision.min.js
 	cat lib/flotr2/flotr2.min.js > envision.min.js
 	echo ";" >> envision.min.js
 	cat lib/bonzo/bonzo.min.js >> envision.min.js
 	echo ";" >> envision.min.js
 	cat build/envision.min.js >> envision.min.js
-	cp build/envision-templates.js .
-	cp build/envision-templates.min.js .
+	echo ";" >> envision.js
 
 demo: envision
 	mkdir build/demos
