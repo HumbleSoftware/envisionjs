@@ -148,7 +148,8 @@ Component.prototype = {
     if (options[attribute]) {
       bonzo(node).css(attribute, options[attribute]);
     } else {
-      options[attribute] = parseInt(bonzo(node).css(attribute), 10);
+      //options[attribute] = parseInt(bonzo(node).css(attribute), 10);
+      options[attribute] = node.clientWidth;
     }
     this[attribute] = options[attribute];
   }
