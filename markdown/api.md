@@ -147,6 +147,12 @@ Performing these optimizations will limit memory overhead, important
 for garbage collection and performance on old browsers, as well as drawing
 overhead, important for mobile devices, old browsers and large data sets.
 
+#### Configuration:
+
+An object is submitted to the constructor for configuration.
+
+* `data` The data for processing.
+
 #### Methods:
 
 ##### `getData ()`
