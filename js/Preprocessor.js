@@ -4,7 +4,7 @@
 /**
  * @summary Data preprocessor.
  *
- * @description  Data can be preprocessed before it is rendered by an adapter.
+ * @description Data can be preprocessed before it is rendered by an adapter.
  *
  * This has several important performance considerations.  If data will be 
  * rendered repeatedly or on slower browsers, it will be faster after being
@@ -17,6 +17,8 @@
  * Performing these optimizations will limit memory overhead, important
  * for garbage collection and performance on old browsers, as well as drawing
  * overhead, important for mobile devices, old browsers and large data sets.
+ *
+ * @param {Array} [data]  The data for processing.
  *
  * @memberof envision
  * @class
