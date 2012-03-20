@@ -64,9 +64,6 @@
 }
 
 @media screen and (max-width: 600px) {
-  div#demo {
-    height: 253px;
-  }
   .envision-finance {
     width: 100%;
   }

@@ -43,6 +43,10 @@ div#footer a:visited {
 }
 
 @media screen and (max-width: 600px) {
+  div#demo {
+    height: 253px;
+  }
+
   h3 {
     margin: 12px 0px;
     font-size: 24px;
