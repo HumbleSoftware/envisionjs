@@ -5,11 +5,15 @@ envision:
 	# envision.js
 	cat lib/flotr2/flotr2.min.js > envision.js
 	echo ";" >> envision.js
+	cat build/handles.min.js >> envision.js
+	echo ";" >> envision.js
 	cat lib/bonzo/bonzo.min.js >> envision.js
 	cat build/envision.js >> envision.js
 	echo ";" >> envision.js
 	# envision.min.js
 	cat lib/flotr2/flotr2.min.js > envision.min.js
+	echo ";" >> envision.min.js
+	cat build/handles.min.js >> envision.min.js
 	echo ";" >> envision.min.js
 	cat lib/bonzo/bonzo.min.js >> envision.min.js
 	echo ";" >> envision.min.js
