@@ -36,8 +36,8 @@
   background: #fff;
 }
 .envision-finance-connection canvas object {
-  position: relative;
-  top: -1px;
+  position: absolute;
+  top: 0px;
 }
 
 /* Y-Axis Labels */
