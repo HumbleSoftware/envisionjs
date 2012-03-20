@@ -43,18 +43,6 @@ function Interaction(options) {
 
 Interaction.prototype = {
 
-  getLeaders : function () {
-    return this.leaders; 
-  },
-
-  getFollowers : function () {
-    return this.followers; 
-  },
-
-  getActions : function () {
-    return this.actions;
-  },
-
   /**
    * Add a component as an interaction leader.
    *
