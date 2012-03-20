@@ -7,7 +7,7 @@ var
   V = envision,
   A = envision.adapters,
   E = Flotr.EventAdapter,
-  DEFAULTS = A.flotr.defaultOptions;
+  DEFAULTS = A.defaultOptions;
 
 function Child (options) {
   this.options = options || {};
@@ -21,7 +21,7 @@ Child.prototype = {
     this.flotr.destroy();
   },
 
-  draw : function (data, flotr, node) {
+  draw : function (data, flotr, node, skipPreprocess) {
 
     var
       o           = this.options,
@@ -31,9 +31,9 @@ Child.prototype = {
 
     if (flotr) {
       flotr = Flotr.clone(flotr);
-      flotr = Flotr.merge(o.flotr, flotr);
+      flotr = Flotr.merge(o, flotr);
     } else {
-      flotr = o.flotr;
+      flotr = o;
     }
 
     o.data = data;
@@ -41,7 +41,7 @@ Child.prototype = {
     max = flotr.xaxis.max;
 
     data = this._getDataArray(data);
-    if (o.skipPreprocess) {
+    if (skipPreprocess) {
       flotrData = data;
     } else {
       _.each(data, function (d, index) {
@@ -116,7 +116,7 @@ Child.prototype = {
 
   _flotrDefaultOptions : function (options) {
 
-    var o = options || this.options.flotr,
+    var o = options || this.options,
       i;
 
     for (i in DEFAULTS) {
@@ -351,7 +351,7 @@ Child.prototype = {
 function selectHandler (component, selection) {
 
   var
-    mode = component.options.flotr.selection.mode,
+    mode = component.options.config.selection.mode,
     axes = component.api.flotr.axes,
     datax, datay, x, y, options;
 

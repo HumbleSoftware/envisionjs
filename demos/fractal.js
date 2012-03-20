@@ -95,7 +95,7 @@ function example () {
       data : [[-2, 1.2], [1, -1.2]],
       width : 598,
       height : 456,
-      flotr : {
+      config : {
         fractal : {
           show : true
         },

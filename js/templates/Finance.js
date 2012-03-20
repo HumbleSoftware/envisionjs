@@ -18,7 +18,7 @@ function getDefaults () {
   return {
     price : {
       name : 'envision-finance-price',
-      flotr : {
+      config : {
         'lite-lines' : {
           lineWidth : 1,
           show : true,
@@ -45,7 +45,7 @@ function getDefaults () {
     },
     volume : {
       name : 'envision-finance-volume',
-      flotr : {
+      config : {
         whiskers : {
           show : true,
           lineWidth : 2
@@ -64,7 +64,7 @@ function getDefaults () {
     },
     summary : {
       name : 'envision-finance-summary',
-      flotr : {
+      config : {
         'lite-lines' : {
           show : true,
           lineWidth : 1,
@@ -116,7 +116,7 @@ function Finance (options) {
   defaults.volume.data = data.volume;
   defaults.summary.data = data.summary;
 
-  defaults.price.flotr.mouse.trackFormatter = options.trackFormatter || function (o) {
+  defaults.price.config.mouse.trackFormatter = options.trackFormatter || function (o) {
 
     var
       index = o.index,
@@ -126,9 +126,9 @@ function Finance (options) {
     return value;
   };
   if (options.xTickFormatter) {
-    defaults.summary.flotr.xaxis.tickFormatter = options.xTickFormatter;
+    defaults.summary.config.xaxis.tickFormatter = options.xTickFormatter;
   }
-  defaults.price.flotr.yaxis.tickFormatter = options.yTickFormatter || function (n) {
+  defaults.price.config.yaxis.tickFormatter = options.yTickFormatter || function (n) {
     return '$' + n;
   };
 

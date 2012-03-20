@@ -35,8 +35,7 @@ var
  * instantiated by the component.
  * @param {Function} [adapterCallback]  An callback invoked by the component
  * returning an adapter.
- * @param {Object} [adapterOptions]  Options passed to the adapter constructor
- * or function.
+ * @param {Object} [config]  Configuration for the adapter.
  *
  * @memberof envision
  * @class
@@ -51,14 +50,14 @@ function Component (options) {
   this.options = options;
   this.node = node;
 
-  if (options.flotr) {
-    this.api = new V.adapters.flotr.Child(options);
-  } else if (options.adapter) {
+  if (options.adapter) {
     this.api = options.adapter;
   } else if (options.adapterConstructor) {
-    this.api = new options.adapterConstructor(options.adapterOptions);
+    this.api = new options.adapterConstructor(options.config);
   } else if (options.adapterCallback) {
-    this.api = options.adapterCallback.call(null, options.adapterOptions);
+    this.api = options.adapterCallback.call(null, options.config);
+  } else if (options.config) {
+    this.api = new V.adapters.flotr.Child(options.config || {});
   }
 }
 
@@ -89,7 +88,7 @@ Component.prototype = {
     this._setDimension('height');
     this.container = element;
 
-    this.draw(options.data, options.flotr);
+    this.draw(options.data, options.config);
   },
 
   /**
@@ -100,7 +99,7 @@ Component.prototype = {
    */
   draw : function (data, options) {
     if (this.api) {
-      this.api.draw(data, options, this.node);
+      this.api.draw(data || this.options.data, options, this.node, this.options.skipPreprocess);
     }
   },
 

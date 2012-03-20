@@ -111,7 +111,7 @@ describe('Component', function () {
       spyOn(mocks, 'MockAdapter').andCallThrough();
       component = new H.Component({
         adapterConstructor : mocks.MockAdapter,
-        adapterOptions : adapterOptions
+        config : adapterOptions
       });
       expect(mocks.MockAdapter).toHaveBeenCalledWith(adapterOptions);
       expect(component.api).toBeDefined();
@@ -126,7 +126,7 @@ describe('Component', function () {
         adapterCallback : function () {
           return api;
         },
-        adapterOptions : adapterOptions
+        config : adapterOptions
       }
       spyOn(options, 'adapterCallback').andCallThrough();
       component = new H.Component(options);

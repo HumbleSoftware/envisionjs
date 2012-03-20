@@ -48,7 +48,7 @@ function example () {
         },
         summary : {
           skipPreprocess : true,
-          flotr : {
+          config : {
             xaxis : {
               // Set x ticks manually with defaults override:
               ticks : currentData.summaryTicks

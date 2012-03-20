@@ -7,13 +7,12 @@ function getDefaults () {
   return {
     detail : {
       name : 'envision-timeseries-detail',
-      flotr : {
-
+      config : {
       }
     },
     summary : {
       name : 'envision-timeseries-summary',
-      flotr : {
+      config : {
         handles : {
           show : true
         },
