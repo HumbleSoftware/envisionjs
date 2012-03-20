@@ -1,3 +1,842 @@
+//     Underscore.js 1.1.7
+//     (c) 2011 Jeremy Ashkenas, DocumentCloud Inc.
+//     Underscore is freely distributable under the MIT license.
+//     Portions of Underscore are inspired or borrowed from Prototype,
+//     Oliver Steele's Functional, and John Resig's Micro-Templating.
+//     For all details and documentation:
+//     http://documentcloud.github.com/underscore
+
+(function() {
+
+  // Baseline setup
+  // --------------
+
+  // Establish the root object, `window` in the browser, or `global` on the server.
+  var root = this;
+
+  // Save the previous value of the `_` variable.
+  var previousUnderscore = root._;
+
+  // Establish the object that gets returned to break out of a loop iteration.
+  var breaker = {};
+
+  // Save bytes in the minified (but not gzipped) version:
+  var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
+
+  // Create quick reference variables for speed access to core prototypes.
+  var slice            = ArrayProto.slice,
+      unshift          = ArrayProto.unshift,
+      toString         = ObjProto.toString,
+      hasOwnProperty   = ObjProto.hasOwnProperty;
+
+  // All **ECMAScript 5** native function implementations that we hope to use
+  // are declared here.
+  var
+    nativeForEach      = ArrayProto.forEach,
+    nativeMap          = ArrayProto.map,
+    nativeReduce       = ArrayProto.reduce,
+    nativeReduceRight  = ArrayProto.reduceRight,
+    nativeFilter       = ArrayProto.filter,
+    nativeEvery        = ArrayProto.every,
+    nativeSome         = ArrayProto.some,
+    nativeIndexOf      = ArrayProto.indexOf,
+    nativeLastIndexOf  = ArrayProto.lastIndexOf,
+    nativeIsArray      = Array.isArray,
+    nativeKeys         = Object.keys,
+    nativeBind         = FuncProto.bind;
+
+  // Create a safe reference to the Underscore object for use below.
+  var _ = function(obj) { return new wrapper(obj); };
+
+  // Export the Underscore object for **CommonJS**, with backwards-compatibility
+  // for the old `require()` API. If we're not in CommonJS, add `_` to the
+  // global object.
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = _;
+    _._ = _;
+  } else {
+    // Exported as a string, for Closure Compiler "advanced" mode.
+    root['_'] = _;
+  }
+
+  // Current version.
+  _.VERSION = '1.1.7';
+
+  // Collection Functions
+  // --------------------
+
+  // The cornerstone, an `each` implementation, aka `forEach`.
+  // Handles objects with the built-in `forEach`, arrays, and raw objects.
+  // Delegates to **ECMAScript 5**'s native `forEach` if available.
+  var each = _.each = _.forEach = function(obj, iterator, context) {
+    if (obj == null) return;
+    if (nativeForEach && obj.forEach === nativeForEach) {
+      obj.forEach(iterator, context);
+    } else if (obj.length === +obj.length) {
+      for (var i = 0, l = obj.length; i < l; i++) {
+        if (i in obj && iterator.call(context, obj[i], i, obj) === breaker) return;
+      }
+    } else {
+      for (var key in obj) {
+        if (hasOwnProperty.call(obj, key)) {
+          if (iterator.call(context, obj[key], key, obj) === breaker) return;
+        }
+      }
+    }
+  };
+
+  // Return the results of applying the iterator to each element.
+  // Delegates to **ECMAScript 5**'s native `map` if available.
+  _.map = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+    each(obj, function(value, index, list) {
+      results[results.length] = iterator.call(context, value, index, list);
+    });
+    return results;
+  };
+
+  // **Reduce** builds up a single result from a list of values, aka `inject`,
+  // or `foldl`. Delegates to **ECMAScript 5**'s native `reduce` if available.
+  _.reduce = _.foldl = _.inject = function(obj, iterator, memo, context) {
+    var initial = memo !== void 0;
+    if (obj == null) obj = [];
+    if (nativeReduce && obj.reduce === nativeReduce) {
+      if (context) iterator = _.bind(iterator, context);
+      return initial ? obj.reduce(iterator, memo) : obj.reduce(iterator);
+    }
+    each(obj, function(value, index, list) {
+      if (!initial) {
+        memo = value;
+        initial = true;
+      } else {
+        memo = iterator.call(context, memo, value, index, list);
+      }
+    });
+    if (!initial) throw new TypeError("Reduce of empty array with no initial value");
+    return memo;
+  };
+
+  // The right-associative version of reduce, also known as `foldr`.
+  // Delegates to **ECMAScript 5**'s native `reduceRight` if available.
+  _.reduceRight = _.foldr = function(obj, iterator, memo, context) {
+    if (obj == null) obj = [];
+    if (nativeReduceRight && obj.reduceRight === nativeReduceRight) {
+      if (context) iterator = _.bind(iterator, context);
+      return memo !== void 0 ? obj.reduceRight(iterator, memo) : obj.reduceRight(iterator);
+    }
+    var reversed = (_.isArray(obj) ? obj.slice() : _.toArray(obj)).reverse();
+    return _.reduce(reversed, iterator, memo, context);
+  };
+
+  // Return the first value which passes a truth test. Aliased as `detect`.
+  _.find = _.detect = function(obj, iterator, context) {
+    var result;
+    any(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) {
+        result = value;
+        return true;
+      }
+    });
+    return result;
+  };
+
+  // Return all the elements that pass a truth test.
+  // Delegates to **ECMAScript 5**'s native `filter` if available.
+  // Aliased as `select`.
+  _.filter = _.select = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    if (nativeFilter && obj.filter === nativeFilter) return obj.filter(iterator, context);
+    each(obj, function(value, index, list) {
+      if (iterator.call(context, value, index, list)) results[results.length] = value;
+    });
+    return results;
+  };
+
+  // Return all the elements for which a truth test fails.
+  _.reject = function(obj, iterator, context) {
+    var results = [];
+    if (obj == null) return results;
+    each(obj, function(value, index, list) {
+      if (!iterator.call(context, value, index, list)) results[results.length] = value;
+    });
+    return results;
+  };
+
+  // Determine whether all of the elements match a truth test.
+  // Delegates to **ECMAScript 5**'s native `every` if available.
+  // Aliased as `all`.
+  _.every = _.all = function(obj, iterator, context) {
+    var result = true;
+    if (obj == null) return result;
+    if (nativeEvery && obj.every === nativeEvery) return obj.every(iterator, context);
+    each(obj, function(value, index, list) {
+      if (!(result = result && iterator.call(context, value, index, list))) return breaker;
+    });
+    return result;
+  };
+
+  // Determine if at least one element in the object matches a truth test.
+  // Delegates to **ECMAScript 5**'s native `some` if available.
+  // Aliased as `any`.
+  var any = _.some = _.any = function(obj, iterator, context) {
+    iterator = iterator || _.identity;
+    var result = false;
+    if (obj == null) return result;
+    if (nativeSome && obj.some === nativeSome) return obj.some(iterator, context);
+    each(obj, function(value, index, list) {
+      if (result |= iterator.call(context, value, index, list)) return breaker;
+    });
+    return !!result;
+  };
+
+  // Determine if a given value is included in the array or object using `===`.
+  // Aliased as `contains`.
+  _.include = _.contains = function(obj, target) {
+    var found = false;
+    if (obj == null) return found;
+    if (nativeIndexOf && obj.indexOf === nativeIndexOf) return obj.indexOf(target) != -1;
+    any(obj, function(value) {
+      if (found = value === target) return true;
+    });
+    return found;
+  };
+
+  // Invoke a method (with arguments) on every item in a collection.
+  _.invoke = function(obj, method) {
+    var args = slice.call(arguments, 2);
+    return _.map(obj, function(value) {
+      return (method.call ? method || value : value[method]).apply(value, args);
+    });
+  };
+
+  // Convenience version of a common use case of `map`: fetching a property.
+  _.pluck = function(obj, key) {
+    return _.map(obj, function(value){ return value[key]; });
+  };
+
+  // Return the maximum element or (element-based computation).
+  _.max = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj)) return Math.max.apply(Math, obj);
+    var result = {computed : -Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed >= result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Return the minimum element (or element-based computation).
+  _.min = function(obj, iterator, context) {
+    if (!iterator && _.isArray(obj)) return Math.min.apply(Math, obj);
+    var result = {computed : Infinity};
+    each(obj, function(value, index, list) {
+      var computed = iterator ? iterator.call(context, value, index, list) : value;
+      computed < result.computed && (result = {value : value, computed : computed});
+    });
+    return result.value;
+  };
+
+  // Sort the object's values by a criterion produced by an iterator.
+  _.sortBy = function(obj, iterator, context) {
+    return _.pluck(_.map(obj, function(value, index, list) {
+      return {
+        value : value,
+        criteria : iterator.call(context, value, index, list)
+      };
+    }).sort(function(left, right) {
+      var a = left.criteria, b = right.criteria;
+      return a < b ? -1 : a > b ? 1 : 0;
+    }), 'value');
+  };
+
+  // Groups the object's values by a criterion produced by an iterator
+  _.groupBy = function(obj, iterator) {
+    var result = {};
+    each(obj, function(value, index) {
+      var key = iterator(value, index);
+      (result[key] || (result[key] = [])).push(value);
+    });
+    return result;
+  };
+
+  // Use a comparator function to figure out at what index an object should
+  // be inserted so as to maintain order. Uses binary search.
+  _.sortedIndex = function(array, obj, iterator) {
+    iterator || (iterator = _.identity);
+    var low = 0, high = array.length;
+    while (low < high) {
+      var mid = (low + high) >> 1;
+      iterator(array[mid]) < iterator(obj) ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
+
+  // Safely convert anything iterable into a real, live array.
+  _.toArray = function(iterable) {
+    if (!iterable)                return [];
+    if (iterable.toArray)         return iterable.toArray();
+    if (_.isArray(iterable))      return slice.call(iterable);
+    if (_.isArguments(iterable))  return slice.call(iterable);
+    return _.values(iterable);
+  };
+
+  // Return the number of elements in an object.
+  _.size = function(obj) {
+    return _.toArray(obj).length;
+  };
+
+  // Array Functions
+  // ---------------
+
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. Aliased as `head`. The **guard** check allows it to work
+  // with `_.map`.
+  _.first = _.head = function(array, n, guard) {
+    return (n != null) && !guard ? slice.call(array, 0, n) : array[0];
+  };
+
+  // Returns everything but the first entry of the array. Aliased as `tail`.
+  // Especially useful on the arguments object. Passing an **index** will return
+  // the rest of the values in the array from that index onward. The **guard**
+  // check allows it to work with `_.map`.
+  _.rest = _.tail = function(array, index, guard) {
+    return slice.call(array, (index == null) || guard ? 1 : index);
+  };
+
+  // Get the last element of an array.
+  _.last = function(array) {
+    return array[array.length - 1];
+  };
+
+  // Trim out all falsy values from an array.
+  _.compact = function(array) {
+    return _.filter(array, function(value){ return !!value; });
+  };
+
+  // Return a completely flattened version of an array.
+  _.flatten = function(array) {
+    return _.reduce(array, function(memo, value) {
+      if (_.isArray(value)) return memo.concat(_.flatten(value));
+      memo[memo.length] = value;
+      return memo;
+    }, []);
+  };
+
+  // Return a version of the array that does not contain the specified value(s).
+  _.without = function(array) {
+    return _.difference(array, slice.call(arguments, 1));
+  };
+
+  // Produce a duplicate-free version of the array. If the array has already
+  // been sorted, you have the option of using a faster algorithm.
+  // Aliased as `unique`.
+  _.uniq = _.unique = function(array, isSorted) {
+    return _.reduce(array, function(memo, el, i) {
+      if (0 == i || (isSorted === true ? _.last(memo) != el : !_.include(memo, el))) memo[memo.length] = el;
+      return memo;
+    }, []);
+  };
+
+  // Produce an array that contains the union: each distinct element from all of
+  // the passed-in arrays.
+  _.union = function() {
+    return _.uniq(_.flatten(arguments));
+  };
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays. (Aliased as "intersect" for back-compat.)
+  _.intersection = _.intersect = function(array) {
+    var rest = slice.call(arguments, 1);
+    return _.filter(_.uniq(array), function(item) {
+      return _.every(rest, function(other) {
+        return _.indexOf(other, item) >= 0;
+      });
+    });
+  };
+
+  // Take the difference between one array and another.
+  // Only the elements present in just the first array will remain.
+  _.difference = function(array, other) {
+    return _.filter(array, function(value){ return !_.include(other, value); });
+  };
+
+  // Zip together multiple lists into a single array -- elements that share
+  // an index go together.
+  _.zip = function() {
+    var args = slice.call(arguments);
+    var length = _.max(_.pluck(args, 'length'));
+    var results = new Array(length);
+    for (var i = 0; i < length; i++) results[i] = _.pluck(args, "" + i);
+    return results;
+  };
+
+  // If the browser doesn't supply us with indexOf (I'm looking at you, **MSIE**),
+  // we need this function. Return the position of the first occurrence of an
+  // item in an array, or -1 if the item is not included in the array.
+  // Delegates to **ECMAScript 5**'s native `indexOf` if available.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  _.indexOf = function(array, item, isSorted) {
+    if (array == null) return -1;
+    var i, l;
+    if (isSorted) {
+      i = _.sortedIndex(array, item);
+      return array[i] === item ? i : -1;
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+    for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
+    return -1;
+  };
+
+
+  // Delegates to **ECMAScript 5**'s native `lastIndexOf` if available.
+  _.lastIndexOf = function(array, item) {
+    if (array == null) return -1;
+    if (nativeLastIndexOf && array.lastIndexOf === nativeLastIndexOf) return array.lastIndexOf(item);
+    var i = array.length;
+    while (i--) if (array[i] === item) return i;
+    return -1;
+  };
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  _.range = function(start, stop, step) {
+    if (arguments.length <= 1) {
+      stop = start || 0;
+      start = 0;
+    }
+    step = arguments[2] || 1;
+
+    var len = Math.max(Math.ceil((stop - start) / step), 0);
+    var idx = 0;
+    var range = new Array(len);
+
+    while(idx < len) {
+      range[idx++] = start;
+      start += step;
+    }
+
+    return range;
+  };
+
+  // Function (ahem) Functions
+  // ------------------
+
+  // Create a function bound to a given object (assigning `this`, and arguments,
+  // optionally). Binding with arguments is also known as `curry`.
+  // Delegates to **ECMAScript 5**'s native `Function.bind` if available.
+  // We check for `func.bind` first, to fail fast when `func` is undefined.
+  _.bind = function(func, obj) {
+    if (func.bind === nativeBind && nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
+    var args = slice.call(arguments, 2);
+    return function() {
+      return func.apply(obj, args.concat(slice.call(arguments)));
+    };
+  };
+
+  // Bind all of an object's methods to that object. Useful for ensuring that
+  // all callbacks defined on an object belong to it.
+  _.bindAll = function(obj) {
+    var funcs = slice.call(arguments, 1);
+    if (funcs.length == 0) funcs = _.functions(obj);
+    each(funcs, function(f) { obj[f] = _.bind(obj[f], obj); });
+    return obj;
+  };
+
+  // Memoize an expensive function by storing its results.
+  _.memoize = function(func, hasher) {
+    var memo = {};
+    hasher || (hasher = _.identity);
+    return function() {
+      var key = hasher.apply(this, arguments);
+      return hasOwnProperty.call(memo, key) ? memo[key] : (memo[key] = func.apply(this, arguments));
+    };
+  };
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  _.delay = function(func, wait) {
+    var args = slice.call(arguments, 2);
+    return setTimeout(function(){ return func.apply(func, args); }, wait);
+  };
+
+  // Defers a function, scheduling it to run after the current call stack has
+  // cleared.
+  _.defer = function(func) {
+    return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
+  };
+
+  // Internal function used to implement `_.throttle` and `_.debounce`.
+  var limit = function(func, wait, debounce) {
+    var timeout;
+    return function() {
+      var context = this, args = arguments;
+      var throttler = function() {
+        timeout = null;
+        func.apply(context, args);
+      };
+      if (debounce) clearTimeout(timeout);
+      if (debounce || !timeout) timeout = setTimeout(throttler, wait);
+    };
+  };
+
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time.
+  _.throttle = function(func, wait) {
+    return limit(func, wait, false);
+  };
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds.
+  _.debounce = function(func, wait) {
+    return limit(func, wait, true);
+  };
+
+  // Returns a function that will be executed at most one time, no matter how
+  // often you call it. Useful for lazy initialization.
+  _.once = function(func) {
+    var ran = false, memo;
+    return function() {
+      if (ran) return memo;
+      ran = true;
+      return memo = func.apply(this, arguments);
+    };
+  };
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  _.wrap = function(func, wrapper) {
+    return function() {
+      var args = [func].concat(slice.call(arguments));
+      return wrapper.apply(this, args);
+    };
+  };
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  _.compose = function() {
+    var funcs = slice.call(arguments);
+    return function() {
+      var args = slice.call(arguments);
+      for (var i = funcs.length - 1; i >= 0; i--) {
+        args = [funcs[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  };
+
+  // Returns a function that will only be executed after being called N times.
+  _.after = function(times, func) {
+    return function() {
+      if (--times < 1) { return func.apply(this, arguments); }
+    };
+  };
+
+
+  // Object Functions
+  // ----------------
+
+  // Retrieve the names of an object's properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`
+  _.keys = nativeKeys || function(obj) {
+    if (obj !== Object(obj)) throw new TypeError('Invalid object');
+    var keys = [];
+    for (var key in obj) if (hasOwnProperty.call(obj, key)) keys[keys.length] = key;
+    return keys;
+  };
+
+  // Retrieve the values of an object's properties.
+  _.values = function(obj) {
+    return _.map(obj, _.identity);
+  };
+
+  // Return a sorted list of the function names available on the object.
+  // Aliased as `methods`
+  _.functions = _.methods = function(obj) {
+    var names = [];
+    for (var key in obj) {
+      if (_.isFunction(obj[key])) names.push(key);
+    }
+    return names.sort();
+  };
+
+  // Extend a given object with all the properties in passed-in object(s).
+  _.extend = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      for (var prop in source) {
+        if (source[prop] !== void 0) obj[prop] = source[prop];
+      }
+    });
+    return obj;
+  };
+
+  // Fill in a given object with default properties.
+  _.defaults = function(obj) {
+    each(slice.call(arguments, 1), function(source) {
+      for (var prop in source) {
+        if (obj[prop] == null) obj[prop] = source[prop];
+      }
+    });
+    return obj;
+  };
+
+  // Create a (shallow-cloned) duplicate of an object.
+  _.clone = function(obj) {
+    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
+  };
+
+  // Invokes interceptor with the obj, and then returns obj.
+  // The primary purpose of this method is to "tap into" a method chain, in
+  // order to perform operations on intermediate results within the chain.
+  _.tap = function(obj, interceptor) {
+    interceptor(obj);
+    return obj;
+  };
+
+  // Perform a deep comparison to check if two objects are equal.
+  _.isEqual = function(a, b) {
+    // Check object identity.
+    if (a === b) return true;
+    // Different types?
+    var atype = typeof(a), btype = typeof(b);
+    if (atype != btype) return false;
+    // Basic equality test (watch out for coercions).
+    if (a == b) return true;
+    // One is falsy and the other truthy.
+    if ((!a && b) || (a && !b)) return false;
+    // Unwrap any wrapped objects.
+    if (a._chain) a = a._wrapped;
+    if (b._chain) b = b._wrapped;
+    // One of them implements an isEqual()?
+    if (a.isEqual) return a.isEqual(b);
+    if (b.isEqual) return b.isEqual(a);
+    // Check dates' integer values.
+    if (_.isDate(a) && _.isDate(b)) return a.getTime() === b.getTime();
+    // Both are NaN?
+    if (_.isNaN(a) && _.isNaN(b)) return false;
+    // Compare regular expressions.
+    if (_.isRegExp(a) && _.isRegExp(b))
+      return a.source     === b.source &&
+             a.global     === b.global &&
+             a.ignoreCase === b.ignoreCase &&
+             a.multiline  === b.multiline;
+    // If a is not an object by this point, we can't handle it.
+    if (atype !== 'object') return false;
+    // Check for different array lengths before comparing contents.
+    if (a.length && (a.length !== b.length)) return false;
+    // Nothing else worked, deep compare the contents.
+    var aKeys = _.keys(a), bKeys = _.keys(b);
+    // Different object sizes?
+    if (aKeys.length != bKeys.length) return false;
+    // Recursive comparison of contents.
+    for (var key in a) if (!(key in b) || !_.isEqual(a[key], b[key])) return false;
+    return true;
+  };
+
+  // Is a given array or object empty?
+  _.isEmpty = function(obj) {
+    if (_.isArray(obj) || _.isString(obj)) return obj.length === 0;
+    for (var key in obj) if (hasOwnProperty.call(obj, key)) return false;
+    return true;
+  };
+
+  // Is a given value a DOM element?
+  _.isElement = function(obj) {
+    return !!(obj && obj.nodeType == 1);
+  };
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  _.isArray = nativeIsArray || function(obj) {
+    return toString.call(obj) === '[object Array]';
+  };
+
+  // Is a given variable an object?
+  _.isObject = function(obj) {
+    return obj === Object(obj);
+  };
+
+  // Is a given variable an arguments object?
+  _.isArguments = function(obj) {
+    return !!(obj && hasOwnProperty.call(obj, 'callee'));
+  };
+
+  // Is a given value a function?
+  _.isFunction = function(obj) {
+    return !!(obj && obj.constructor && obj.call && obj.apply);
+  };
+
+  // Is a given value a string?
+  _.isString = function(obj) {
+    return !!(obj === '' || (obj && obj.charCodeAt && obj.substr));
+  };
+
+  // Is a given value a number?
+  _.isNumber = function(obj) {
+    return !!(obj === 0 || (obj && obj.toExponential && obj.toFixed));
+  };
+
+  // Is the given value `NaN`? `NaN` happens to be the only value in JavaScript
+  // that does not equal itself.
+  _.isNaN = function(obj) {
+    return obj !== obj;
+  };
+
+  // Is a given value a boolean?
+  _.isBoolean = function(obj) {
+    return obj === true || obj === false;
+  };
+
+  // Is a given value a date?
+  _.isDate = function(obj) {
+    return !!(obj && obj.getTimezoneOffset && obj.setUTCFullYear);
+  };
+
+  // Is the given value a regular expression?
+  _.isRegExp = function(obj) {
+    return !!(obj && obj.test && obj.exec && (obj.ignoreCase || obj.ignoreCase === false));
+  };
+
+  // Is a given value equal to null?
+  _.isNull = function(obj) {
+    return obj === null;
+  };
+
+  // Is a given variable undefined?
+  _.isUndefined = function(obj) {
+    return obj === void 0;
+  };
+
+  // Utility Functions
+  // -----------------
+
+  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
+  // previous owner. Returns a reference to the Underscore object.
+  _.noConflict = function() {
+    root._ = previousUnderscore;
+    return this;
+  };
+
+  // Keep the identity function around for default iterators.
+  _.identity = function(value) {
+    return value;
+  };
+
+  // Run a function **n** times.
+  _.times = function (n, iterator, context) {
+    for (var i = 0; i < n; i++) iterator.call(context, i);
+  };
+
+  // Add your own custom functions to the Underscore object, ensuring that
+  // they're correctly added to the OOP wrapper as well.
+  _.mixin = function(obj) {
+    each(_.functions(obj), function(name){
+      addToWrapper(name, _[name] = obj[name]);
+    });
+  };
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  _.uniqueId = function(prefix) {
+    var id = idCounter++;
+    return prefix ? prefix + id : id;
+  };
+
+  // By default, Underscore uses ERB-style template delimiters, change the
+  // following template settings to use alternative delimiters.
+  _.templateSettings = {
+    evaluate    : /<%([\s\S]+?)%>/g,
+    interpolate : /<%=([\s\S]+?)%>/g
+  };
+
+  // JavaScript micro-templating, similar to John Resig's implementation.
+  // Underscore templating handles arbitrary delimiters, preserves whitespace,
+  // and correctly escapes quotes within interpolated code.
+  _.template = function(str, data) {
+    var c  = _.templateSettings;
+    var tmpl = 'var __p=[],print=function(){__p.push.apply(__p,arguments);};' +
+      'with(obj||{}){__p.push(\'' +
+      str.replace(/\\/g, '\\\\')
+         .replace(/'/g, "\\'")
+         .replace(c.interpolate, function(match, code) {
+           return "'," + code.replace(/\\'/g, "'") + ",'";
+         })
+         .replace(c.evaluate || null, function(match, code) {
+           return "');" + code.replace(/\\'/g, "'")
+                              .replace(/[\r\n\t]/g, ' ') + "__p.push('";
+         })
+         .replace(/\r/g, '\\r')
+         .replace(/\n/g, '\\n')
+         .replace(/\t/g, '\\t')
+         + "');}return __p.join('');";
+    var func = new Function('obj', tmpl);
+    return data ? func(data) : func;
+  };
+
+  // The OOP Wrapper
+  // ---------------
+
+  // If Underscore is called as a function, it returns a wrapped object that
+  // can be used OO-style. This wrapper holds altered versions of all the
+  // underscore functions. Wrapped objects may be chained.
+  var wrapper = function(obj) { this._wrapped = obj; };
+
+  // Expose `wrapper.prototype` as `_.prototype`
+  _.prototype = wrapper.prototype;
+
+  // Helper function to continue chaining intermediate results.
+  var result = function(obj, chain) {
+    return chain ? _(obj).chain() : obj;
+  };
+
+  // A method to easily add functions to the OOP wrapper.
+  var addToWrapper = function(name, func) {
+    wrapper.prototype[name] = function() {
+      var args = slice.call(arguments);
+      unshift.call(args, this._wrapped);
+      return result(func.apply(_, args), this._chain);
+    };
+  };
+
+  // Add all of the Underscore functions to the wrapper object.
+  _.mixin(_);
+
+  // Add all mutator Array functions to the wrapper.
+  each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
+    var method = ArrayProto[name];
+    wrapper.prototype[name] = function() {
+      method.apply(this._wrapped, arguments);
+      return result(this._wrapped, this._chain);
+    };
+  });
+
+  // Add all accessor Array functions to the wrapper.
+  each(['concat', 'join', 'slice'], function(name) {
+    var method = ArrayProto[name];
+    wrapper.prototype[name] = function() {
+      return result(method.apply(this._wrapped, arguments), this._chain);
+    };
+  });
+
+  // Start chaining a wrapped Underscore object.
+  wrapper.prototype.chain = function() {
+    this._chain = true;
+    return this;
+  };
+
+  // Extracts the result from a wrapped and chained object.
+  wrapper.prototype.value = function() {
+    return this._wrapped;
+  };
+
+})();
 /*!
   * bean.js - copyright Jacob Thornton 2011
   * https://github.com/fat/bean
@@ -6,34 +845,501 @@
   * dean edwards: http://dean.edwards.name/
   * dperini: https://github.com/dperini/nwevents
   * the entire mootools team: github.com/mootools/mootools-core
-  *//*global module:true, define:true*/
-!function(a,b,c){typeof module!="undefined"?module.exports=c(a,b):typeof define=="function"&&typeof define.amd=="object"?define(c):b[a]=c(a,b)}("bean",this,function(a,b){var c=window,d=b[a],e=/over|out/,f=/[^\.]*(?=\..*)\.|.*/,g=/\..*/,h="addEventListener",i="attachEvent",j="removeEventListener",k="detachEvent",l=document||{},m=l.documentElement||{},n=m[h],o=n?h:i,p=Array.prototype.slice,q=/click|mouse|menu|drag|drop/i,r=/^touch|^gesture/i,s={one:1},t=function(a,b,c){for(c=0;c<b.length;c++)a[b[c]]=1;return a}({},("click dblclick mouseup mousedown contextmenu mousewheel DOMMouseScroll mouseover mouseout mousemove selectstart selectend keydown keypress keyup orientationchange focus blur change reset select submit load unload beforeunload resize move DOMContentLoaded readystatechange error abort scroll "+(n?"show input invalid touchstart touchmove touchend touchcancel gesturestart gesturechange gestureend message readystatechange pageshow pagehide popstate hashchange offline online afterprint beforeprint dragstart dragenter dragover dragleave drag drop dragend loadstart progress suspend emptied stalled loadmetadata loadeddata canplay canplaythrough playing waiting seeking seeked ended durationchange timeupdate play pause ratechange volumechange cuechange checking noupdate downloading cached updateready obsolete ":"")).split(" ")),u=function(){function a(a,b){while((b=b.parentNode)!==null)if(b===a)return!0;return!1}function b(b){var c=b.relatedTarget;return c?c!==this&&c.prefix!=="xul"&&!/document/.test(this.toString())&&!a(this,c):c===null}return{mouseenter:{base:"mouseover",condition:b},mouseleave:{base:"mouseout",condition:b},mousewheel:{base:/Firefox/.test(navigator.userAgent)?"DOMMouseScroll":"mousewheel"}}}(),v=function(){var a="altKey attrChange attrName bubbles cancelable ctrlKey currentTarget detail eventPhase getModifierState isTrusted metaKey relatedNode relatedTarget shiftKey srcElement target timeStamp type view which".split(" "),b=a.concat("button buttons clientX clientY dataTransfer fromElement offsetX offsetY pageX pageY screenX screenY toElement".split(" ")),c=a.concat("char charCode key keyCode".split(" ")),d=a.concat("touches targetTouches changedTouches scale rotation".split(" ")),f="preventDefault",g=function(a){return function(){a[f]?a[f]():a.returnValue=!1}},h="stopPropagation",i=function(a){return function(){a[h]?a[h]():a.cancelBubble=!0}},j=function(a){return function(){a[f](),a[h](),a.stopped=!0}},k=function(a,b,c){var d,e;for(d=c.length;d--;)e=c[d],!(e in b)&&e in a&&(b[e]=a[e])};return function(n,o){var p={originalEvent:n,isNative:o};if(!n)return p;var s,t=n.type,u=n.target||n.srcElement;p[f]=g(n),p[h]=i(n),p.stop=j(p),p.target=u&&u.nodeType===3?u.parentNode:u;if(o){if(t.indexOf("key")!==-1)s=c,p.keyCode=n.which||n.keyCode;else if(q.test(t)){s=b,p.rightClick=n.which===3||n.button===2,p.pos={x:0,y:0};if(n.pageX||n.pageY)p.clientX=n.pageX,p.clientY=n.pageY;else if(n.clientX||n.clientY)p.clientX=n.clientX+l.body.scrollLeft+m.scrollLeft,p.clientY=n.clientY+l.body.scrollTop+m.scrollTop;e.test(t)&&(p.relatedTarget=n.relatedTarget||n[(t==="mouseover"?"from":"to")+"Element"])}else r.test(t)&&(s=d);k(n,p,s||a)}return p}}(),w=function(a,b){return!n&&!b&&(a===l||a===c)?m:a},x=function(){function a(a,b,c,d,e){this.element=a,this.type=b,this.handler=c,this.original=d,this.namespaces=e,this.custom=u[b],this.isNative=t[b]&&a[o],this.eventType=n||this.isNative?b:"propertychange",this.customType=!n&&!this.isNative&&b,this.target=w(a,this.isNative),this.eventSupport=this.target[o]}return a.prototype={inNamespaces:function(a){var b,c;if(!a)return!0;if(!this.namespaces)return!1;for(b=a.length;b--;)for(c=this.namespaces.length;c--;)if(a[b]===this.namespaces[c])return!0;return!1},matches:function(a,b,c){return this.element===a&&(!b||this.original===b)&&(!c||this.handler===c)}},a}(),y=function(){var a={},b=function(c,d,e,f,g){if(!d||d==="*")for(var h in a)h.charAt(0)==="$"&&b(c,h.substr(1),e,f,g);else{var i=0,j,k=a["$"+d],l=c==="*";if(!k)return;for(j=k.length;i<j;i++)if(l||k[i].matches(c,e,f))if(!g(k[i],k,i,d))return}},c=function(b,c,d){var e,f=a["$"+c];if(f)for(e=f.length;e--;)if(f[e].matches(b,d,null))return!0;return!1},d=function(a,c,d){var e=[];return b(a,c,d,null,function(a){return e.push(a)}),e},e=function(b){return(a["$"+b.type]||(a["$"+b.type]=[])).push(b),b},f=function(c){b(c.element,c.type,null,c.handler,function(b,c,d){return c.splice(d,1),c.length===0&&delete a["$"+b.type],!1})},g=function(){var b,c=[];for(b in a)b.charAt(0)==="$"&&(c=c.concat(a[b]));return c};return{has:c,get:d,put:e,del:f,entries:g}}(),z=n?function(a,b,c,d){a[d?h:j](b,c,!1)}:function(a,b,c,d,e){e&&d&&a["_on"+e]===null&&(a["_on"+e]=0),a[d?i:k]("on"+b,c)},A=function(a,b,d){return function(e){return e=v(e||((this.ownerDocument||this.document||this).parentWindow||c).event,!0),b.apply(a,[e].concat(d))}},B=function(a,b,d,e,f,g){return function(h){if(e?e.apply(this,arguments):n?!0:h&&h.propertyName==="_on"+d||!h)h&&(h=v(h||((this.ownerDocument||this.document||this).parentWindow||c).event,g)),b.apply(a,h&&(!f||f.length===0)?arguments:p.call(arguments,h?0:1).concat(f))}},C=function(a,b,c,d,e){return function(){a(b,c,e),d.apply(this,arguments)}},D=function(a,b,c,d){var e,f,h,i=b&&b.replace(g,""),j=y.get(a,i,c);for(e=0,f=j.length;e<f;e++)j[e].inNamespaces(d)&&((h=j[e]).eventSupport&&z(h.target,h.eventType,h.handler,!1,h.type),y.del(h))},E=function(a,b,c,d,e){var h,i=b.replace(g,""),j=b.replace(f,"").split(".");if(y.has(a,i,c))return a;i==="unload"&&(c=C(D,a,i,c,d)),u[i]&&(u[i].condition&&(c=B(a,c,i,u[i].condition,!0)),i=u[i].base||i),h=y.put(new x(a,i,c,d,j[0]&&j)),h.handler=h.isNative?A(a,h.handler,e):B(a,h.handler,i,!1,e,!1),h.eventSupport&&z(h.target,h.eventType,h.handler,!0,h.customType)},F=function(a,b,c){return function(d){var e,f,g=typeof a=="string"?c(a,this):a;for(e=d.target;e&&e!==this;e=e.parentNode)for(f=g.length;f--;)if(g[f]===e)return b.apply(e,arguments)}},G=function(a,b,c){var d,e,h,i,j,k=D,l=b&&typeof b=="string";if(l&&b.indexOf(" ")>0){b=b.split(" ");for(j=b.length;j--;)G(a,b[j],c);return a}h=l&&b.replace(g,""),h&&u[h]&&(h=u[h].type);if(!b||l){if(i=l&&b.replace(f,""))i=i.split(".");k(a,h,c,i)}else if(typeof b=="function")k(a,null,b);else for(d in b)b.hasOwnProperty(d)&&G(a,d,b[d]);return a},H=function(a,b,c,d,e){var f,g,h,i,j=c,k=c&&typeof c=="string";if(b&&!c&&typeof b=="object")for(f in b)b.hasOwnProperty(f)&&H.apply(this,[a,f,b[f]]);else{i=arguments.length>3?p.call(arguments,3):[],g=(k?c:b).split(" "),k&&(c=F(b,j=d,e))&&(i=p.call(i,1)),this===s&&(c=C(G,a,b,c,j));for(h=g.length;h--;)E(a,g[h],c,j,i)}return a},I=function(){return H.apply(s,arguments)},J=n?function(a,b,d){var e=l.createEvent(a?"HTMLEvents":"UIEvents");e[a?"initEvent":"initUIEvent"](b,!0,!0,c,1),d.dispatchEvent(e)}:function(a,b,c){c=w(c,a),a?c.fireEvent("on"+b,l.createEventObject()):c["_on"+b]++},K=function(a,b,c){var d,e,h,i,j,k=b.split(" ");for(d=k.length;d--;){b=k[d].replace(g,"");if(i=k[d].replace(f,""))i=i.split(".");if(!i&&!c&&a[o])J(t[b],b,a);else{j=y.get(a,b),c=[!1].concat(c);for(e=0,h=j.length;e<h;e++)j[e].inNamespaces(i)&&j[e].handler.apply(a,c)}}return a},L=function(a,b,c){var d=0,e=y.get(b,c),f=e.length;for(;d<f;d++)e[d].original&&H(a,e[d].type,e[d].original);return a},M={add:H,one:I,remove:G,clone:L,fire:K,noConflict:function(){return b[a]=d,this}};if(c[i]){var N=function(){var a,b=y.entries();for(a in b)b[a].type&&b[a].type!=="unload"&&G(b[a].element,b[a].type);c[k]("onunload",N),c.CollectGarbage&&c.CollectGarbage()};c[i]("onunload",N)}return M});
-// Underscore.js 1.1.6
-// (c) 2011 Jeremy Ashkenas, DocumentCloud Inc.
-// Underscore is freely distributable under the MIT license.
-// Portions of Underscore are inspired or borrowed from Prototype,
-// Oliver Steele's Functional, and John Resig's Micro-Templating.
-// For all details and documentation:
-// http://documentcloud.github.com/underscore
-(function(){var p=this,C=p._,m={},i=Array.prototype,n=Object.prototype,f=i.slice,D=i.unshift,E=n.toString,l=n.hasOwnProperty,s=i.forEach,t=i.map,u=i.reduce,v=i.reduceRight,w=i.filter,x=i.every,y=i.some,o=i.indexOf,z=i.lastIndexOf;n=Array.isArray;var F=Object.keys,q=Function.prototype.bind,b=function(a){return new j(a)};typeof module!=="undefined"&&module.exports?(module.exports=b,b._=b):p._=b;b.VERSION="1.1.6";var h=b.each=b.forEach=function(a,c,d){if(a!=null)if(s&&a.forEach===s)a.forEach(c,d);else if(b.isNumber(a.length))for(var e=
-0,k=a.length;e<k;e++){if(c.call(d,a[e],e,a)===m)break}else for(e in a)if(l.call(a,e)&&c.call(d,a[e],e,a)===m)break};b.map=function(a,c,b){var e=[];if(a==null)return e;if(t&&a.map===t)return a.map(c,b);h(a,function(a,g,G){e[e.length]=c.call(b,a,g,G)});return e};b.reduce=b.foldl=b.inject=function(a,c,d,e){var k=d!==void 0;a==null&&(a=[]);if(u&&a.reduce===u)return e&&(c=b.bind(c,e)),k?a.reduce(c,d):a.reduce(c);h(a,function(a,b,f){!k&&b===0?(d=a,k=!0):d=c.call(e,d,a,b,f)});if(!k)throw new TypeError("Reduce of empty array with no initial value");
-return d};b.reduceRight=b.foldr=function(a,c,d,e){a==null&&(a=[]);if(v&&a.reduceRight===v)return e&&(c=b.bind(c,e)),d!==void 0?a.reduceRight(c,d):a.reduceRight(c);a=(b.isArray(a)?a.slice():b.toArray(a)).reverse();return b.reduce(a,c,d,e)};b.find=b.detect=function(a,c,b){var e;A(a,function(a,g,f){if(c.call(b,a,g,f))return e=a,!0});return e};b.filter=b.select=function(a,c,b){var e=[];if(a==null)return e;if(w&&a.filter===w)return a.filter(c,b);h(a,function(a,g,f){c.call(b,a,g,f)&&(e[e.length]=a)});return e};
-b.reject=function(a,c,b){var e=[];if(a==null)return e;h(a,function(a,g,f){c.call(b,a,g,f)||(e[e.length]=a)});return e};b.every=b.all=function(a,c,b){var e=!0;if(a==null)return e;if(x&&a.every===x)return a.every(c,b);h(a,function(a,g,f){if(!(e=e&&c.call(b,a,g,f)))return m});return e};var A=b.some=b.any=function(a,c,d){c||(c=b.identity);var e=!1;if(a==null)return e;if(y&&a.some===y)return a.some(c,d);h(a,function(a,b,f){if(e=c.call(d,a,b,f))return m});return e};b.include=b.contains=function(a,c){var b=
-!1;if(a==null)return b;if(o&&a.indexOf===o)return a.indexOf(c)!=-1;A(a,function(a){if(b=a===c)return!0});return b};b.invoke=function(a,c){var d=f.call(arguments,2);return b.map(a,function(a){return(c.call?c||a:a[c]).apply(a,d)})};b.pluck=function(a,c){return b.map(a,function(a){return a[c]})};b.max=function(a,c,d){if(!c&&b.isArray(a))return Math.max.apply(Math,a);var e={computed:-Infinity};h(a,function(a,b,f){b=c?c.call(d,a,b,f):a;b>=e.computed&&(e={value:a,computed:b})});return e.value};b.min=function(a,
-c,d){if(!c&&b.isArray(a))return Math.min.apply(Math,a);var e={computed:Infinity};h(a,function(a,b,f){b=c?c.call(d,a,b,f):a;b<e.computed&&(e={value:a,computed:b})});return e.value};b.sortBy=function(a,c,d){return b.pluck(b.map(a,function(a,b,f){return{value:a,criteria:c.call(d,a,b,f)}}).sort(function(a,b){var c=a.criteria,d=b.criteria;return c<d?-1:c>d?1:0}),"value")};b.sortedIndex=function(a,c,d){d||(d=b.identity);for(var e=0,f=a.length;e<f;){var g=e+f>>1;d(a[g])<d(c)?e=g+1:f=g}return e};b.toArray=
-function(a){if(!a)return[];if(a.toArray)return a.toArray();if(b.isArray(a))return a;if(b.isArguments(a))return f.call(a);return b.values(a)};b.size=function(a){return b.toArray(a).length};b.first=b.head=function(a,b,d){return b!=null&&!d?f.call(a,0,b):a[0]};b.rest=b.tail=function(a,b,d){return f.call(a,b==null||d?1:b)};b.last=function(a){return a[a.length-1]};b.compact=function(a){return b.filter(a,function(a){return!!a})};b.flatten=function(a){return b.reduce(a,function(a,d){if(b.isArray(d))return a.concat(b.flatten(d));
-a[a.length]=d;return a},[])};b.without=function(a){var c=f.call(arguments,1);return b.filter(a,function(a){return!b.include(c,a)})};b.uniq=b.unique=function(a,c){return b.reduce(a,function(a,e,f){if(0==f||(c===!0?b.last(a)!=e:!b.include(a,e)))a[a.length]=e;return a},[])};b.intersect=function(a){var c=f.call(arguments,1);return b.filter(b.uniq(a),function(a){return b.every(c,function(c){return b.indexOf(c,a)>=0})})};b.zip=function(){for(var a=f.call(arguments),c=b.max(b.pluck(a,"length")),d=Array(c),
-e=0;e<c;e++)d[e]=b.pluck(a,""+e);return d};b.indexOf=function(a,c,d){if(a==null)return-1;var e;if(d)return d=b.sortedIndex(a,c),a[d]===c?d:-1;if(o&&a.indexOf===o)return a.indexOf(c);d=0;for(e=a.length;d<e;d++)if(a[d]===c)return d;return-1};b.lastIndexOf=function(a,b){if(a==null)return-1;if(z&&a.lastIndexOf===z)return a.lastIndexOf(b);for(var d=a.length;d--;)if(a[d]===b)return d;return-1};b.range=function(a,b,d){arguments.length<=1&&(b=a||0,a=0);d=arguments[2]||1;for(var e=Math.max(Math.ceil((b-a)/
-d),0),f=0,g=Array(e);f<e;)g[f++]=a,a+=d;return g};b.bind=function(a,b){if(a.bind===q&&q)return q.apply(a,f.call(arguments,1));var d=f.call(arguments,2);return function(){return a.apply(b,d.concat(f.call(arguments)))}};b.bindAll=function(a){var c=f.call(arguments,1);c.length==0&&(c=b.functions(a));h(c,function(c){a[c]=b.bind(a[c],a)});return a};b.memoize=function(a,c){var d={};c||(c=b.identity);return function(){var b=c.apply(this,arguments);return l.call(d,b)?d[b]:d[b]=a.apply(this,arguments)}};b.delay=
-function(a,b){var d=f.call(arguments,2);return setTimeout(function(){return a.apply(a,d)},b)};b.defer=function(a){return b.delay.apply(b,[a,1].concat(f.call(arguments,1)))};var B=function(a,b,d){var e;return function(){var f=this,g=arguments,h=function(){e=null;a.apply(f,g)};d&&clearTimeout(e);if(d||!e)e=setTimeout(h,b)}};b.throttle=function(a,b){return B(a,b,!1)};b.debounce=function(a,b){return B(a,b,!0)};b.once=function(a){var b=!1,d;return function(){if(b)return d;b=!0;return d=a.apply(this,arguments)}};
-b.wrap=function(a,b){return function(){var d=[a].concat(f.call(arguments));return b.apply(this,d)}};b.compose=function(){var a=f.call(arguments);return function(){for(var b=f.call(arguments),d=a.length-1;d>=0;d--)b=[a[d].apply(this,b)];return b[0]}};b.after=function(a,b){return function(){if(--a<1)return b.apply(this,arguments)}};b.keys=F||function(a){if(a!==Object(a))throw new TypeError("Invalid object");var b=[],d;for(d in a)l.call(a,d)&&(b[b.length]=d);return b};b.values=function(a){return b.map(a,
-b.identity)};b.functions=b.methods=function(a){return b.filter(b.keys(a),function(c){return b.isFunction(a[c])}).sort()};b.extend=function(a){h(f.call(arguments,1),function(b){for(var d in b)b[d]!==void 0&&(a[d]=b[d])});return a};b.defaults=function(a){h(f.call(arguments,1),function(b){for(var d in b)a[d]==null&&(a[d]=b[d])});return a};b.clone=function(a){return b.isArray(a)?a.slice():b.extend({},a)};b.tap=function(a,b){b(a);return a};b.isEqual=function(a,c){if(a===c)return!0;var d=typeof a;if(d!=
-typeof c)return!1;if(a==c)return!0;if(!a&&c||a&&!c)return!1;if(a._chain)a=a._wrapped;if(c._chain)c=c._wrapped;if(a.isEqual)return a.isEqual(c);if(b.isDate(a)&&b.isDate(c))return a.getTime()===c.getTime();if(b.isNaN(a)&&b.isNaN(c))return!1;if(b.isRegExp(a)&&b.isRegExp(c))return a.source===c.source&&a.global===c.global&&a.ignoreCase===c.ignoreCase&&a.multiline===c.multiline;if(d!=="object")return!1;if(a.length&&a.length!==c.length)return!1;d=b.keys(a);var e=b.keys(c);if(d.length!=e.length)return!1;
-for(var f in a)if(!(f in c)||!b.isEqual(a[f],c[f]))return!1;return!0};b.isEmpty=function(a){if(b.isArray(a)||b.isString(a))return a.length===0;for(var c in a)if(l.call(a,c))return!1;return!0};b.isElement=function(a){return!!(a&&a.nodeType==1)};b.isArray=n||function(a){return E.call(a)==="[object Array]"};b.isArguments=function(a){return!(!a||!l.call(a,"callee"))};b.isFunction=function(a){return!(!a||!a.constructor||!a.call||!a.apply)};b.isString=function(a){return!!(a===""||a&&a.charCodeAt&&a.substr)};
-b.isNumber=function(a){return!!(a===0||a&&a.toExponential&&a.toFixed)};b.isNaN=function(a){return a!==a};b.isBoolean=function(a){return a===!0||a===!1};b.isDate=function(a){return!(!a||!a.getTimezoneOffset||!a.setUTCFullYear)};b.isRegExp=function(a){return!(!a||!a.test||!a.exec||!(a.ignoreCase||a.ignoreCase===!1))};b.isNull=function(a){return a===null};b.isUndefined=function(a){return a===void 0};b.noConflict=function(){p._=C;return this};b.identity=function(a){return a};b.times=function(a,b,d){for(var e=
-0;e<a;e++)b.call(d,e)};b.mixin=function(a){h(b.functions(a),function(c){H(c,b[c]=a[c])})};var I=0;b.uniqueId=function(a){var b=I++;return a?a+b:b};b.templateSettings={evaluate:/<%([\s\S]+?)%>/g,interpolate:/<%=([\s\S]+?)%>/g};b.template=function(a,c){var d=b.templateSettings;d="var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('"+a.replace(/\\/g,"\\\\").replace(/'/g,"\\'").replace(d.interpolate,function(a,b){return"',"+b.replace(/\\'/g,"'")+",'"}).replace(d.evaluate||
-null,function(a,b){return"');"+b.replace(/\\'/g,"'").replace(/[\r\n\t]/g," ")+"__p.push('"}).replace(/\r/g,"\\r").replace(/\n/g,"\\n").replace(/\t/g,"\\t")+"');}return __p.join('');";d=new Function("obj",d);return c?d(c):d};var j=function(a){this._wrapped=a};b.prototype=j.prototype;var r=function(a,c){return c?b(a).chain():a},H=function(a,c){j.prototype[a]=function(){var a=f.call(arguments);D.call(a,this._wrapped);return r(c.apply(b,a),this._chain)}};b.mixin(b);h(["pop","push","reverse","shift","sort",
-"splice","unshift"],function(a){var b=i[a];j.prototype[a]=function(){b.apply(this._wrapped,arguments);return r(this._wrapped,this._chain)}});h(["concat","join","slice"],function(a){var b=i[a];j.prototype[a]=function(){return r(b.apply(this._wrapped,arguments),this._chain)}});j.prototype.chain=function(){this._chain=!0;return this};j.prototype.value=function(){return this._wrapped}})();
+  */
+/*global module:true, define:true*/
+!function (name, context, definition) {
+  if (typeof module !== 'undefined') module.exports = definition(name, context);
+  else if (typeof define === 'function' && typeof define.amd  === 'object') define(definition);
+  else context[name] = definition(name, context);
+}('bean', this, function (name, context) {
+  var win = window
+    , old = context[name]
+    , overOut = /over|out/
+    , namespaceRegex = /[^\.]*(?=\..*)\.|.*/
+    , nameRegex = /\..*/
+    , addEvent = 'addEventListener'
+    , attachEvent = 'attachEvent'
+    , removeEvent = 'removeEventListener'
+    , detachEvent = 'detachEvent'
+    , doc = document || {}
+    , root = doc.documentElement || {}
+    , W3C_MODEL = root[addEvent]
+    , eventSupport = W3C_MODEL ? addEvent : attachEvent
+    , slice = Array.prototype.slice
+    , mouseTypeRegex = /click|mouse|menu|drag|drop/i
+    , touchTypeRegex = /^touch|^gesture/i
+    , ONE = { one: 1 } // singleton for quick matching making add() do one()
+
+    , nativeEvents = (function (hash, events, i) {
+        for (i = 0; i < events.length; i++)
+          hash[events[i]] = 1
+        return hash
+      })({}, (
+          'click dblclick mouseup mousedown contextmenu ' +                  // mouse buttons
+          'mousewheel DOMMouseScroll ' +                                     // mouse wheel
+          'mouseover mouseout mousemove selectstart selectend ' +            // mouse movement
+          'keydown keypress keyup ' +                                        // keyboard
+          'orientationchange ' +                                             // mobile
+          'focus blur change reset select submit ' +                         // form elements
+          'load unload beforeunload resize move DOMContentLoaded readystatechange ' + // window
+          'error abort scroll ' +                                            // misc
+          (W3C_MODEL ? // element.fireEvent('onXYZ'... is not forgiving if we try to fire an event
+                       // that doesn't actually exist, so make sure we only do these on newer browsers
+            'show ' +                                                          // mouse buttons
+            'input invalid ' +                                                 // form elements
+            'touchstart touchmove touchend touchcancel ' +                     // touch
+            'gesturestart gesturechange gestureend ' +                         // gesture
+            'message readystatechange pageshow pagehide popstate ' +           // window
+            'hashchange offline online ' +                                     // window
+            'afterprint beforeprint ' +                                        // printing
+            'dragstart dragenter dragover dragleave drag drop dragend ' +      // dnd
+            'loadstart progress suspend emptied stalled loadmetadata ' +       // media
+            'loadeddata canplay canplaythrough playing waiting seeking ' +     // media
+            'seeked ended durationchange timeupdate play pause ratechange ' +  // media
+            'volumechange cuechange ' +                                        // media
+            'checking noupdate downloading cached updateready obsolete ' +     // appcache
+            '' : '')
+        ).split(' ')
+      )
+
+    , customEvents = (function () {
+        function isDescendant(parent, node) {
+          while ((node = node.parentNode) !== null) {
+            if (node === parent) return true
+          }
+          return false
+        }
+
+        function check(event) {
+          var related = event.relatedTarget
+          if (!related) return related === null
+          return (related !== this && related.prefix !== 'xul' && !/document/.test(this.toString()) && !isDescendant(this, related))
+        }
+
+        return {
+            mouseenter: { base: 'mouseover', condition: check }
+          , mouseleave: { base: 'mouseout', condition: check }
+          , mousewheel: { base: /Firefox/.test(navigator.userAgent) ? 'DOMMouseScroll' : 'mousewheel' }
+        }
+      })()
+
+    , fixEvent = (function () {
+        var commonProps = 'altKey attrChange attrName bubbles cancelable ctrlKey currentTarget detail eventPhase getModifierState isTrusted metaKey relatedNode relatedTarget shiftKey srcElement target timeStamp type view which'.split(' ')
+          , mouseProps = commonProps.concat('button buttons clientX clientY dataTransfer fromElement offsetX offsetY pageX pageY screenX screenY toElement'.split(' '))
+          , keyProps = commonProps.concat('char charCode key keyCode'.split(' '))
+          , touchProps = commonProps.concat('touches targetTouches changedTouches scale rotation'.split(' '))
+          , preventDefault = 'preventDefault'
+          , createPreventDefault = function (event) {
+              return function () {
+                if (event[preventDefault])
+                  event[preventDefault]()
+                else
+                  event.returnValue = false
+              }
+            }
+          , stopPropagation = 'stopPropagation'
+          , createStopPropagation = function (event) {
+              return function () {
+                if (event[stopPropagation])
+                  event[stopPropagation]()
+                else
+                  event.cancelBubble = true
+              }
+            }
+          , createStop = function (synEvent) {
+              return function () {
+                synEvent[preventDefault]()
+                synEvent[stopPropagation]()
+                synEvent.stopped = true
+              }
+            }
+          , copyProps = function (event, result, props) {
+              var i, p
+              for (i = props.length; i--;) {
+                p = props[i]
+                if (!(p in result) && p in event) result[p] = event[p]
+              }
+            }
+
+        return function (event, isNative) {
+          var result = { originalEvent: event, isNative: isNative }
+          if (!event)
+            return result
+
+          var props
+            , type = event.type
+            , target = event.target || event.srcElement
+
+          result[preventDefault] = createPreventDefault(event)
+          result[stopPropagation] = createStopPropagation(event)
+          result.stop = createStop(result)
+          result.target = target && target.nodeType === 3 ? target.parentNode : target
+
+          if (isNative) { // we only need basic augmentation on custom events, the rest is too expensive
+            if (type.indexOf('key') !== -1) {
+              props = keyProps
+              result.keyCode = event.which || event.keyCode
+            } else if (mouseTypeRegex.test(type)) {
+              props = mouseProps
+              result.rightClick = event.which === 3 || event.button === 2
+              result.pos = { x: 0, y: 0 }
+              if (event.pageX || event.pageY) {
+                result.clientX = event.pageX
+                result.clientY = event.pageY
+              } else if (event.clientX || event.clientY) {
+                result.clientX = event.clientX + doc.body.scrollLeft + root.scrollLeft
+                result.clientY = event.clientY + doc.body.scrollTop + root.scrollTop
+              }
+              if (overOut.test(type))
+                result.relatedTarget = event.relatedTarget || event[(type === 'mouseover' ? 'from' : 'to') + 'Element']
+            } else if (touchTypeRegex.test(type)) {
+              props = touchProps
+            }
+            copyProps(event, result, props || commonProps)
+          }
+          return result
+        }
+      })()
+
+      // if we're in old IE we can't do onpropertychange on doc or win so we use doc.documentElement for both
+    , targetElement = function (element, isNative) {
+        return !W3C_MODEL && !isNative && (element === doc || element === win) ? root : element
+      }
+
+      // we use one of these per listener, of any type
+    , RegEntry = (function () {
+        function entry(element, type, handler, original, namespaces) {
+          this.element = element
+          this.type = type
+          this.handler = handler
+          this.original = original
+          this.namespaces = namespaces
+          this.custom = customEvents[type]
+          this.isNative = nativeEvents[type] && element[eventSupport]
+          this.eventType = W3C_MODEL || this.isNative ? type : 'propertychange'
+          this.customType = !W3C_MODEL && !this.isNative && type
+          this.target = targetElement(element, this.isNative)
+          this.eventSupport = this.target[eventSupport]
+        }
+
+        entry.prototype = {
+            // given a list of namespaces, is our entry in any of them?
+            inNamespaces: function (checkNamespaces) {
+              var i, j
+              if (!checkNamespaces)
+                return true
+              if (!this.namespaces)
+                return false
+              for (i = checkNamespaces.length; i--;) {
+                for (j = this.namespaces.length; j--;) {
+                  if (checkNamespaces[i] === this.namespaces[j])
+                    return true
+                }
+              }
+              return false
+            }
+
+            // match by element, original fn (opt), handler fn (opt)
+          , matches: function (checkElement, checkOriginal, checkHandler) {
+              return this.element === checkElement &&
+                (!checkOriginal || this.original === checkOriginal) &&
+                (!checkHandler || this.handler === checkHandler)
+            }
+        }
+
+        return entry
+      })()
+
+    , registry = (function () {
+        // our map stores arrays by event type, just because it's better than storing
+        // everything in a single array. uses '$' as a prefix for the keys for safety
+        var map = {}
+
+          // generic functional search of our registry for matching listeners,
+          // `fn` returns false to break out of the loop
+          , forAll = function (element, type, original, handler, fn) {
+              if (!type || type === '*') {
+                // search the whole registry
+                for (var t in map) {
+                  if (t.charAt(0) === '$')
+                    forAll(element, t.substr(1), original, handler, fn)
+                }
+              } else {
+                var i = 0, l, list = map['$' + type], all = element === '*'
+                if (!list)
+                  return
+                for (l = list.length; i < l; i++) {
+                  if (all || list[i].matches(element, original, handler))
+                    if (!fn(list[i], list, i, type))
+                      return
+                }
+              }
+            }
+
+          , has = function (element, type, original) {
+              // we're not using forAll here simply because it's a bit slower and this
+              // needs to be fast
+              var i, list = map['$' + type]
+              if (list) {
+                for (i = list.length; i--;) {
+                  if (list[i].matches(element, original, null))
+                    return true
+                }
+              }
+              return false
+            }
+
+          , get = function (element, type, original) {
+              var entries = []
+              forAll(element, type, original, null, function (entry) { return entries.push(entry) })
+              return entries
+            }
+
+          , put = function (entry) {
+              (map['$' + entry.type] || (map['$' + entry.type] = [])).push(entry)
+              return entry
+            }
+
+          , del = function (entry) {
+              forAll(entry.element, entry.type, null, entry.handler, function (entry, list, i) {
+                list.splice(i, 1)
+                if (list.length === 0)
+                  delete map['$' + entry.type]
+                return false
+              })
+            }
+
+            // dump all entries, used for onunload
+          , entries = function () {
+              var t, entries = []
+              for (t in map) {
+                if (t.charAt(0) === '$')
+                  entries = entries.concat(map[t])
+              }
+              return entries
+            }
+
+        return { has: has, get: get, put: put, del: del, entries: entries }
+      })()
+
+      // add and remove listeners to DOM elements
+    , listener = W3C_MODEL ? function (element, type, fn, add) {
+        element[add ? addEvent : removeEvent](type, fn, false)
+      } : function (element, type, fn, add, custom) {
+        if (custom && add && element['_on' + custom] === null)
+          element['_on' + custom] = 0
+        element[add ? attachEvent : detachEvent]('on' + type, fn)
+      }
+
+    , nativeHandler = function (element, fn, args) {
+        return function (event) {
+          event = fixEvent(event || ((this.ownerDocument || this.document || this).parentWindow || win).event, true)
+          return fn.apply(element, [event].concat(args))
+        }
+      }
+
+    , customHandler = function (element, fn, type, condition, args, isNative) {
+        return function (event) {
+          if (condition ? condition.apply(this, arguments) : W3C_MODEL ? true : event && event.propertyName === '_on' + type || !event) {
+            if (event)
+              event = fixEvent(event || ((this.ownerDocument || this.document || this).parentWindow || win).event, isNative)
+            fn.apply(element, event && (!args || args.length === 0) ? arguments : slice.call(arguments, event ? 0 : 1).concat(args))
+          }
+        }
+      }
+
+    , once = function (rm, element, type, fn, originalFn) {
+        // wrap the handler in a handler that does a remove as well
+        return function () {
+          rm(element, type, originalFn)
+          fn.apply(this, arguments)
+        }
+      }
+
+    , removeListener = function (element, orgType, handler, namespaces) {
+        var i, l, entry
+          , type = (orgType && orgType.replace(nameRegex, ''))
+          , handlers = registry.get(element, type, handler)
+
+        for (i = 0, l = handlers.length; i < l; i++) {
+          if (handlers[i].inNamespaces(namespaces)) {
+            if ((entry = handlers[i]).eventSupport)
+              listener(entry.target, entry.eventType, entry.handler, false, entry.type)
+            // TODO: this is problematic, we have a registry.get() and registry.del() that
+            // both do registry searches so we waste cycles doing this. Needs to be rolled into
+            // a single registry.forAll(fn) that removes while finding, but the catch is that
+            // we'll be splicing the arrays that we're iterating over. Needs extra tests to
+            // make sure we don't screw it up. @rvagg
+            registry.del(entry)
+          }
+        }
+      }
+
+    , addListener = function (element, orgType, fn, originalFn, args) {
+        var entry
+          , type = orgType.replace(nameRegex, '')
+          , namespaces = orgType.replace(namespaceRegex, '').split('.')
+
+        if (registry.has(element, type, fn))
+          return element // no dupe
+        if (type === 'unload')
+          fn = once(removeListener, element, type, fn, originalFn) // self clean-up
+        if (customEvents[type]) {
+          if (customEvents[type].condition)
+            fn = customHandler(element, fn, type, customEvents[type].condition, true)
+          type = customEvents[type].base || type
+        }
+        entry = registry.put(new RegEntry(element, type, fn, originalFn, namespaces[0] && namespaces))
+        entry.handler = entry.isNative ?
+          nativeHandler(element, entry.handler, args) :
+          customHandler(element, entry.handler, type, false, args, false)
+        if (entry.eventSupport)
+          listener(entry.target, entry.eventType, entry.handler, true, entry.customType)
+      }
+
+    , del = function (selector, fn, $) {
+        return function (e) {
+          var target, i, array = typeof selector === 'string' ? $(selector, this) : selector
+          for (target = e.target; target && target !== this; target = target.parentNode) {
+            for (i = array.length; i--;) {
+              if (array[i] === target) {
+                return fn.apply(target, arguments)
+              }
+            }
+          }
+        }
+      }
+
+    , remove = function (element, typeSpec, fn) {
+        var k, m, type, namespaces, i
+          , rm = removeListener
+          , isString = typeSpec && typeof typeSpec === 'string'
+
+        if (isString && typeSpec.indexOf(' ') > 0) {
+          // remove(el, 't1 t2 t3', fn) or remove(el, 't1 t2 t3')
+          typeSpec = typeSpec.split(' ')
+          for (i = typeSpec.length; i--;)
+            remove(element, typeSpec[i], fn)
+          return element
+        }
+        type = isString && typeSpec.replace(nameRegex, '')
+        if (type && customEvents[type])
+          type = customEvents[type].type
+        if (!typeSpec || isString) {
+          // remove(el) or remove(el, t1.ns) or remove(el, .ns) or remove(el, .ns1.ns2.ns3)
+          if (namespaces = isString && typeSpec.replace(namespaceRegex, ''))
+            namespaces = namespaces.split('.')
+          rm(element, type, fn, namespaces)
+        } else if (typeof typeSpec === 'function') {
+          // remove(el, fn)
+          rm(element, null, typeSpec)
+        } else {
+          // remove(el, { t1: fn1, t2, fn2 })
+          for (k in typeSpec) {
+            if (typeSpec.hasOwnProperty(k))
+              remove(element, k, typeSpec[k])
+          }
+        }
+        return element
+      }
+
+    , add = function (element, events, fn, delfn, $) {
+        var type, types, i, args
+          , originalFn = fn
+          , isDel = fn && typeof fn === 'string'
+
+        if (events && !fn && typeof events === 'object') {
+          for (type in events) {
+            if (events.hasOwnProperty(type))
+              add.apply(this, [ element, type, events[type] ])
+          }
+        } else {
+          args = arguments.length > 3 ? slice.call(arguments, 3) : []
+          types = (isDel ? fn : events).split(' ')
+          isDel && (fn = del(events, (originalFn = delfn), $)) && (args = slice.call(args, 1))
+          // special case for one()
+          this === ONE && (fn = once(remove, element, events, fn, originalFn))
+          for (i = types.length; i--;) addListener(element, types[i], fn, originalFn, args)
+        }
+        return element
+      }
+
+    , one = function () {
+        return add.apply(ONE, arguments)
+      }
+
+    , fireListener = W3C_MODEL ? function (isNative, type, element) {
+        var evt = doc.createEvent(isNative ? 'HTMLEvents' : 'UIEvents')
+        evt[isNative ? 'initEvent' : 'initUIEvent'](type, true, true, win, 1)
+        element.dispatchEvent(evt)
+      } : function (isNative, type, element) {
+        element = targetElement(element, isNative)
+        // if not-native then we're using onpropertychange so we just increment a custom property
+        isNative ? element.fireEvent('on' + type, doc.createEventObject()) : element['_on' + type]++
+      }
+
+    , fire = function (element, type, args) {
+        var i, j, l, names, handlers
+          , types = type.split(' ')
+
+        for (i = types.length; i--;) {
+          type = types[i].replace(nameRegex, '')
+          if (names = types[i].replace(namespaceRegex, ''))
+            names = names.split('.')
+          if (!names && !args && element[eventSupport]) {
+            fireListener(nativeEvents[type], type, element)
+          } else {
+            // non-native event, either because of a namespace, arguments or a non DOM element
+            // iterate over all listeners and manually 'fire'
+            handlers = registry.get(element, type)
+            args = [false].concat(args)
+            for (j = 0, l = handlers.length; j < l; j++) {
+              if (handlers[j].inNamespaces(names))
+                handlers[j].handler.apply(element, args)
+            }
+          }
+        }
+        return element
+      }
+
+    , clone = function (element, from, type) {
+        var i = 0
+          , handlers = registry.get(from, type)
+          , l = handlers.length
+
+        for (;i < l; i++)
+          handlers[i].original && add(element, handlers[i].type, handlers[i].original)
+        return element
+      }
+
+    , bean = {
+          add: add
+        , one: one
+        , remove: remove
+        , clone: clone
+        , fire: fire
+        , noConflict: function () {
+            context[name] = old
+            return this
+          }
+      }
+
+  if (win[attachEvent]) {
+    // for IE, clean up on unload to avoid leaks
+    var cleanup = function () {
+      var i, entries = registry.entries()
+      for (i in entries) {
+        if (entries[i].type && entries[i].type !== 'unload')
+          remove(entries[i].element, entries[i].type)
+      }
+      win[detachEvent]('onunload', cleanup)
+      win.CollectGarbage && win.CollectGarbage()
+    }
+    win[attachEvent]('onunload', cleanup)
+  }
+
+  return bean
+});
 /**
  * Flotr2 (c) 2012 Carl Sutherland
  * MIT License
@@ -41,7 +1347,3971 @@ null,function(a,b){return"');"+b.replace(/\\'/g,"'").replace(/[\r\n\t]/g," ")+"_
  * Flotr: http://code.google.com/p/flotr/ (fork)
  * Flot: https://github.com/flot/flot (original fork)
  */
-(function(){var a=this,b=this.Flotr,c;c={_:_,bean:bean,isIphone:/iphone/i.test(navigator.userAgent),isIE:navigator.appVersion.indexOf("MSIE")!=-1?parseFloat(navigator.appVersion.split("MSIE")[1]):!1,graphTypes:{},plugins:{},addType:function(a,b){c.graphTypes[a]=b,c.defaultOptions[a]=b.options||{},c.defaultOptions.defaultType=c.defaultOptions.defaultType||a},addPlugin:function(a,b){c.plugins[a]=b,c.defaultOptions[a]=b.options||{}},draw:function(a,b,d,e){return e=e||c.Graph,new e(a,b,d)},merge:function(a,b){var d,e,f=b||{};for(d in a)e=a[d],e&&typeof e=="object"?e.constructor===Array?f[d]=this._.clone(e):e.constructor!==RegExp&&!this._.isElement(e)?f[d]=c.merge(e,b?b[d]:undefined):f[d]=e:f[d]=e;return f},clone:function(a){return c.merge(a,{})},getTickSize:function(a,b,d,e){var f=(d-b)/a,g=c.getMagnitude(f),h=10,i=f/g;return i<1.5?h=1:i<2.25?h=2:i<3?h=e===0?2:2.5:i<7.5&&(h=5),h*g},defaultTickFormatter:function(a,b){return a+""},defaultTrackFormatter:function(a){return"("+a.x+", "+a.y+")"},engineeringNotation:function(a,b,c){var d=["Y","Z","E","P","T","G","M","k",""],e=["y","z","a","f","p","n","µ","m",""],f=d.length;c=c||1e3,b=Math.pow(10,b||2);if(a===0)return 0;if(a>1)while(f--&&a>=c)a/=c;else{d=e,f=d.length;while(f--&&a<1)a*=c}return Math.round(a*b)/b+d[f]},getMagnitude:function(a){return Math.pow(10,Math.floor(Math.log(a)/Math.LN10))},toPixel:function(a){return Math.floor(a)+.5},toRad:function(a){return-a*(Math.PI/180)},floorInBase:function(a,b){return b*Math.floor(a/b)},drawText:function(a,b,d,e,f){if(!a.fillText){a.drawText(b,d,e,f);return}f=this._.extend({size:c.defaultOptions.fontSize,color:"#000000",textAlign:"left",textBaseline:"bottom",weight:1,angle:0},f),a.save(),a.translate(d,e),a.rotate(f.angle),a.fillStyle=f.color,a.font=(f.weight>1?"bold ":"")+f.size*1.3+"px sans-serif",a.textAlign=f.textAlign,a.textBaseline=f.textBaseline,a.fillText(b,0,0),a.restore()},getBestTextAlign:function(a,b){return b=b||{textAlign:"center",textBaseline:"middle"},a+=c.getTextAngleFromAlign(b),Math.abs(Math.cos(a))>.01&&(b.textAlign=Math.cos(a)>0?"right":"left"),Math.abs(Math.sin(a))>.01&&(b.textBaseline=Math.sin(a)>0?"top":"bottom"),b},alignTable:{"right middle":0,"right top":Math.PI/4,"center top":Math.PI/2,"left top":3*(Math.PI/4),"left middle":Math.PI,"left bottom":-3*(Math.PI/4),"center bottom":-Math.PI/2,"right bottom":-Math.PI/4,"center middle":0},getTextAngleFromAlign:function(a){return c.alignTable[a.textAlign+" "+a.textBaseline]||0},noConflict:function(){return a.Flotr=b,this}},a.Flotr=c})(),Flotr.defaultOptions={colors:["#00A8F0","#C0D800","#CB4B4B","#4DA74D","#9440ED"],ieBackgroundColor:"#FFFFFF",title:null,subtitle:null,shadowSize:4,defaultType:null,HtmlText:!0,fontColor:"#545454",fontSize:7.5,resolution:1,parseFloat:!0,xaxis:{ticks:null,minorTicks:null,showLabels:!0,showMinorLabels:!1,labelsAngle:0,title:null,titleAngle:0,noTicks:5,minorTickFreq:null,tickFormatter:Flotr.defaultTickFormatter,tickDecimals:null,min:null,max:null,autoscale:!1,autoscaleMargin:0,color:null,mode:"normal",timeFormat:null,scaling:"linear",base:Math.E,titleAlign:"center",margin:!0},x2axis:{},yaxis:{ticks:null,minorTicks:null,showLabels:!0,showMinorLabels:!1,labelsAngle:0,title:null,titleAngle:90,noTicks:5,minorTickFreq:null,tickFormatter:Flotr.defaultTickFormatter,tickDecimals:null,min:null,max:null,autoscale:!1,autoscaleMargin:0,color:null,scaling:"linear",base:Math.E,titleAlign:"center",margin:!0},y2axis:{titleAngle:270},grid:{color:"#545454",backgroundColor:null,backgroundImage:null,watermarkAlpha:.4,tickColor:"#DDDDDD",labelMargin:3,verticalLines:!0,minorVerticalLines:null,horizontalLines:!0,minorHorizontalLines:null,outlineWidth:1,circular:!1},mouse:{track:!1,trackAll:!1,position:"se",relative:!1,trackFormatter:Flotr.defaultTrackFormatter,margin:5,lineColor:"#FF3F19",trackDecimals:1,sensibility:2,trackY:!0,radius:3,fillColor:null,fillOpacity:.4}},function(){function b(a,b,c,d){this.rgba=["r","g","b","a"];var e=4;while(-1<--e)this[this.rgba[e]]=arguments[e]||(e==3?1:0);this.normalize()}var a=Flotr._,c={aqua:[0,255,255],azure:[240,255,255],beige:[245,245,220],black:[0,0,0],blue:[0,0,255],brown:[165,42,42],cyan:[0,255,255],darkblue:[0,0,139],darkcyan:[0,139,139],darkgrey:[169,169,169],darkgreen:[0,100,0],darkkhaki:[189,183,107],darkmagenta:[139,0,139],darkolivegreen:[85,107,47],darkorange:[255,140,0],darkorchid:[153,50,204],darkred:[139,0,0],darksalmon:[233,150,122],darkviolet:[148,0,211],fuchsia:[255,0,255],gold:[255,215,0],green:[0,128,0],indigo:[75,0,130],khaki:[240,230,140],lightblue:[173,216,230],lightcyan:[224,255,255],lightgreen:[144,238,144],lightgrey:[211,211,211],lightpink:[255,182,193],lightyellow:[255,255,224],lime:[0,255,0],magenta:[255,0,255],maroon:[128,0,0],navy:[0,0,128],olive:[128,128,0],orange:[255,165,0],pink:[255,192,203],purple:[128,0,128],violet:[128,0,128],red:[255,0,0],silver:[192,192,192],white:[255,255,255],yellow:[255,255,0]};b.prototype={scale:function(b,c,d,e){var f=4;while(-1<--f)a.isUndefined(arguments[f])||(this[this.rgba[f]]*=arguments[f]);return this.normalize()},alpha:function(b){return!a.isUndefined(b)&&!a.isNull(b)&&(this.a=b),this.normalize()},clone:function(){return new b(this.r,this.b,this.g,this.a)},limit:function(a,b,c){return Math.max(Math.min(a,c),b)},normalize:function(){var a=this.limit;return this.r=a(parseInt(this.r,10),0,255),this.g=a(parseInt(this.g,10),0,255),this.b=a(parseInt(this.b,10),0,255),this.a=a(this.a,0,1),this},distance:function(a){if(!a)return;a=new b.parse(a);var c=0,d=3;while(-1<--d)c+=Math.abs(this[this.rgba[d]]-a[this.rgba[d]]);return c},toString:function(){return this.a>=1?"rgb("+[this.r,this.g,this.b].join(",")+")":"rgba("+[this.r,this.g,this.b,this.a].join(",")+")"},contrast:function(){var a=1-(.299*this.r+.587*this.g+.114*this.b)/255;return a<.5?"#000000":"#ffffff"}},a.extend(b,{parse:function(a){if(a instanceof b)return a;var d;if(d=/#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(a))return new b(parseInt(d[1],16),parseInt(d[2],16),parseInt(d[3],16));if(d=/rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(a))return new b(parseInt(d[1],10),parseInt(d[2],10),parseInt(d[3],10));if(d=/#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(a))return new b(parseInt(d[1]+d[1],16),parseInt(d[2]+d[2],16),parseInt(d[3]+d[3],16));if(d=/rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(a))return new b(parseInt(d[1],10),parseInt(d[2],10),parseInt(d[3],10),parseFloat(d[4]));if(d=/rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(a))return new b(parseFloat(d[1])*2.55,parseFloat(d[2])*2.55,parseFloat(d[3])*2.55);if(d=/rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(a))return new b(parseFloat(d[1])*2.55,parseFloat(d[2])*2.55,parseFloat(d[3])*2.55,parseFloat(d[4]));var e=(a+"").replace(/^\s*([\S\s]*?)\s*$/,"$1").toLowerCase();return e=="transparent"?new b(255,255,255,0):(d=c[e])?new b(d[0],d[1],d[2]):new b(0,0,0,0)},processColor:function(c,d){var e=d.opacity;if(!c)return"rgba(0, 0, 0, 0)";if(c instanceof b)return c.alpha(e).toString();if(a.isString(c))return b.parse(c).alpha(e).toString();var f=c.colors?c:{colors:c};if(!d.ctx)return a.isArray(f.colors)?b.parse(a.isArray(f.colors[0])?f.colors[0][1]:f.colors[0]).alpha(e).toString():"rgba(0, 0, 0, 0)";f=a.extend({start:"top",end:"bottom"},f),/top/i.test(f.start)&&(d.x1=0),/left/i.test(f.start)&&(d.y1=0),/bottom/i.test(f.end)&&(d.x2=0),/right/i.test(f.end)&&(d.y2=0);var g,h,i,j=d.ctx.createLinearGradient(d.x1,d.y1,d.x2,d.y2);for(g=0;g<f.colors.length;g++)h=f.colors[g],a.isArray(h)?(i=h[0],h=h[1]):i=g/(f.colors.length-1),j.addColorStop(i,b.parse(h).alpha(e));return j}}),Flotr.Color=b}(),Flotr.Date={format:function(a,b){function d(a){return a+="",a.length==1?"0"+a:a}if(!a)return;var c={h:a.getUTCHours().toString(),H:d(a.getUTCHours()),M:d(a.getUTCMinutes()),S:d(a.getUTCSeconds()),s:a.getUTCMilliseconds(),d:a.getUTCDate().toString(),m:(a.getUTCMonth()+1).toString(),y:a.getUTCFullYear().toString(),b:Flotr.Date.monthNames[a.getUTCMonth()]},e=[],f,g=!1;for(var h=0;h<b.length;++h)f=b.charAt(h),g?(e.push(c[f]||f),g=!1):f=="%"?g=!0:e.push(f);return e.join("")},getFormat:function(a,b){var c=Flotr.Date.timeUnits;return a<c.second?"%h:%M:%S.%s":a<c.minute?"%h:%M:%S":a<c.day?b<2*c.day?"%h:%M":"%b %d %h:%M":a<c.month?"%b %d":a<c.year?b<c.year?"%b":"%b %y":"%y"},formatter:function(a,b){var c=new Date(a);if(b.options.timeFormat)return Flotr.Date.format(c,b.options.timeFormat);var d=b.max-b.min,e=b.tickSize*Flotr.Date.timeUnits[b.tickUnit];return Flotr.Date.format(c,Flotr.Date.getFormat(e,d))},generator:function(a){var b=[],c=new Date(a.min),d=Flotr.Date.timeUnits,e=a.tickSize*d[a.tickUnit];switch(a.tickUnit){case"millisecond":c.setUTCMilliseconds(Flotr.floorInBase(c.getUTCMilliseconds(),a.tickSize));break;case"second":c.setUTCSeconds(Flotr.floorInBase(c.getUTCSeconds(),a.tickSize));break;case"minute":c.setUTCMinutes(Flotr.floorInBase(c.getUTCMinutes(),a.tickSize));break;case"hour":c.setUTCHours(Flotr.floorInBase(c.getUTCHours(),a.tickSize));break;case"month":c.setUTCMonth(Flotr.floorInBase(c.getUTCMonth(),a.tickSize));break;case"year":c.setUTCFullYear(Flotr.floorInBase(c.getUTCFullYear(),a.tickSize))}e>=d.second&&c.setUTCMilliseconds(0),e>=d.minute&&c.setUTCSeconds(0),e>=d.hour&&c.setUTCMinutes(0),e>=d.day&&c.setUTCHours(0),e>=d.day*4&&c.setUTCDate(1),e>=d.year&&c.setUTCMonth(0);var f=0,g=NaN,h;do{h=g,g=c.getTime(),b.push({v:g,label:Flotr.Date.formatter(g,a)});if(a.tickUnit=="month")if(a.tickSize<1){c.setUTCDate(1);var i=c.getTime();c.setUTCMonth(c.getUTCMonth()+1);var j=c.getTime();c.setTime(g+f*d.hour+(j-i)*a.tickSize),f=c.getUTCHours(),c.setUTCHours(0)}else c.setUTCMonth(c.getUTCMonth()+a.tickSize);else a.tickUnit=="year"?c.setUTCFullYear(c.getUTCFullYear()+a.tickSize):c.setTime(g+e)}while(g<a.max&&g!=h);return b},timeUnits:{millisecond:1,second:1e3,minute:6e4,hour:36e5,day:864e5,month:2592e6,year:31556952e3},spec:[[1,"millisecond"],[20,"millisecond"],[50,"millisecond"],[100,"millisecond"],[200,"millisecond"],[500,"millisecond"],[1,"second"],[2,"second"],[5,"second"],[10,"second"],[30,"second"],[1,"minute"],[2,"minute"],[5,"minute"],[10,"minute"],[30,"minute"],[1,"hour"],[2,"hour"],[4,"hour"],[8,"hour"],[12,"hour"],[1,"day"],[2,"day"],[3,"day"],[.25,"month"],[.5,"month"],[1,"month"],[2,"month"],[3,"month"],[6,"month"],[1,"year"]],monthNames:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]},function(){var a=Flotr._;Flotr.DOM={addClass:function(b,c){var d=b.className?b.className:"";if(a.include(d.split(/\s+/g),c))return;b.className=(d?d+" ":"")+c},create:function(a){return document.createElement(a)},node:function(a){var b=Flotr.DOM.create("div"),c;return b.innerHTML=a,c=b.children[0],b.innerHTML="",c},empty:function(a){a.innerHTML=""},hide:function(a){Flotr.DOM.setStyles(a,{display:"none"})},insert:function(b,c){a.isString(c)?b.innerHTML+=c:a.isElement(c)&&b.appendChild(c)},opacity:function(a,b){a.style.opacity=b},position:function(a,b){return a.offsetParent?(b=this.position(a.offsetParent),b.left+=a.offsetLeft,b.top+=a.offsetTop,b):{left:a.offsetLeft||0,top:a.offsetTop||0}},removeClass:function(b,c){var d=b.className?b.className:"";b.className=a.filter(d.split(/\s+/g),function(a){if(a!=c)return!0}).join(" ")},setStyles:function(b,c){a.each(c,function(a,c){b.style[c]=a})},show:function(a){Flotr.DOM.setStyles(a,{display:""})},size:function(a){return{height:a.offsetHeight,width:a.offsetWidth}}}}(),function(){var a=Flotr,b=a.bean;a.EventAdapter={observe:function(a,c,d){return b.add(a,c,d),this},fire:function(a,c,d){return b.fire(a,c,d),typeof Prototype!="undefined"&&Event.fire(a,c,d),this},stopObserving:function(a,c,d){return b.remove(a,c,d),this},eventPointer:function(b){if(!a._.isUndefined(b.touches)&&b.touches.length>0)return{x:b.touches[0].pageX,y:b.touches[0].pageY};if(!a._.isUndefined(b.changedTouches)&&b.changedTouches.length>0)return{x:b.changedTouches[0].pageX,y:b.changedTouches[0].pageY};if(b.pageX||b.pageY)return{x:b.pageX,y:b.pageY};if(b.clientX||b.clientY){var c=document,d=c.body,e=c.documentElement;return{x:b.clientX+d.scrollLeft+e.scrollLeft,y:b.clientY+d.scrollTop+e.scrollTop}}}}}(),function(){var a=Flotr,b=a.DOM,c=a._,d=function(a){this.o=a};d.prototype={dimensions:function(a,b,c,d){return a?this.o.html?this.html(a,this.o.element,c,d):this.canvas(a,b):{width:0,height:0}},canvas:function(b,c){if(!this.o.textEnabled)return;c=c||{};var d=this.measureText(b,c),e=d.width,f=c.size||a.defaultOptions.fontSize,g=c.angle||0,h=Math.cos(g),i=Math.sin(g),j=2,k=6,l;return l={width:Math.abs(h*e)+Math.abs(i*f)+j,height:Math.abs(i*e)+Math.abs(h*f)+k},l},html:function(a,c,d,e){var f=b.create("div");return b.setStyles(f,{position:"absolute",top:"-10000px"}),b.insert(f,'<div style="'+d+'" class="'+e+' flotr-dummy-div">'+a+"</div>"),b.insert(this.o.element,f),b.size(f)},measureText:function(b,d){var e=this.o.ctx,f;return!e.fillText||a.isIphone&&e.measure?{width:e.measure(b,d)}:(d=c.extend({size:a.defaultOptions.fontSize,weight:1,angle:0},d),e.save(),e.font=(d.weight>1?"bold ":"")+d.size*1.3+"px sans-serif",f=e.measureText(b),e.restore(),f)}},Flotr.Text=d}(),function(){var a=Flotr.DOM,b=Flotr.EventAdapter,c=Flotr._,d=Flotr;Graph=function(a,e,f){this._setEl(a),this._initMembers(),this._initPlugins(),b.fire(this.el,"flotr:beforeinit",[this]),this.data=e,this.series=d.Series.getSeries(e),this._initOptions(f),this._initGraphTypes(),this._initCanvas(),this._text=new d.Text({element:this.el,ctx:this.ctx,html:this.options.HtmlText,textEnabled:this.textEnabled}),b.fire(this.el,"flotr:afterconstruct",[this]),this._initEvents(),this.findDataRanges(),this.calculateSpacing(),this.draw(c.bind(function(){b.fire(this.el,"flotr:afterinit",[this])},this))},Graph.prototype={destroy:function(){c.each(this._handles,function(a){b.stopObserving.apply(this,a)}),this._handles=[],this.el.graph=null},_observe:function(a,c,d){return b.observe.apply(this,arguments),this._handles.push(arguments),this},processColor:function(a,b){var e={x1:0,y1:0,x2:this.plotWidth,y2:this.plotHeight,opacity:1,ctx:this.ctx};return c.extend(e,b),d.Color.processColor(a,e)},findDataRanges:function(){var a=this.axes,b,e,f;c.each(this.series,function(a){f=a.getRange(),f&&(b=a.xaxis,e=a.yaxis,b.datamin=Math.min(f.xmin,b.datamin),b.datamax=Math.max(f.xmax,b.datamax),e.datamin=Math.min(f.ymin,e.datamin),e.datamax=Math.max(f.ymax,e.datamax),b.used=b.used||f.xused,e.used=e.used||f.yused)},this),!a.x.used&&!a.x2.used&&(a.x.used=!0),!a.y.used&&!a.y2.used&&(a.y.used=!0),c.each(a,function(a){a.calculateRange()});var g=c.keys(d.graphTypes),h=!1;c.each(this.series,function(a){if(a.hide)return;c.each(g,function(b){a[b]&&a[b].show&&(this.extendRange(b,a),h=!0)},this),h||this.extendRange(this.options.defaultType,a)},this)},extendRange:function(a,b){this[a].extendRange&&this[a].extendRange(b,b.data,b[a],this[a]),this[a].extendYRange&&this[a].extendYRange(b.yaxis,b.data,b[a],this[a]),this[a].extendXRange&&this[a].extendXRange(b.xaxis,b.data,b[a],this[a])},calculateSpacing:function(){var a=this.axes,b=this.options,d=this.series,e=b.grid.labelMargin,f=this._text,g=a.x,h=a.x2,i=a.y,j=a.y2,k=b.grid.outlineWidth,l,m,n,o;c.each(a,function(a){a.calculateTicks(),a.calculateTextDimensions(f,b)}),o=f.dimensions(b.title,{size:b.fontSize*1.5},"font-size:1em;font-weight:bold;","flotr-title"),this.titleHeight=o.height,o=f.dimensions(b.subtitle,{size:b.fontSize},"font-size:smaller;","flotr-subtitle"),this.subtitleHeight=o.height;for(m=0;m<b.length;++m)d[m].points.show&&(k=Math.max(k,d[m].points.radius+d[m].points.lineWidth/2));var p=this.plotOffset;g.options.margin===!1?(p.bottom=0,p.top=0):(p.bottom+=(b.grid.circular?0:g.used&&g.options.showLabels?g.maxLabel.height+e:0)+(g.used&&g.options.title?g.titleSize.height+e:0)+k,p.top+=(b.grid.circular?0:h.used&&h.options.showLabels?h.maxLabel.height+e:0)+(h.used&&h.options.title?h.titleSize.height+e:0)+this.subtitleHeight+this.titleHeight+k),i.options.margin===!1?(p.left=0,p.right=0):(p.left+=(b.grid.circular?0:i.used&&i.options.showLabels?i.maxLabel.width+e:0)+(i.used&&i.options.title?i.titleSize.width+e:0)+k,p.right+=(b.grid.circular?0:j.used&&j.options.showLabels?j.maxLabel.width+e:0)+(j.used&&j.options.title?j.titleSize.width+e:0)+k),p.top=Math.floor(p.top),this.plotWidth=this.canvasWidth-p.left-p.right,this.plotHeight=this.canvasHeight-p.bottom-p.top,g.length=h.length=this.plotWidth,i.length=j.length=this.plotHeight,i.offset=j.offset=this.plotHeight,g.setScale(),h.setScale(),i.setScale(),j.setScale()},draw:function(a){var c=this.ctx,d;b.fire(this.el,"flotr:beforedraw",[this.series,this]);if(this.series.length){c.save(),c.translate(this.plotOffset.left,this.plotOffset.top);for(d=0;d<this.series.length;d++)this.series[d].hide||this.drawSeries(this.series[d]);c.restore(),this.clip()}b.fire(this.el,"flotr:afterdraw",[this.series,this]),a&&a()},drawSeries:function(a){function b(a,b){var c=this.getOptions(a,b);this[b].draw(c)}var e=!1;a=a||this.series,c.each(d.graphTypes,function(c,d){a[d]&&a[d].show&&this[d]&&(e=!0,b.call(this,a,d))},this),e||b.call(this,a,this.options.defaultType)},getOptions:function(a,b){var e=a[b],f=this[b],g={context:this.ctx,width:this.plotWidth,height:this.plotHeight,fontSize:this.options.fontSize,fontColor:this.options.fontColor,textEnabled:this.textEnabled,htmlText:this.options.HtmlText,text:this._text,data:a.data,color:a.color,shadowSize:a.shadowSize,xScale:c.bind(a.xaxis.d2p,a.xaxis),yScale:c.bind(a.yaxis.d2p,a.yaxis)};return g=d.merge(e,g),g.fillStyle=this.processColor(e.fillColor||a.color,{opacity:e.fillOpacity}),g},getEventPosition:function(c){var d=document,e=d.body,f=d.documentElement,g=this.axes,h=this.plotOffset,i=this.lastMousePos,j=b.eventPointer(c),k=j.x-i.pageX,l=j.y-i.pageY,m,n,o;return"ontouchstart"in this.el?(m=a.position(this.overlay),n=j.x-m.left-h.left,o=j.y-m.top-h.top):(m=this.overlay.getBoundingClientRect(),n=c.clientX-m.left-h.left-e.scrollLeft-f.scrollLeft,o=c.clientY-m.top-h.top-e.scrollTop-f.scrollTop),{x:g.x.p2d(n),x2:g.x2.p2d(n),y:g.y.p2d(o),y2:g.y2.p2d(o),relX:n,relY:o,dX:k,dY:l,absX:j.x,absY:j.y}},clickHandler:function(a){if(this.ignoreClick)return this.ignoreClick=!1,this.ignoreClick;b.fire(this.el,"flotr:click",[this.getEventPosition(a),this])},mouseMoveHandler:function(a){var c=this.getEventPosition(a);this.lastMousePos.pageX=c.absX,this.lastMousePos.pageY=c.absY,b.fire(this.el,"flotr:mousemove",[a,c,this])},mouseDownHandler:function(a){if(this.mouseUpHandler)return;this.mouseUpHandler=c.bind(function(a){b.stopObserving(document,"mouseup",this.mouseUpHandler),this.mouseUpHandler=null,b.fire(this.el,"flotr:mouseup",[a,this])},this),b.observe(document,"mouseup",this.mouseUpHandler),b.fire(this.el,"flotr:mousedown",[a,this]),this.ignoreClick=!1},drawTooltip:function(b,c,d,e){var f=this.getMouseTrack(),g="opacity:0.7;background-color:#000;color:#fff;display:none;position:absolute;padding:2px 8px;-moz-border-radius:4px;border-radius:4px;white-space:nowrap;",h=e.position,i=e.margin,j=this.plotOffset;c!==null&&d!==null?(e.relative?(h.charAt(0)=="n"?g+="bottom:"+(i-j.top-d+this.canvasHeight)+"px;top:auto;":h.charAt(0)=="s"&&(g+="top:"+(i+j.top+d)+"px;bottom:auto;"),h.charAt(1)=="e"?g+="left:"+(i+j.left+c)+"px;right:auto;":h.charAt(1)=="w"&&(g+="right:"+(i-j.left-c+this.canvasWidth)+"px;left:auto;")):(h.charAt(0)=="n"?g+="top:"+(i+j.top)+"px;bottom:auto;":h.charAt(0)=="s"&&(g+="bottom:"+(i+j.bottom)+"px;top:auto;"),h.charAt(1)=="e"?g+="right:"+(i+j.right)+"px;left:auto;":h.charAt(1)=="w"&&(g+="left:"+(i+j.left)+"px;right:auto;")),f.style.cssText=g,a.empty(f),a.insert(f,b),a.show(f)):a.hide(f)},clip:function(){var a=this.ctx,b=this.plotOffset,c=this.canvasWidth,e=this.canvasHeight;d.isIE&&d.isIE<9?(a.save(),a.fillStyle=this.processColor(this.options.ieBackgroundColor),a.fillRect(0,0,c,b.top),a.fillRect(0,0,b.left,e),a.fillRect(0,e-b.bottom,c,b.bottom),a.fillRect(c-b.right,0,b.right,e),a.restore()):(a.clearRect(0,0,c,b.top),a.clearRect(0,0,b.left,e),a.clearRect(0,e-b.bottom,c,b.bottom),a.clearRect(c-b.right,0,b.right,e))},_initMembers:function(){this._handles=[],this.lastMousePos={pageX:null,pageY:null},this.plotOffset={left:0,right:0,top:0,bottom:0},this.ignoreClick=!0,this.prevHit=null},_initGraphTypes:function(){c.each(d.graphTypes,function(a,b){this[b]=d.clone(a)},this)},_initEvents:function(){var a=this.el,d,e,f;"ontouchstart"in a?(d=c.bind(function(c){f=!0,b.stopObserving(document,"touchend",d),b.fire(a,"flotr:mouseup",[event,this]),e||this.clickHandler(c)},this),this._observe(this.overlay,"touchstart",c.bind(function(c){e=!1,f=!1,this.ignoreClick=!1,b.fire(a,"flotr:mousedown",[event,this]),this._observe(document,"touchend",d)},this)),this._observe(this.overlay,"touchmove",c.bind(function(c){c.preventDefault(),e=!0;var d=c.touches[0].pageX,g=c.touches[0].pageY,h=this.getEventPosition(c.touches[0]);this.lastMousePos.pageX=d,this.lastMousePos.pageY=g,f||b.fire(a,"flotr:mousemove",[event,h,this])},this))):this._observe(this.overlay,"mousedown",c.bind(this.mouseDownHandler,this))._observe(a,"mousemove",c.bind(this.mouseMoveHandler,this))._observe(this.overlay,"click",c.bind(this.clickHandler,this))._observe(a,"mouseout",function(){b.fire(a,"flotr:mouseout")})},_initCanvas:function(){function k(e,f){return e||(e=a.create("canvas"),typeof FlashCanvas!="undefined"&&typeof e.getContext=="function"&&FlashCanvas.initElement(e),e.className="flotr-"+f,e.style.cssText="position:absolute;left:0px;top:0px;",a.insert(b,e)),c.each(i,function(b,c){a.show(e);if(f=="canvas"&&e.getAttribute(c)===b)return;e.setAttribute(c,b*d.resolution),e.style[c]=b+"px"}),e.context_=null,e}function l(a){window.G_vmlCanvasManager&&window.G_vmlCanvasManager.initElement(a);var b=a.getContext("2d");return window.G_vmlCanvasManager||b.scale(d.resolution,d.resolution),b}var b=this.el,d=this.options,e=b.children,f=[],g,h,i,j;for(h=e.length;h--;)g=e[h],!this.canvas&&g.className==="flotr-canvas"?this.canvas=g:!this.overlay&&g.className==="flotr-overlay"?this.overlay=g:f.push(g);for(h=f.length;h--;)b.removeChild(f[h]);a.setStyles(b,{position:"relative"}),i=a.size(b);if(i.width<=0||i.height<=0||d.resolution<=0)throw"Invalid dimensions for plot, width = "+i.width+", height = "+i.height+", resolution = "+d.resolution;this.canvas=k(this.canvas,"canvas"),this.overlay=k(this.overlay,"overlay"),this.ctx=l(this.canvas),this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height),this.octx=l(this.overlay),this.ctx.clearRect(0,0,this.overlay.width,this.overlay.height),this.canvasHeight=i.height*d.resolution,this.canvasWidth=i.width*d.resolution,this.textEnabled=!!this.ctx.drawText||!!this.ctx.fillText},_initPlugins:function(){c.each(d.plugins,function(a,b){c.each(a.callbacks,function(a,b){this._observe(this.el,b,c.bind(a,this))},this),this[b]=d.clone(a),c.each(this[b],function(a,d){c.isFunction(a)&&(this[b][d]=c.bind(a,this))},this)},this)},_initOptions:function(a){var e=d.clone(d.defaultOptions);e.x2axis=c.extend(c.clone(e.xaxis),e.x2axis),e.y2axis=c.extend(c.clone(e.yaxis),e.y2axis),this.options=d.merge(a||{},e),this.options.grid.minorVerticalLines===null&&this.options.xaxis.scaling==="logarithmic"&&(this.options.grid.minorVerticalLines=!0),this.options.grid.minorHorizontalLines===null&&this.options.yaxis.scaling==="logarithmic"&&(this.options.grid.minorHorizontalLines=!0),b.fire(this.el,"flotr:afterinitoptions",[this]),this.axes=d.Axis.getAxes(this.options);var f=[],g=[],h=this.series.length,i=this.series.length,j=this.options.colors,k=[],l=0,m,n,o,p;for(n=i-1;n>-1;--n)m=this.series[n].color,m&&(--i,c.isNumber(m)?f.push(m):k.push(d.Color.parse(m)));for(n=f.length-1;n>-1;--n)i=Math.max(i,f[n]+1);for(n=0;g.length<i;){m=j.length==n?new d.Color(100,100,100):d.Color.parse(j[n]);var q=l%2==1?-1:1,r=1+q*Math.ceil(l/2)*.2;m.scale(r,r,r),g.push(m),++n>=j.length&&(n=0,++l)}for(n=0,o=0;n<h;++n){p=this.series[n],p.color?c.isNumber(p.color)&&(p.color=g[p.color].toString()):p.color=g[o++].toString(),p.xaxis||(p.xaxis=this.axes.x),p.xaxis==1?p.xaxis=this.axes.x:p.xaxis==2&&(p.xaxis=this.axes.x2),p.yaxis||(p.yaxis=this.axes.y),p.yaxis==1?p.yaxis=this.axes.y:p.yaxis==2&&(p.yaxis=this.axes.y2);for(var s in d.graphTypes)p[s]=c.extend(c.clone(this.options[s]),p[s]);p.mouse=c.extend(c.clone(this.options.mouse),p.mouse),c.isUndefined(p.shadowSize)&&(p.shadowSize=this.options.shadowSize)}},_setEl:function(a){if(!a)throw"The target container doesn't exist";if(!a.clientWidth)throw"The target container must be visible";this.el=a,this.el.graph&&this.el.graph.destroy(),this.el.graph=this}},Flotr.Graph=Graph}(),function(){function c(b){this.orientation=1,this.offset=0,this.datamin=Number.MAX_VALUE,this.datamax=-Number.MAX_VALUE,a.extend(this,b),this._setTranslations()}function d(a){return this.offset+this.orientation*(a-this.min)*this.scale}function e(a){return(this.offset+this.orientation*a)/this.scale+this.min}function f(a){return this.offset+this.orientation*(h(a,this.options.base)-h(this.min,this.options.base))*this.scale}function g(a){return j((this.offset+this.orientation*a)/this.scale+h(this.min,this.options.base),this.options.base)}function h(a,b){return a=Math.log(Math.max(a,Number.MIN_VALUE)),b!==Math.E&&(a/=Math.log(b)),a}function j(a,b){return b===Math.E?Math.exp(a):Math.pow(b,a)}var a=Flotr._,b="logarithmic";c.prototype={setScale:function(){var a=this.length;this.options.scaling==b?this.scale=a/(h(this.max,this.options.base)-h(this.min,this.options.base)):this.scale=a/(this.max-this.min)},calculateTicks:function(){var a=this.options;this.ticks=[],this.minorTicks=[],a.ticks?(this._cleanUserTicks(a.ticks,this.ticks),this._cleanUserTicks(a.minorTicks||[],this.minorTicks)):a.mode=="time"?this._calculateTimeTicks():a.scaling==="logarithmic"?this._calculateLogTicks():this._calculateTicks()},calculateRange:function(){if(!this.used)return;var a=this,b=a.options,c=b.min!==null?b.min:a.datamin,d=b.max!==null?b.max:a.datamax,e=b.autoscaleMargin;b.scaling=="logarithmic"&&(c<=0&&(c=a.datamin),d<=0&&(d=c));if(d==c){var f=d?.01:1;c-=f,d+=f}if(b.scaling==="logarithmic"){c<0&&(c=d/b.base);var g=Math.log(d);b.base!=Math.E&&(g/=Math.log(b.base)),g=Math.ceil(g);var h=Math.log(c);b.base!=Math.E&&(h/=Math.log(b.base)),h=Math.ceil(h),a.tickSize=Flotr.getTickSize(b.noTicks,h,g,b.tickDecimals===null?0:b.tickDecimals),b.minorTickFreq===null&&(g-h>10?b.minorTickFreq=0:g-h>5?b.minorTickFreq=2:b.minorTickFreq=5)}else a.tickSize=Flotr.getTickSize(b.noTicks,c,d,b.tickDecimals);a.min=c,a.max=d,b.min===null&&b.autoscale&&(a.min-=a.tickSize*e,a.min<0&&a.datamin>=0&&(a.min=0),a.min=a.tickSize*Math.floor(a.min/a.tickSize)),b.max===null&&b.autoscale&&(a.max+=a.tickSize*e,a.max>0&&a.datamax<=0&&a.datamax!=a.datamin&&(a.max=0),a.max=a.tickSize*Math.ceil(a.max/a.tickSize)),a.min==a.max&&(a.max=a.min+1)},calculateTextDimensions:function(a,b){var c="",d,e;if(this.options.showLabels)for(e=0;e<this.ticks.length;++e)d=this.ticks[e].label.length,d>c.length&&(c=this.ticks[e].label);this.maxLabel=a.dimensions(c,{size:b.fontSize,angle:Flotr.toRad(this.options.labelsAngle)},"font-size:smaller;","flotr-grid-label"),this.titleSize=a.dimensions(this.options.title,{size:b.fontSize*1.2,angle:Flotr.toRad(this.options.titleAngle)},"font-weight:bold;","flotr-axis-title")},_cleanUserTicks:function(b,c){var d=this,e=this.options,f,g,h,i;a.isFunction(b)&&(b=b({min:d.min,max:d.max}));for(g=0;g<b.length;++g)i=b[g],typeof i=="object"?(f=i[0],h=i.length>1?i[1]:e.tickFormatter(f,{min:d.min,max:d.max})):(f=i,h=e.tickFormatter(f,{min:this.min,max:this.max})),c[g]={v:f,label:h}},_calculateTimeTicks:function(){var a=this,b=Flotr.Date.timeUnits,c=Flotr.Date.spec,d=(a.max-a.min)/a.options.noTicks,e,f,g;for(g=0;g<c.length-1;++g){var h=c[g][0]*b[c[g][1]];if(d<(h+c[g+1][0]*b[c[g+1][1]])/2&&h>=a.tickSize)break}e=c[g][0],f=c[g][1],f=="year"&&(e=Flotr.getTickSize(a.options.noTicks*b.year,a.min,a.max,0)),a.tickSize=e,a.tickUnit=f,a.ticks=Flotr.Date.generator(a)},_calculateLogTicks:function(){var a=this,b=a.options,c,d,e=Math.log(a.max);b.base!=Math.E&&(e/=Math.log(b.base)),e=Math.ceil(e);var f=Math.log(a.min);b.base!=Math.E&&(f/=Math.log(b.base)),f=Math.ceil(f);for(i=f;i<e;i+=a.tickSize){d=b.base==Math.E?Math.exp(i):Math.pow(b.base,i);var g=d*(b.base==Math.E?Math.exp(a.tickSize):Math.pow(b.base,a.tickSize)),h=(g-d)/b.minorTickFreq;a.ticks.push({v:d,label:b.tickFormatter(d,{min:a.min,max:a.max})});for(c=d+h;c<g;c+=h)a.minorTicks.push({v:c,label:b.tickFormatter(c,{min:a.min,max:a.max})})}d=b.base==Math.E?Math.exp(i):Math.pow(b.base,i),a.ticks.push({v:d,label:b.tickFormatter(d,{min:a.min,max:a.max})})},_calculateTicks:function(){var a=this,b=a.options,c=a.tickSize,d=a.min,e=a.max,f=c*Math.ceil(d/c),g,h,i,j,k,l;b.minorTickFreq&&(h=c/b.minorTickFreq);for(k=0;(i=j=f+k*c)<=e;++k){g=b.tickDecimals,g===null&&(g=1-Math.floor(Math.log(c)/Math.LN10)),g<0&&(g=0),i=i.toFixed(g),a.ticks.push({v:i,label:b.tickFormatter(i,{min:a.min,max:a.max})});if(b.minorTickFreq)for(l=0;l<b.minorTickFreq&&k*c+l*h<e;++l)i=(j+l*h).toFixed(g),a.minorTicks.push({v:i,label:b.tickFormatter(i,{min:a.min,max:a.max})})}},_setTranslations:function(a){this.d2p=a?f:d,this.p2d=a?g:e}},a.extend(c,{getAxes:function(a){return{x:new c({options:a.xaxis,n:1,length:this.plotWidth}),x2:new c({options:a.x2axis,n:2,length:this.plotWidth}),y:new c({options:a.yaxis,n:1,length:this.plotHeight,offset:this.plotHeight,orientation:-1}),y2:new c({options:a.y2axis,n:2,length:this.plotHeight,offset:this.plotHeight,orientation:-1})}}}),Flotr.Axis=c}(),function(){function b(b){a.extend(this,b)}var a=Flotr._;b.prototype={getRange:function(){var a=this.data,b=a.length,c=Number.MAX_VALUE,d=Number.MAX_VALUE,e=-Number.MAX_VALUE,f=-Number.MAX_VALUE,g=!1,h=!1,i,j,k;if(b<0||this.hide)return!1;for(k=0;k<b;k++)i=a[k][0],j=a[k][1],i<c&&(c=i,g=!0),i>e&&(e=i,g=!0),j<d&&(d=j,h=!0),j>f&&(f=j,h=!0);return{xmin:c,xmax:e,ymin:d,ymax:f,xused:g,yused:h}}},a.extend(b,{getSeries:function(c){return a.map(c,function(c){var d;return c.data?(d=new b,a.extend(d,c)):d=new b({data:c}),d})}}),Flotr.Series=b}(),Flotr.addType("lines",{options:{show:!1,lineWidth:2,fill:!1,fillBorder:!1,fillColor:null,fillOpacity:.4,steps:!1,stacked:!1},stack:{values:[]},draw:function(a){var b=a.context,c=a.lineWidth,d=a.shadowSize,e;b.save(),b.lineJoin="round",d&&(b.lineWidth=d/2,e=c/2+b.lineWidth/2,b.strokeStyle="rgba(0,0,0,0.1)",this.plot(a,e+d/2,!1),b.strokeStyle="rgba(0,0,0,0.2)",this.plot(a,e,!1)),b.lineWidth=c,b.strokeStyle=a.color,this.plot(a,0,!0),b.restore()},plot:function(a,b,c){var d=a.context,e=a.plotWidth,f=a.plotHeight,g=a.xScale,h=a.yScale,i=a.data,j=a.stacked?this.stack:!1,k=i.length-1,l=null,m=null,n=h(0),o,p,q,r,s,t,u;if(k<1)return;d.beginPath();for(u=0;u<k;++u){if(i[u][1]===null||i[u+1][1]===null)continue;o=g(i[u][0]),p=g(i[u+1][0]),j?(s=j.values[i[u][0]]||0,t=j.values[i[u+1][0]]||j.values[i[u][0]]||0,q=h(i[u][1]+s),r=h(i[u+1][1]+t),c&&(j.values[i[u][0]]=i[u][1]+s,u==k-1&&(j.values[i[u+1][0]]=i[u+1][1]+t))):(q=h(i[u][1]),r=h(i[u+1][1]));if(q>=f&&r>=e||q<=0&&r<=0||o<=0&&p<=0||o>=e&&p>=e)continue;(l!=o||m!=q+b)&&d.moveTo(o,q+b),l=p,m=r+b,a.steps?(d.lineTo(l+b/2,q+b),d.lineTo(l+b/2,m)):d.lineTo(l,m)}(!a.fill||a.fill&&!a.fillBorder)&&d.stroke(),!b&&a.fill&&(o=g(i[0][0]),d.fillStyle=a.fillStyle,d.lineTo(p,n),d.lineTo(o,n),d.lineTo(o,h(i[0][1])),d.fill(),a.fillBorder&&d.stroke()),d.closePath()},extendYRange:function(a,b,c,d){var e=a.options;if(c.stacked&&(!e.max&&e.max!==0||!e.min&&e.min!==0)){var f=a.max,g=a.min,h=d.positiveSums||{},i=d.negativeSums||{},j,k;for(k=0;k<b.length;k++)j=b[k][0]+"",b[k][1]>0?(h[j]=(h[j]||0)+b[k][1],f=Math.max(f,h[j])):(i[j]=(i[j]||0)+b[k][1],g=Math.min(g,i[j]));d.negativeSums=i,d.positiveSums=h,a.max=f,a.min=g}c.steps&&(this.hit=function(a){var b=a.data,c=a.args,d=a.yScale,e=c[0],f=b.length,g=c[1],h=e.x,i=e.relY,j;for(j=0;j<f-1;j++)if(h>=b[j][0]&&h<=b[j+1][0]){Math.abs(d(b[j][1])-i)<8&&(g.x=b[j][0],g.y=b[j][1],g.index=j,g.seriesIndex=a.index);break}},this.drawHit=function(a){var b=a.context,c=a.args,d=a.data,e=a.xScale,f=c.index,g=e(c.x),h=a.yScale(c.y),i;d.length-1>f&&(i=a.xScale(d[f+1][0]),b.save(),b.strokeStyle=a.color,b.lineWidth=a.lineWidth,b.beginPath(),b.moveTo(g,h),b.lineTo(i,h),b.stroke(),b.closePath(),b.restore())},this.clearHit=function(a){var b=a.context,c=a.args,d=a.data,e=a.xScale,f=a.lineWidth,g=c.index,h=e(c.x),i=a.yScale(c.y),j;d.length-1>g&&(j=a.xScale(d[g+1][0]),b.clearRect(h-f,i-f,j-h+2*f,2*f))})}}),Flotr.addType("bars",{options:{show:!1,lineWidth:2,barWidth:1,fill:!0,fillColor:null,fillOpacity:.4,horizontal:!1,stacked:!1,centered:!0,topPadding:.1},stack:{positive:[],negative:[],_positive:[],_negative:[]},draw:function(a){var b=a.context;b.save(),b.lineJoin="miter",b.lineWidth=a.lineWidth,b.strokeStyle=a.color,a.fill&&(b.fillStyle=a.fillStyle),this.plot(a),b.restore()},plot:function(a){var b=a.data,c=a.context,d=a.shadowSize,e,f,g,h,i,j;if(b.length<1)return;this.translate(c,a.horizontal);for(e=0;e<b.length;e++){f=this.getBarGeometry(b[e][0],b[e][1],a);if(f===null)continue;g=f.left,h=f.top,i=f.width,j=f.height,a.fill&&c.fillRect(g,h,i,j),d&&(c.save(),c.fillStyle="rgba(0,0,0,0.05)",c.fillRect(g+d,h+d,i,j),c.restore()),a.lineWidth&&c.strokeRect(g,h,i,j)}},translate:function(a,b){b&&(a.rotate(-Math.PI/2),a.scale(-1,1))},getBarGeometry:function(a,b,c){var d=c.horizontal,e=c.barWidth,f=c.centered,g=c.stacked?this.stack:!1,h=c.lineWidth,i=f?e/2:0,j=d?c.yScale:c.xScale,k=d?c.xScale:c.yScale,l=d?b:a,m=d?a:b,n=0,o,p,q,r,s;return g&&(o=m>0?g.positive:g.negative,n=o[l]||n,o[l]=n+m),p=j(l-i),q=j(l+e-i),r=k(m+n),s=k(n),s<0&&(s=0),a===null||b===null?null:{x:l,y:m,xScale:j,yScale:k,top:r,left:Math.min(p,q)-h/2,width:Math.abs(q-p)-h,height:s-r}},hit:function(a){var b=a.data,c=a.args,d=c[0],e=c[1],f=d.x,g=d.y,h=this.getBarGeometry(f,g,a),i=h.width/2,j=h.left,k,l;for(l=b.length;l--;)k=this.getBarGeometry(b[l][0],b[l][1],a),k.y>h.y&&Math.abs(j-k.left)<i&&(e.x=b[l][0],e.y=b[l][1],e.index=l,e.seriesIndex=a.index)},drawHit:function(a){var b=a.context,c=a.args,d=this.getBarGeometry(c.x,c.y,a),e=d.left,f=d.top,g=d.width,h=d.height;b.save(),b.strokeStyle=a.color,b.lineWidth=a.lineWidth,this.translate(b,a.horizontal),b.beginPath(),b.moveTo(e,f+h),b.lineTo(e,f),b.lineTo(e+g,f),b.lineTo(e+g,f+h),a.fill&&(b.fillStyle=a.fillStyle,b.fill()),b.stroke(),b.closePath(),b.restore()},clearHit:function(a){var b=a.context,c=a.args,d=this.getBarGeometry(c.x,c.y,a),e=d.left,f=d.width,g=d.top,h=d.height,i=2*a.lineWidth;b.save(),this.translate(b,a.horizontal),b.clearRect(e-i,Math.min(g,g+h)-i,f+2*i,Math.abs(h)+2*i),b.restore()},extendXRange:function(a,b,c,d){this._extendRange(a,b,c,d)},extendYRange:function(a,b,c,d){this._extendRange(a,b,c,d)},_extendRange:function(a,b,c,d){var e=a.options.max;if(_.isNumber(e)||_.isString(e))return;var f=a.min,g=a.max,h=c.horizontal,i=a.orientation,j=this.positiveSums||{},k=this.negativeSums||{},l,m,n,o;(i==1&&!h||i==-1&&h)&&c.centered&&(g=Math.max(a.datamax+c.barWidth,g),f=Math.min(a.datamin-c.barWidth,f));if(c.stacked&&(i==1&&h||i==-1&&!h))for(o=b.length;o--;)l=b[o][i==1?1:0]+"",m=b[o][i==1?0:1],m>0?(j[l]=(j[l]||0)+m,g=Math.max(g,j[l])):(k[l]=(k[l]||0)+m,f=Math.min(f,k[l]));(i==1&&h||i==-1&&!h)&&c.topPadding&&(a.max===a.datamax||c.stacked&&this.stackMax!==g)&&(g+=c.topPadding*(g-f)),this.stackMin=f,this.stackMax=g,this.negativeSums=k,this.positiveSums=j,a.max=g,a.min=f}}),Flotr.addType("bubbles",{options:{show:!1,lineWidth:2,fill:!0,fillOpacity:.4,baseRadius:2},draw:function(a){var b=a.context,c=a.shadowSize;b.save(),b.lineWidth=a.lineWidth,b.fillStyle="rgba(0,0,0,0.05)",b.strokeStyle="rgba(0,0,0,0.05)",this.plot(a,c/2),b.strokeStyle="rgba(0,0,0,0.1)",this.plot(a,c/4),b.strokeStyle=a.color,b.fillStyle=a.fillStyle,this.plot(a),b.restore()},plot:function(a,b){var c=a.data,d=a.context,e,f,g,h,i;b=b||0;for(f=0;f<c.length;++f)e=this.getGeometry(c[f],a),d.beginPath(),d.arc(e.x+b,e.y+b,e.z,0,2*Math.PI,!0),d.stroke(),a.fill&&d.fill(),d.closePath()},getGeometry:function(a,b){return{x:b.xScale(a[0]),y:b.yScale(a[1]),z:a[2]*b.baseRadius}},drawHit:function(a){var b=a.context,c=this.getGeometry(a.data[a.args.index],a);b.save(),b.lineWidth=a.lineWidth,b.fillStyle=a.fillStyle,b.strokeStyle=a.color,b.beginPath(),b.arc(c.x,c.y,c.z,0,2*Math.PI,!0),b.fill(),b.stroke(),b.closePath(),b.restore()},clearHit:function(a){var b=a.context,c=this.getGeometry(a.data[a.args.index],a),d=c.z+a.lineWidth;b.save(),b.clearRect(c.x-d,c.y-d,2*d,2*d),b.restore()}}),Flotr.addType("candles",{options:{show:!1,lineWidth:1,wickLineWidth:1,candleWidth:.6,fill:!0,upFillColor:"#00A8F0",downFillColor:"#CB4B4B",fillOpacity:.5,barcharts:!1},draw:function(a){var b=a.context;b.save(),b.lineJoin="miter",b.lineCap="butt",b.lineWidth=a.wickLineWidth||a.lineWidth,this.plot(a),b.restore()},plot:function(a){var b=a.data,c=a.context,d=a.xScale,e=a.yScale,f=a.candleWidth/2,g=a.shadowSize,h=a.wickLineWidth,i=h%2/2,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x;if(b.length<1)return;for(x=0;x<b.length;x++){k=b[x],l=k[0],n=k[1],o=k[2],p=k[3],q=k[4],r=d(l-f),s=d(l+f),t=e(p),u=e(o),v=e(Math.min(n,q)),w=e(Math.max(n,q)),j=a[n>q?"downFillColor":"upFillColor"],a.fill&&!a.barcharts&&(c.fillStyle="rgba(0,0,0,0.05)",c.fillRect(r+g,w+g,s-r,v-w),c.save(),c.globalAlpha=a.fillOpacity,c.fillStyle=j,c.fillRect(r,w+f,s-r,v-w),c.restore());if(a.lineWidth||h)l=Math.floor((r+s)/2)+i,c.strokeStyle=j,c.beginPath(),a.barcharts?(c.moveTo(l,Math.floor(u+f)),c.lineTo(l,Math.floor(t+f)),m=Math.floor(n+f)+.5,c.moveTo(Math.floor(r)+i,m),c.lineTo(l,m),m=Math.floor(q+f)+.5,c.moveTo(Math.floor(s)+i,m),c.lineTo(l,m)):(c.strokeRect(r,w+f,s-r,v-w),c.moveTo(l,Math.floor(w+f)),c.lineTo(l,Math.floor(u+f)),c.moveTo(l,Math.floor(v+f)),c.lineTo(l,Math.floor(t+f))),c.closePath(),c.stroke()}},extendXRange:function(a,b,c){a.options.max===null&&(a.max=Math.max(a.datamax+.5,a.max),a.min=Math.min(a.datamin-.5,a.min))}}),Flotr.addType("gantt",{options:{show:!1,lineWidth:2,barWidth:1,fill:!0,fillColor:null,fillOpacity:.4,centered:!0},draw:function(a){var b=this.ctx,c=a.gantt.barWidth,d=Math.min(a.gantt.lineWidth,c);b.save(),b.translate(this.plotOffset.left,this.plotOffset.top),b.lineJoin="miter",b.lineWidth=d,b.strokeStyle=a.color,b.save(),this.gantt.plotShadows(a,c,0,a.gantt.fill),b.restore();if(a.gantt.fill){var e=a.gantt.fillColor||a.color;b.fillStyle=this.processColor(e,{opacity:a.gantt.fillOpacity})}this.gantt.plot(a,c,0,a.gantt.fill),b.restore()},plot:function(a,b,c,d){var e=a.data;if(e.length<1)return;var f=a.xaxis,g=a.yaxis,h=this.ctx,i;for(i=0;i<e.length;i++){var j=e[i][0],k=e[i][1],l=e[i][2],m=!0,n=!0,o=!0;if(k===null||l===null)continue;var p=k,q=k+l,r=j-(a.gantt.centered?b/2:0),s=j+b-(a.gantt.centered?b/2:0);if(q<f.min||p>f.max||s<g.min||r>g.max)continue;p<f.min&&(p=f.min,m=!1),q>f.max&&(q=f.max,f.lastSerie!=a&&(n=!1)),r<g.min&&(r=g.min),s>g.max&&(s=g.max,g.lastSerie!=a&&(n=!1)),d&&(h.beginPath(),h.moveTo(f.d2p(p),g.d2p(r)+c),h.lineTo(f.d2p(p),g.d2p(s)+c),h.lineTo(f.d2p(q),g.d2p(s)+c),h.lineTo(f.d2p(q),g.d2p(r)+c),h.fill(),h.closePath()),a.gantt.lineWidth&&(m||o||n)&&(h.beginPath(),h.moveTo(f.d2p(p),g.d2p(r)+c),h[m?"lineTo":"moveTo"](f.d2p(p),g.d2p(s)+c),h[n?"lineTo":"moveTo"](f.d2p(q),g.d2p(s)+c),h[o?"lineTo":"moveTo"](f.d2p(q),g.d2p(r)+c),h.stroke(),h.closePath())}},plotShadows:function(a,b,c){var d=a.data;if(d.length<1)return;var e,f,g,h,i=a.xaxis,j=a.yaxis,k=this.ctx,l=this.options.shadowSize;for(e=0;e<d.length;e++){f=d[e][0],g=d[e][1],h=d[e][2];if(g===null||h===null)continue;var m=g,n=g+h,o=f-(a.gantt.centered?b/2:0),p=f+b-(a.gantt.centered?b/2:0);if(n<i.min||m>i.max||p<j.min||o>j.max)continue;m<i.min&&(m=i.min),n>i.max&&(n=i.max),o<j.min&&(o=j.min),p>j.max&&(p=j.max);var q=i.d2p(n)-i.d2p(m)-(i.d2p(n)+l<=this.plotWidth?0:l),r=j.d2p(o)-j.d2p(p)-(j.d2p(o)+l<=this.plotHeight?0:l);k.fillStyle="rgba(0,0,0,0.05)",k.fillRect(Math.min(i.d2p(m)+l,this.plotWidth),Math.min(j.d2p(p)+l,this.plotHeight),q,r)}},extendXRange:function(a){if(a.options.max===null){var b=a.min,c=a.max,d,e,f,g,h,i={},j={},k=null;for(d=0;d<this.series.length;++d){g=this.series[d],h=g.gantt;if(h.show&&g.xaxis==a){for(e=0;e<g.data.length;e++)h.show&&(y=g.data[e][0]+"",i[y]=Math.max(i[y]||0,g.data[e][1]+g.data[e][2]),k=g);for(e in i)c=Math.max(i[e],c)}}a.lastSerie=k,a.max=c,a.min=b}},extendYRange:function(a){if(a.options.max===null){var b=Number.MIN_VALUE,c=Number.MAX_VALUE,d,e,f,g,h={},i={},j=null;for(d=0;d<this.series.length;++d){f=this.series[d],g=f.gantt;if(g.show&&!f.hide&&f.yaxis==a){var k=Number.MIN_VALUE,l=Number.MAX_VALUE;for(e=0;e<f.data.length;e++)k=Math.max(k,f.data[e][0]),l=Math.min(l,f.data[e][0]);g.centered?(b=Math.max(k+.5,b),c=Math.min(l-.5,c)):(b=Math.max(k+1,b),c=Math.min(l,c)),g.barWidth+k>b&&(b=a.max+g.barWidth)}}a.lastSerie=j,a.max=b,a.min=c,a.tickSize=Flotr.getTickSize(a.options.noTicks,c,b,a.options.tickDecimals)}}}),function(){function a(a){return typeof a=="object"&&a.constructor&&(Image?!0:a.constructor===Image)}Flotr.defaultMarkerFormatter=function(a){return Math.round(a.y*100)/100+""},Flotr.addType("markers",{options:{show:!1,lineWidth:1,color:"#000000",fill:!1,fillColor:"#FFFFFF",fillOpacity:.4,stroke:!1,position:"ct",labelFormatter:Flotr.defaultMarkerFormatter,fontSize:Flotr.defaultOptions.fontSize,stacked:!1,stackingType:"b",horizontal:!1},stack:{positive:[],negative:[],values:[]},draw:function(a){function m(a,b){return g=d.negative[a]||0,f=d.positive[a]||0,b>0?(d.positive[a]=g+b,g+b):(d.negative[a]=f+b,f+b)}var b=a.data,c=a.context,d=a.stacked?a.stack:!1,e=a.stackingType,f,g,h,i,j,k,l;c.save(),c.lineJoin="round",c.lineWidth=a.lineWidth,c.strokeStyle="rgba(0,0,0,0.5)",c.fillStyle=a.fillStyle;for(i=0;i<b.length;++i)j=b[i][0],k=b[i][1],d&&(e=="b"?a.horizontal?k=m(k,j):j=m(j,k):e=="a"&&(h=d.values[j]||0,d.values[j]=h+k,k=h+k)),l=a.labelFormatter({x:j,y:k,index:i,data:b}),this.plot(a.xScale(j),a.yScale(k),l,a);c.restore()},plot:function(b,c,d,e){var f=e.context;if(a(d)&&!d.complete)throw"Marker image not loaded.";this._plot(b,c,d,e)},_plot:function(b,c,d,e){var f=e.context,g=2,h=b,i=c,j;a(d)?j={height:d.height,width:d.width}:j=e.text.canvas(d),j.width=Math.floor(j.width+g*2),j.height=Math.floor(j.height+g*2),e.position.indexOf("c")!=-1?h-=j.width/2+g:e.position.indexOf("l")!=-1&&(h-=j.width),e.position.indexOf("m")!=-1?i-=j.height/2+g:e.position.indexOf("t")!=-1&&(i-=j.height),h=Math.floor(h)+.5,i=Math.floor(i)+.5,e.fill&&f.fillRect(h,i,j.width,j.height),e.stroke&&f.strokeRect(h,i,j.width,j.height),a(d)?f.drawImage(d,h+g,i+g):Flotr.drawText(f,d,h+g,i+g,{textBaseline:"top",textAlign:"left",size:e.fontSize,color:e.color})}})}(),function(){var a=Flotr._;Flotr.defaultPieLabelFormatter=function(a,b){return(100*b/a).toFixed(2)+"%"},Flotr.addType("pie",{options:{show:!1,lineWidth:1,fill:!0,fillColor:null,fillOpacity:.6,explode:6,sizeRatio:.6,startAngle:Math.PI/4,labelFormatter:Flotr.defaultPieLabelFormatter,pie3D:!1,pie3DviewAngle:Math.PI/2*.8,pie3DspliceThickness:20},draw:function(a){var b=a.data,c=a.context,d=c.canvas,e=a.lineWidth,f=a.shadowSize,g=a.sizeRatio,h=a.height,i=a.explode,j=a.color,k=a.fill,l=a.fillStyle,m=Math.min(d.width,d.height)*g/2,n=b[0][1],o=[],p=1,q=Math.PI*2*n/this.total,r=this.startAngle||2*Math.PI*a.startAngle,s=r+q,t=r+q/2,u=a.labelFormatter(this.total,n),v=Math.cos(t)<0,w=Math.sin(t)>0,x=i+m+4,y,z,A,B,C;c.save(),c.translate(a.width/2,a.height/2),c.scale(1,p),z=Math.cos(t)*i,A=Math.sin(t)*i,f>0&&(this.plotSlice(z+f,A+f,m,r,s,c),k&&(c.fillStyle="rgba(0,0,0,0.1)",c.fill())),this.plotSlice(z,A,m,r,s,c),k&&(c.fillStyle=l,c.fill()),c.lineWidth=e,c.strokeStyle=j,c.stroke(),B=Math.cos(t)*x,C=Math.sin(t)*x,y={size:a.fontSize*1.2,color:a.fontColor,weight:1.5};if(u)if(a.htmlText||!a.textEnabled){var D=textAlignTop?C-5:h-C+5,E="position:absolute;"+(textAlignTop?"top":"bottom")+":"+D+"px;";textAlignRight?E+="right:"+(this.canvasWidth-B)+"px;text-align:right;":E+="left:"+B+"px;text-align:left;",o.push('<div style="',E,'" class="flotr-grid-label">',u,"</div>")}else y.textAlign=v?"right":"left",y.textBaseline=w?"top":"bottom",Flotr.drawText(c,u,B,C,y);if(a.htmlText||!a.textEnabled){var F=Flotr.DOM.node('<div style="color:'+a.fontColor+'" class="flotr-labels"></div>');Flotr.DOM.insert(F,o.join("")),Flotr.DOM.insert(this.el,F)}c.restore(),this.startAngle=s,this.slices=this.slices||[],this.slices.push({radius:Math.min(d.width,d.height)*g/2,x:z,y:A,explode:i,start:r,end:s})},plotSlice:function(a,b,c,d,e,f){f.beginPath(),f.moveTo(a,b),f.arc(a,b,c,d,e,!1),f.lineTo(a,b),f.closePath()},hit:function(a){var b=a.data[0],c=a.args,d=a.index,e=c[0],f=c[1],g=this.slices[d],h=e.relX-a.width/2,i=e.relY-a.height/2,j=Math.sqrt(h*h+i*i),k=Math.atan(i/h),l=Math.PI*2,m=g.explode||a.explode,n=g.start%l,o=g.end%l;h<0?k+=Math.PI:h>0&&i<0&&(k+=l),j<g.radius+m&&j>m&&(n>o&&(k<o||k>n)||k>n&&k<o)&&(f.x=b[0],f.y=b[1],f.sAngle=n,f.eAngle=o,f.index=0,f.seriesIndex=d,f.fraction=b[1]/this.total)},drawHit:function(a){var b=a.context,c=this.slices[a.args.seriesIndex];b.save(),b.translate(a.width/2,a.height/2),this.plotSlice(c.x,c.y,c.radius,c.start,c.end,b),b.stroke(),b.restore()},clearHit:function(a){var b=a.context,c=this.slices[a.args.seriesIndex],d=2*a.lineWidth,e=c.radius+d;b.save(),b.translate(a.width/2,a.height/2),b.clearRect(c.x-e,c.y-e,2*e+d,2*e+d),b.restore()},extendYRange:function(a,b){this.total=(this.total||0)+b[0][1]}})}(),Flotr.addType("points",{options:{show:!1,radius:3,lineWidth:2,fill:!0,fillColor:"#FFFFFF",fillOpacity:.4},draw:function(a){var b=a.context,c=a.lineWidth,d=a.shadowSize;b.save(),d>0&&(b.lineWidth=d/2,b.strokeStyle="rgba(0,0,0,0.1)",this.plot(a,d/2+b.lineWidth/2),b.strokeStyle="rgba(0,0,0,0.2)",this.plot(a,b.lineWidth/2)),b.lineWidth=a.lineWidth,b.strokeStyle=a.color,b.fillStyle=a.fillColor||a.color,this.plot(a),b.restore()},plot:function(a,b){var c=a.data,d=a.context,e=a.xScale,f=a.yScale,g,h,i;for(g=c.length-1;g>-1;--g){i=c[g][1];if(i===null)continue;h=e(c[g][0]),i=f(i);if(h<0||h>a.width||i<0||i>a.height)continue;d.beginPath(),b?d.arc(h,i+b,a.radius,0,Math.PI,!1):(d.arc(h,i,a.radius,0,2*Math.PI,!0),a.fill&&d.fill()),d.stroke(),d.closePath()}}}),Flotr.addType("radar",{options:{show:!1,lineWidth:2,fill:!0,fillOpacity:.4,radiusRatio:.9},draw:function(a){var b=a.context,c=a.shadowSize;b.save(),b.translate(a.width/2,a.height/2),b.lineWidth=a.lineWidth,b.fillStyle="rgba(0,0,0,0.05)",b.strokeStyle="rgba(0,0,0,0.05)",this.plot(a,c/2),b.strokeStyle="rgba(0,0,0,0.1)",this.plot(a,c/4),b.strokeStyle=a.color,b.fillStyle=a.fillStyle,this.plot(a),b.restore()},plot:function(a,b){var c=a.data,d=a.context,e=Math.min(a.height,a.width)*a.radiusRatio/2,f=2*Math.PI/c.length,g=-Math.PI/2,h,i;b=b||0,d.beginPath();for(h=0;h<c.length;++h)i=c[h][1]/this.max,d[h===0?"moveTo":"lineTo"](Math.cos(h*f+g)*e*i+b,Math.sin(h*f+g)*e*i+b);d.closePath(),a.fill&&d.fill(),d.stroke()},extendYRange:function(a,b){this.max=Math.max(a.max,this.max||-Number.MAX_VALUE)}}),Flotr.addType("timeline",{options:{show:!1,lineWidth:1,barWidth:.2,fill:!0,fillColor:null,fillOpacity:.4,centered:!0},draw:function(a){var b=a.context;b.save(),b.lineJoin="miter",b.lineWidth=a.lineWidth,b.strokeStyle=a.color,b.fillStyle=a.fillStyle,this.plot(a),b.restore()},plot:function(a){var b=a.data,c=a.context,d=a.xScale,e=a.yScale,f=a.barWidth,g=a.lineWidth,h;Flotr._.each(b,function(a){var b=a[0],h=a[1],i=a[2],j=f,k=Math.ceil(d(b)),l=Math.ceil(d(b+i))-k,m=Math.round(e(h)),n=Math.round(e(h-j))-m,o=k-g/2,p=Math.round(m-n/2)-g/2;c.strokeRect(o,p,l,n),c.fillRect(o,p,l,n)})},extendRange:function(a){var b=a.data,c=a.xaxis,d=a.yaxis,e=a.timeline.barWidth;c.options.min===null&&(c.min=c.datamin-e/2);if(c.options.max===null){var f=c.max;Flotr._.each(b,function(a){f=Math.max(f,a[0]+a[2])},this),c.max=f+e/2}d.options.min===null&&(d.min=d.datamin-e),d.options.min===null&&(d.max=d.datamax+e)}}),function(){var a=Flotr.DOM;Flotr.addPlugin("crosshair",{options:{mode:null,color:"#FF0000",hideCursor:!0},callbacks:{"flotr:mousemove":function(a,b){this.options.crosshair.mode&&this.crosshair.clearCrosshair(),this.options.crosshair.mode&&this.crosshair.drawCrosshair(b)}},drawCrosshair:function(b){var c=this.octx,d=this.options.crosshair,e=this.plotOffset,f=e.left+b.relX+.5,g=e.top+b.relY+.5;if(b.relX<0||b.relY<0||b.relX>this.plotWidth||b.relY>this.plotHeight){this.el.style.cursor=null,a.removeClass(this.el,"flotr-crosshair");return}this.lastMousePos.relX=null,this.lastMousePos.relY=null,d.hideCursor&&(this.el.style.cursor="none",a.addClass(this.el,"flotr-crosshair")),c.save(),c.strokeStyle=d.color,c.lineWidth=1,c.beginPath(),d.mode.indexOf("x")!=-1&&(c.moveTo(f,e.top),c.lineTo(f,e.top+this.plotHeight),this.lastMousePos.relX=f),d.mode.indexOf("y")!=-1&&(c.moveTo(e.left,g),c.lineTo(e.left+this.plotWidth,g),this.lastMousePos.relY=g),c.stroke(),c.restore()},clearCrosshair:function(){this.lastMousePos.relX&&this.octx.clearRect(this.lastMousePos.relX-.5,this.plotOffset.top,1,this.plotHeight+1),this.lastMousePos.relY&&this.octx.clearRect(this.plotOffset.left,this.lastMousePos.relY-.5,this.plotWidth+1,1)}})}(),function(){function c(a,b,c,d){var e="image/"+a,f=b.toDataURL(e),g=new Image;return g.src=f,g}var a=Flotr.DOM,b=Flotr._;Flotr.addPlugin("download",{saveImage:function(d,e,f,g){var h=null;if(Flotr.isIE&&Flotr.isIE<9)return h="<html><body>"+this.canvas.firstChild.innerHTML+"</body></html>",window.open().document.write(h);if(d!=="jpeg"&&d!=="png")return;h=c(d,this.canvas,e,f);if(b.isElement(h)&&g)this.download.restoreCanvas(),a.hide(this.canvas),a.hide(this.overlay),a.setStyles({position:"absolute"}),a.insert(this.el,h),this.saveImageElement=h;else return window.open(h.src)},restoreCanvas:function(){a.show(this.canvas),a.show(this.overlay),this.saveImageElement&&this.el.removeChild(this.saveImageElement),this.saveImageElement=null}})}(),function(){var a=Flotr.EventAdapter,b=Flotr._;Flotr.addPlugin("graphGrid",{callbacks:{"flotr:beforedraw":function(){this.graphGrid.drawGrid()},"flotr:afterdraw":function(){this.graphGrid.drawOutline()}},drawGrid:function(){function p(a){for(n=0;n<a.length;++n){var b=a[n].v/l.max;for(o=0;o<=u;++o)c[o===0?"moveTo":"lineTo"](Math.cos(o*v+w)*t*b,Math.sin(o*v+w)*t*b)}}function q(a,d){b.each(b.pluck(a,"v"),function(a){if(a<=l.min||a>=l.max||(a==l.min||a==l.max)&&e.outlineWidth)return;d(Math.floor(l.d2p(a))+c.lineWidth/2)})}function r(a){c.moveTo(a,0),c.lineTo(a,j)}function s(a){c.moveTo(0,a),c.lineTo(k,a)}var c=this.ctx,d=this.options,e=d.grid,f=e.verticalLines,g=e.horizontalLines,h=e.minorVerticalLines,i=e.minorHorizontalLines,j=this.plotHeight,k=this.plotWidth,l,m,n,o;(f||h||g||i)&&a.fire(this.el,"flotr:beforegrid",[this.axes.x,this.axes.y,d,this]),c.save(),c.lineWidth=1,c.strokeStyle=e.tickColor;if(e.circular){c.translate(this.plotOffset.left+k/2,this.plotOffset.top+j/2);var t=Math.min(j,k)*d.radar.radiusRatio/2,u=this.axes.x.ticks.length,v=2*(Math.PI/u),w=-Math.PI/2;c.beginPath(),l=this.axes.y,g&&p(l.ticks),i&&p(l.minorTicks),f&&b.times(u,function(a){c.moveTo(0,0),c.lineTo(Math.cos(a*v+w)*t,Math.sin(a*v+w)*t)}),c.stroke()}else c.translate(this.plotOffset.left,this.plotOffset.top),e.backgroundColor&&(c.fillStyle=this.processColor(e.backgroundColor,{x1:0,y1:0,x2:k,y2:j}),c.fillRect(0,0,k,j)),c.beginPath(),l=this.axes.x,f&&q(l.ticks,r),h&&q(l.minorTicks,r),l=this.axes.y,g&&q(l.ticks,s),i&&q(l.minorTicks,s),c.stroke();c.restore(),(f||h||g||i)&&a.fire(this.el,"flotr:aftergrid",[this.axes.x,this.axes.y,d,this])},drawOutline:function(){var a=this,b=a.options,c=b.grid,d=a.ctx,e=c.backgroundImage,f=a.plotOffset,g=f.left,h=f.top,j=a.plotWidth,k=a.plotHeight,l,m,n,o,p,q;if(!c.outlineWidth)return;d.save();if(c.circular){d.translate(g+j/2,h+k/2);var r=Math.min(k,j)*b.radar.radiusRatio/2,s=this.axes.x.ticks.length,t=2*(Math.PI/s),u=-Math.PI/2;d.beginPath(),d.lineWidth=c.outlineWidth,d.strokeStyle=c.color,d.lineJoin="round";for(i=0;i<=s;++i)d[i===0?"moveTo":"lineTo"](Math.cos(i*t+u)*r,Math.sin(i*t+u)*r);d.stroke()}else{d.translate(g,h);var v=c.outlineWidth,w=.5-v+(v+1)%2/2;d.lineWidth=v,d.strokeStyle=c.color,d.lineJoin="miter",d.strokeRect(w,w,j,k)}d.restore(),e&&(n=e.src||e,o=(parseInt(e.left,10)||0)+f.left,p=(parseInt(e.top,10)||0)+f.top,m=new Image,m.onload=function(){d.save(),e.alpha&&(d.globalAlpha=e.alpha),d.globalCompositeOperation="destination-over",d.drawImage(m,0,0,j,k,o,p,j,k),d.restore()},m.src=n)}})}(),function(){var a=Flotr.DOM,b=Flotr._,c=Flotr,d="opacity:0.7;background-color:#000;color:#fff;display:none;position:absolute;padding:2px 8px;-moz-border-radius:4px;border-radius:4px;white-space:nowrap;";Flotr.addPlugin("hit",{callbacks:{"flotr:mousemove":function(a,b){this.hit.track(b)},"flotr:click":function(a){this.hit.track(a)},"flotr:mouseout":function(){this.hit.clearHit()}},track:function(a){(this.options.mouse.track||b.any(this.series,function(a){return a.mouse&&a.mouse.track}))&&this.hit.hit(a)},executeOnType:function(a,d,e){function h(a,h){b.each(b.keys(c.graphTypes),function(b){a[b]&&a[b].show&&this[b][d]&&(g=this.getOptions(a,b),g.fill=!!a.mouse.fillColor,g.fillStyle=this.processColor(a.mouse.fillColor||"#ffffff",{opacity:a.mouse.fillOpacity}),g.color=a.mouse.lineColor,g.context=this.octx,g.index=h,e&&(g.args=e),this[b][d].call(this[b],g),f=!0)},this)}var f=!1,g;return b.isArray(a)||(a=[a]),b.each(a,h,this),f},drawHit:function(a){var b=this.octx,c=a.series;if(c.mouse.lineColor){b.save(),b.lineWidth=c.points?c.points.lineWidth:1,b.strokeStyle=c.mouse.lineColor,b.fillStyle=this.processColor(c.mouse.fillColor||"#ffffff",{opacity:c.mouse.fillOpacity}),b.translate(this.plotOffset.left,this.plotOffset.top);if(!this.hit.executeOnType(c,"drawHit",a)){var d=a.xaxis,e=a.yaxis;b.beginPath(),b.arc(d.d2p(a.x),e.d2p(a.y),c.points.radius||c.mouse.radius,0,2*Math.PI,!0),b.fill(),b.stroke(),b.closePath()}b.restore()}this.prevHit=a},clearHit:function(){var b=this.prevHit,c=this.octx,d=this.plotOffset;c.save(),c.translate(d.left,d.top);if(b){if(!this.hit.executeOnType(b.series,"clearHit",this.prevHit)){var e=b.series,f=e.points?e.points.lineWidth:1;offset=(e.points.radius||e.mouse.radius)+f,c.clearRect(b.xaxis.d2p(b.x)-offset,b.yaxis.d2p(b.y)-offset,offset*2,offset*2)}a.hide(this.mouseTrack),this.prevHit=null}c.restore()},hit:function(a){var c=this.options,d=this.prevHit,e,f,g,h,i,j,k,l;if(this.series.length===0)return;n={relX:a.relX,relY:a.relY,absX:a.absX,absY:a.absY};if(c.mouse.trackY&&!c.mouse.trackAll&&this.hit.executeOnType(this.series,"hit",[a,n]))b.isUndefined(n.seriesIndex)||(i=this.series[n.seriesIndex],n.series=i,n.mouse=i.mouse,n.xaxis=i.xaxis,n.yaxis=i.yaxis);else{e=this.hit.closest(a);if(e){e=c.mouse.trackY?e.point:e.x,h=e.seriesIndex,i=this.series[h],k=i.xaxis,l=i.yaxis,f=2*i.mouse.sensibility;if(c.mouse.trackAll||e.distanceX<f/k.scale&&(!c.mouse.trackY||e.distanceY<f/l.scale))n.series=i,n.xaxis=i.xaxis,n.yaxis=i.yaxis,n.mouse=i.mouse,n.x=e.x,n.y=e.y,n.dist=e.distance,n.index=e.dataIndex,n.seriesIndex=h}}if(!d||d.index!==n.index||d.seriesIndex!==n.seriesIndex)this.hit.clearHit(),n.series&&n.mouse&&n.mouse.track&&(this.hit.drawMouseTrack(n),this.hit.drawHit(n),Flotr.EventAdapter.fire(this.el,"flotr:hit",[n,this]))},closest:function(a){function t(a){a.distance=m,a.distanceX=n,a.distanceY=o,a.seriesIndex=r,a.dataIndex=s,a.x=p,a.y=q}var b=this.series,c=this.options,d=a.x,e=a.y,f=Number.MAX_VALUE,g=Number.MAX_VALUE,h={},i={},j=!1,k,l,m,n,o,p,q,r,s;for(r=0;r<b.length;r++){k=b[r],l=k.data,l.length&&(j=!0);for(s=l.length;s--;){p=l[s][0],q=l[s][1];if(p===null||q===null)continue;n=Math.abs(p-d),o=Math.abs(q-e),m=n*n+o*o,m<f&&(f=m,t(h)),n<g&&(g=n,t(i))}}return j?{point:h,x:i}:!1},drawMouseTrack:function(b){var c="",e=b.series,f=b.mouse.position,g=b.mouse.margin,h=d,i=this.mouseTrack,j=this.plotOffset,k=j.left,l=j.right,m=j.bottom,n=j.top,o=b.mouse.trackDecimals,p=this.options;i||(i=a.node('<div class="flotr-mouse-value"></div>'),this.mouseTrack=i,a.insert(this.el,i));if(!b.mouse.relative)f.charAt(0)=="n"?c+="top:"+(g+n)+"px;bottom:auto;":f.charAt(0)=="s"&&(c+="bottom:"+(g+m)+"px;top:auto;"),f.charAt(1)=="e"?c+="right:"+(g+l)+"px;left:auto;":f.charAt(1)=="w"&&(c+="left:"+(g+k)+"px;right:auto;");else if(e.bars.show)c+="bottom:"+(g-n-b.yaxis.d2p(b.y/2)+this.canvasHeight)+"px;top:auto;",c+="left:"+(g+k+b.xaxis.d2p(b.x-p.bars.barWidth/2))+"px;right:auto;";else if(e.pie.show){var q={x:this.plotWidth/2,y:this.plotHeight/2},r=Math.min(this.canvasWidth,this.canvasHeight)*e.pie.sizeRatio/2,s=b.sAngle<b.eAngle?(b.sAngle+b.eAngle)/2:(b.sAngle+b.eAngle+2*Math.PI)/2;c+="bottom:"+(g-n-q.y-Math.sin(s)*r/2+this.canvasHeight)+"px;top:auto;",c+="left:"+(g+k+q.x+Math.cos(s)*r/2)+"px;right:auto;"}else f.charAt(0)=="n"?c+="bottom:"+(g-n-b.yaxis.d2p(b.y)+this.canvasHeight)+"px;top:auto;":f.charAt(0)=="s"&&(c+="top:"+(g+n+b.yaxis.d2p(b.y))+"px;bottom:auto;"),f.charAt(1)=="e"?c+="left:"+(g+k+b.xaxis.d2p(b.x))+"px;right:auto;":f.charAt(1)=="w"&&(c+="right:"+(g-k-b.xaxis.d2p(b.x)+this.canvasWidth)+"px;left:auto;");h+=c,i.style.cssText=h;if(!o||o<0)o=0;i.innerHTML=b.mouse.trackFormatter({x:b.x.toFixed(o),y:b.y.toFixed(o),series:b.series,index:b.index,nearest:b,fraction:b.fraction}),a.show(i)}})}(),function(){function a(a,b){return a.which?a.which===1:a.button===0||a.button===1}function b(a,b){return Math.min(Math.max(0,a),b.plotWidth-1)}function c(a,b){return Math.min(Math.max(0,a),b.plotHeight)}var d=Flotr.DOM,e=Flotr.EventAdapter,f=Flotr._;Flotr.addPlugin("selection",{options:{mode:null,color:"#B6D9FF",fps:20},callbacks:{"flotr:mouseup":function(a){if(!this.options.selection||!this.options.selection.mode)return;this.selection.interval&&clearInterval(this.selection.interval);var b=e.eventPointer(a);this.selection.setSelectionPos(this.selection.selection.second,{pageX:b.x,pageY:b.y}),this.selection.clearSelection(),this.selection.selecting&&this.selection.selectionIsSane()&&(this.selection.drawSelection(),this.selection.fireSelectEvent(),this.ignoreClick=!0)},"flotr:mousedown":function(b){if(!this.options.selection||!this.options.selection.mode)return;if(!this.options.selection.mode||!a(b)&&f.isUndefined(b.touches))return;var c=e.eventPointer(b);this.selection.setSelectionPos(this.selection.selection.first,{pageX:c.x,pageY:c.y}),this.selection.interval&&clearInterval(this.selection.interval),this.lastMousePos.pageX=null,this.selection.selecting=!1,this.selection.interval=setInterval(f.bind(this.selection.updateSelection,this),1e3/this.options.selection.fps)}},getArea:function(){var a=this.selection.selection,b=a.first,c=a.second;return{x1:Math.min(b.x,c.x),x2:Math.max(b.x,c.x),y1:Math.min(b.y,c.y),y2:Math.max(b.y,c.y)}},selection:{first:{x:-1,y:-1},second:{x:-1,y:-1}},prevSelection:null,interval:null,fireSelectEvent:function(a){var b=this.axes,c=this.selection.selection,d,f,g,h;a=a||"select",d=b.x.p2d(c.first.x),f=b.x.p2d(c.second.x),g=b.y.p2d(c.first.y),h=b.y.p2d(c.second.y),e.fire(this.el,"flotr:"+a,[{x1:Math.min(d,f),y1:Math.min(g,h),x2:Math.max(d,f),y2:Math.max(g,h),xfirst:d,xsecond:f,yfirst:g,ysecond:h},this])},setSelection:function(a,d){var e=this.options,f=this.axes.x,g=this.axes.y,h=g.scale,i=f.scale,j=e.selection.mode.indexOf("x")!=-1,k=e.selection.mode.indexOf("y")!=-1,l=this.selection.selection;this.selection.clearSelection(),l.first.y=c(j&&!k?0:(g.max-a.y1)*h,this),l.second.y=c(j&&!k?this.plotHeight-1:(g.max-a.y2)*h,this),l.first.x=b(k&&!j?0:a.x1,this),l.second.x=b(k&&!j?this.plotWidth:a.x2,this),this.selection.drawSelection(),d||this.selection.fireSelectEvent()},setSelectionPos:function(a,e){var f=this.options,g=d.position(this.overlay),h=this.selection.selection;f.selection.mode.indexOf("x")==-1?a.x=a==h.first?0:this.plotWidth:a.x=b(e.pageX-g.left-this.plotOffset.left,this),f.selection.mode.indexOf("y")==-1?a.y=a==h.first?0:this.plotHeight-1:a.y=c(e.pageY-g.top-this.plotOffset.top,this)},drawSelection:function(){this.selection.fireSelectEvent("selecting");var a=this.selection.selection,b=this.octx,c=this.options,d=this.plotOffset,e=this.selection.prevSelection;if(e&&a.first.x==e.first.x&&a.first.y==e.first.y&&a.second.x==e.second.x&&a.second.y==e.second.y)return;b.save(),b.strokeStyle=this.processColor(c.selection.color,{opacity:.8}),b.lineWidth=1,b.lineJoin="miter",b.fillStyle=this.processColor(c.selection.color,{opacity:.4}),this.selection.prevSelection={first:{x:a.first.x,y:a.first.y},second:{x:a.second.x,y:a.second.y}};var f=Math.min(a.first.x,a.second.x),g=Math.min(a.first.y,a.second.y),h=Math.abs(a.second.x-a.first.x),i=Math.abs(a.second.y-a.first.y);b.fillRect(f+d.left+.5,g+d.top+.5,h,i),b.strokeRect(f+d.left+.5,g+d.top+.5,h,i),b.restore()},updateSelection:function(){if(!this.lastMousePos.pageX)return;this.selection.selecting=!0,this.selection.setSelectionPos(this.selection.selection.second,this.lastMousePos),this.selection.clearSelection(),this.selection.selectionIsSane()&&this.selection.drawSelection()},clearSelection:function(){if(!this.selection.prevSelection)return;var a=this.selection.prevSelection,b=1,c=this.plotOffset,d=Math.min(a.first.x,a.second.x),e=Math.min(a.first.y,a.second.y),f=Math.abs(a.second.x-a.first.x),g=Math.abs(a.second.y-a.first.y);this.octx.clearRect(d+c.left-b+.5,e+c.top-b,f+2*b+.5,g+2*b+.5),this.selection.prevSelection=null},selectionIsSane:function(){var a=this.selection.selection;return Math.abs(a.second.x-a.first.x)>=5||Math.abs(a.second.y-a.first.y)>=5}})}(),function(){var a=Flotr.DOM;Flotr.addPlugin("labels",{callbacks:{"flotr:afterdraw":function(){this.labels.draw()}},draw:function(){function s(a,b,d){var e=d?b.minorTicks:b.ticks,f=b.orientation===1,h=b.n===1,k,m;k={color:b.options.color||o.grid.color,angle:Flotr.toRad(b.options.labelsAngle),textBaseline:"middle"};for(l=0;l<e.length&&(d?b.options.showMinorLabels:b.options.showLabels);++l){c=e[l],c.label+="";if(!c.label||!c.label.length)continue;x=Math.cos(l*i+j)*g,y=Math.sin(l*i+j)*g,k.textAlign=f?Math.abs(x)<.1?"center":x<0?"right":"left":"left",Flotr.drawText(p,c.label,f?x:3,f?y:-(b.ticks[l].v/b.max)*(g-o.fontSize),k)}}function t(a,b,d,e){function j(a){return a.options.showLabels&&a.used}function k(a,b,c,d){return a.plotOffset.left+(b?d:c?-o.grid.labelMargin:o.grid.labelMargin+a.plotWidth)}function m(a,b,c,d){return a.plotOffset.top+(b?o.grid.labelMargin:d)+(b&&c?a.plotHeight:0)}var f=b.orientation===1,g=b.n===1,h,i;h={color:b.options.color||o.grid.color,textAlign:d,textBaseline:e,angle:Flotr.toRad(b.options.labelsAngle)},h=Flotr.getBestTextAlign(h.angle,h);for(l=0;l<b.ticks.length&&j(b);++l){c=b.ticks[l];if(!c.label||!c.label.length)continue;i=b.d2p(c.v);if(i<0||i>(f?a.plotWidth:a.plotHeight))continue;Flotr.drawText(p,c.label,k(a,f,g,i),m(a,f,g,i),h),!f&&!g&&(p.save(),p.strokeStyle=h.color,p.beginPath(),p.moveTo(a.plotOffset.left+a.plotWidth-8,a.plotOffset.top+b.d2p(c.v)),p.lineTo(a.plotOffset.left+a.plotWidth,a.plotOffset.top+b.d2p(c.v)),p.stroke(),p.restore())}}function u(a,b){var d=b.orientation===1,e=b.n===1,g,h,i,j=a.plotOffset,k;!d&&!e&&(p.save(),p.strokeStyle=b.options.color||o.grid.color,p.beginPath());if(b.options.showLabels&&(e?!0:b.used))for(l=0;l<b.ticks.length;++l){c=b.ticks[l];if(!c.label||!c.label.length||(d?j.left:j.top)+b.d2p(c.v)<0||(d?j.left:j.top)+b.d2p(c.v)>(d?a.canvasWidth:a.canvasHeight))continue;i=j.top+(d?(e?1:-1)*(a.plotHeight+o.grid.labelMargin):b.d2p(c.v)-b.maxLabel.height/2),g=d?j.left+b.d2p(c.v)-f/2:0,l===0?k=" first":l===b.ticks.length-1?k=" last":k="",m+=['<div style="position:absolute; text-align:'+(d?"center":"right")+"; ","top:"+i+"px; ",(!d&&!e?"right:":"left:")+g+"px; ","width:"+(d?f:(e?j.left:j.right)-o.grid.labelMargin)+"px; ",b.options.color?"color:"+b.options.color+"; ":" ",'" class="flotr-grid-label'+k+'">'+c.label+"</div>"].join(" "),!d&&!e&&(p.moveTo(j.left+a.plotWidth-8,j.top+b.d2p(c.v)),p.lineTo(j.left+a.plotWidth,j.top+b.d2p(c.v)))}}var b,c,d,e,f,g,h,i,j,k,l,m="",n=0,o=this.options,p=this.ctx,q=this.axes,r={size:o.fontSize};for(l=0;l<q.x.ticks.length;++l)q.x.ticks[l].label&&++n;f=this.plotWidth/n,o.grid.circular&&(p.save(),p.translate(this.plotOffset.left+this.plotWidth/2,this.plotOffset.top+this.plotHeight/2),g=this.plotHeight*o.radar.radiusRatio/2+o.fontSize,h=this.axes.x.ticks.length,i=2*(Math.PI/h),j=-Math.PI/2,s(this,q.x,!1),s(this,q.x,!0),s(this,q.y,!1),s(this,q.y,!0),p.restore()),!o.HtmlText&&this.textEnabled?(t(this,q.x,"center","top"),t(this,q.x2,"center","bottom"),t(this,q.y,"right","middle"),t(this,q.y2,"left","middle")):(q.x.options.showLabels||q.x2.options.showLabels||q.y.options.showLabels||q.y2.options.showLabels)&&!o.grid.circular&&(m="",u(this,q.x),u(this,q.x2),u(this,q.y),u(this,q.y2),p.stroke(),p.restore(),k=a.create("div"),a.setStyles(k,{fontSize:"smaller",color:o.grid.color}),k.className="flotr-labels",a.insert(this.el,k),a.insert(k,m))}})}(),function(){var a=Flotr.DOM,b=Flotr._;Flotr.addPlugin("legend",{options:{show:!0,noColumns:1,labelFormatter:function(a){return a},labelBoxBorderColor:"#CCCCCC",labelBoxWidth:14,labelBoxHeight:10,labelBoxMargin:5,labelBoxOpacity:.4,container:null,position:"nw",margin:5,backgroundColor:null,backgroundOpacity:.85},callbacks:{"flotr:afterinit":function(){this.legend.insertLegend()}},insertLegend:function(){if(!this.options.legend.show)return;var c=this.series,d=this.plotOffset,e=this.options,f=e.legend,g=[],h=!1,i=this.ctx,j=b.filter(c,function(a){return a.label&&!a.hide}).length,k=f.position,l=f.margin,m,n,o;if(j)if(!e.HtmlText&&this.textEnabled&&!f.container){var p={size:e.fontSize*1.1,color:e.grid.color},q=f.labelBoxWidth,r=f.labelBoxHeight,s=f.labelBoxMargin,t=d.left+l,u=d.top+l,v=0;for(m=c.length-1;m>-1;--m){if(!c[m].label||c[m].hide)continue;n=f.labelFormatter(c[m].label),v=Math.max(v,this._text.measureText(n,p).width)}var w=Math.round(q+s*3+v),x=Math.round(j*(s+r)+s);k.charAt(0)=="s"&&(u=d.top+this.plotHeight-(l+x)),k.charAt(1)=="e"&&(t=d.left+this.plotWidth-(l+w)),o=this.processColor(f.backgroundColor||"rgb(240,240,240)",{opacity:f.backgroundOpacity||.1}),i.fillStyle=o,i.fillRect(t,u,w,x),i.strokeStyle=f.labelBoxBorderColor,i.strokeRect(Flotr.toPixel(t),Flotr.toPixel(u),w,x);var y=t+s,z=u+s;for(m=0;m<c.length;m++){if(!c[m].label||c[m].hide)continue;n=f.labelFormatter(c[m].label),i.fillStyle=c[m].color,i.fillRect(y,z,q-1,r-1),i.strokeStyle=f.labelBoxBorderColor,i.lineWidth=1,i.strokeRect(Math.ceil(y)-1.5,Math.ceil(z)-1.5,q+2,r+2),Flotr.drawText(i,n,y+q+s,z+r,p),z+=r+s}}else{for(m=0;m<c.length;++m){if(!c[m].label||c[m].hide)continue;m%f.noColumns===0&&(g.push(h?"</tr><tr>":"<tr>"),h=!0);var A=c[m],B=f.labelBoxWidth,C=f.labelBoxHeight,E=A.bars?A.bars.fillOpacity:f.labelBoxOpacity,F="opacity:"+E+";filter:alpha(opacity="+E*100+");";n=f.labelFormatter(A.label),o="background-color:"+(A.bars&&A.bars.show&&A.bars.fillColor&&A.bars.fill?A.bars.fillColor:A.color)+";",g.push('<td class="flotr-legend-color-box">','<div style="border:1px solid ',f.labelBoxBorderColor,';padding:1px">','<div style="width:',B-1,"px;height:",C-1,"px;border:1px solid ",c[m].color,'">','<div style="width:',B,"px;height:",C,"px;","opacity:.4;",o,'"></div>',"</div>","</div>","</td>",'<td class="flotr-legend-label">',n,"</td>")}h&&g.push("</tr>");if(g.length>0){var G='<table style="font-size:smaller;color:'+e.grid.color+'">'+g.join("")+"</table>";if(f.container)a.insert(f.container,G);else{var H={position:"absolute","z-index":2};k.charAt(0)=="n"?(H.top=l+d.top+"px",H.bottom="auto"):k.charAt(0)=="s"&&(H.bottom=l+d.bottom+"px",H.top="auto"),k.charAt(1)=="e"?(H.right=l+d.right+"px",H.left="auto"):k.charAt(1)=="w"&&(H.left=l+d.left+"px",H.right="auto");var I=a.create("div"),J;I.className="flotr-legend",a.setStyles(I,H),a.insert(I,G),a.insert(this.el,I);if(!f.backgroundOpacity)return;var K=f.backgroundColor||e.grid.backgroundColor||"#ffffff";b.extend(H,a.size(I),{backgroundColor:K,"z-index":1}),H.width+="px",H.height+="px",I=a.create("div"),I.className="flotr-legend-bg",a.setStyles(I,H),a.opacity(I,f.backgroundOpacity),a.insert(I," "),a.insert(this.el,I)}}}}})}(),function(){function a(a){if(this.options.spreadsheet.tickFormatter)return this.options.spreadsheet.tickFormatter(a);var b=c.find(this.axes.x.ticks,function(b){return b.v==a});return b?b.label:a}var b=Flotr.DOM,c=Flotr._;Flotr.addPlugin("spreadsheet",{options:{show:!1,tabGraphLabel:"Graph",tabDataLabel:"Data",toolbarDownload:"Download CSV",toolbarSelectAll:"Select all",csvFileSeparator:",",decimalSeparator:".",tickFormatter:null,initialTab:"graph"},callbacks:{"flotr:afterconstruct":function(){if(!this.options.spreadsheet.show)return;var a=this.spreadsheet,c=b.node('<div class="flotr-tabs-group" style="position:absolute;left:0px;width:'+this.canvasWidth+'px"></div>'),d=b.node('<div style="float:left" class="flotr-tab selected">'+this.options.spreadsheet.tabGraphLabel+"</div>"),e=b.node('<div style="float:left" class="flotr-tab">'+this.options.spreadsheet.tabDataLabel+"</div>"),f;a.tabsContainer=c,a.tabs={graph:d,data:e},b.insert(c,d),b.insert(c,e),b.insert(this.el,c),f=b.size(e).height+2,this.plotOffset.bottom+=f,b.setStyles(c,{top:this.canvasHeight-f+"px"}),this._observe(d,"click",function(){a.showTab("graph")})._observe(e,"click",function(){a.showTab("data")}),this.options.spreadsheet.initialTab!=="graph"&&a.showTab(this.options.spreadsheet.initialTab)}},loadDataGrid:function(){if(this.seriesData)return this.seriesData;var a=this.series,b={};return c.each(a,function(a,d){c.each(a.data,function(a){var c=a[0],e=a[1],f=b[c];if(f)f[d+1]=e;else{var g=[];g[0]=c,g[d+1]=e,b[c]=g}})}),this.seriesData=c.sortBy(b,function(a,b){return parseInt(b,10)}),this.seriesData},constructDataGrid:function(){if(this.spreadsheet.datagrid)return this.spreadsheet.datagrid;var d=this.series,e=this.spreadsheet.loadDataGrid(),f=["<colgroup><col />"],g,h,i,j=['<table class="flotr-datagrid"><tr class="first-row">'];j.push("<th>&nbsp;</th>"),c.each(d,function(a,b){j.push('<th scope="col">'+(a.label||String.fromCharCode(65+b))+"</th>"),f.push("<col />")}),j.push("</tr>"),c.each(e,function(b){j.push("<tr>"),c.times(d.length+1,function(d){var e="td",f=b[d],g=c.isUndefined(f)?"":Math.round(f*1e5)/1e5;if(d===0){e="th";var h=a.call(this,g);h&&(g=h)}j.push("<"+e+(e=="th"?' scope="row"':"")+">"+g+"</"+e+">")},this),j.push("</tr>")},this),f.push("</colgroup>"),i=b.node(j.join("")),g=b.node('<button type="button" class="flotr-datagrid-toolbar-button">'+this.options.spreadsheet.toolbarDownload+"</button>"),h=b.node('<button type="button" class="flotr-datagrid-toolbar-button">'+this.options.spreadsheet.toolbarSelectAll+"</button>"),this._observe(g,"click",c.bind(this.spreadsheet.downloadCSV,this))._observe(h,"click",c.bind(this.spreadsheet.selectAllData,this));var k=b.node('<div class="flotr-datagrid-toolbar"></div>');b.insert(k,g),b.insert(k,h);var l=this.canvasHeight-b.size(this.spreadsheet.tabsContainer).height-2,m=b.node('<div class="flotr-datagrid-container" style="position:absolute;left:0px;top:0px;width:'+this.canvasWidth+"px;height:"+l+'px;overflow:auto;z-index:10"></div>');return b.insert(m,k),b.insert(m,i),b.insert(this.el,m),this.spreadsheet.datagrid=i,this.spreadsheet.container=m,i},showTab:function(a){if(this.spreadsheet.activeTab===a)return;switch(a){case"graph":b.hide(this.spreadsheet.container),b.removeClass(this.spreadsheet.tabs.data,"selected"),b.addClass(this.spreadsheet.tabs.graph,"selected");break;case"data":this.spreadsheet.datagrid||this.spreadsheet.constructDataGrid(),b.show(this.spreadsheet.container),b.addClass(this.spreadsheet.tabs.data,"selected"),b.removeClass(this.spreadsheet.tabs.graph,"selected");break;default:throw"Illegal tab name: "+a}this.spreadsheet.activeTab=a},selectAllData:function(){if(this.spreadsheet.tabs){var a,b,c,d,e=this.spreadsheet.constructDataGrid();return this.spreadsheet.showTab("data"),setTimeout(function(){(c=e.ownerDocument)&&(d=c.defaultView)&&d.getSelection&&c.createRange&&(a=window.getSelection())&&a.removeAllRanges?(b=c.createRange(),b.selectNode(e),a.removeAllRanges(),a.addRange(b)):document.body&&document.body.createTextRange&&(b=document.body.createTextRange())&&(b.moveToElementText(e),b.select())},0),!0}return!1},downloadCSV:function(){var b="",d=this.series,e=this.options,f=this.spreadsheet.loadDataGrid(),g=encodeURIComponent(e.spreadsheet.csvFileSeparator);if(e.spreadsheet.decimalSeparator===e.spreadsheet.csvFileSeparator)throw"The decimal separator is the same as the column separator ("+e.spreadsheet.decimalSeparator+")";c.each(d,function(a,c){b+=g+'"'+(a.label||String.fromCharCode(65+c)).replace(/\"/g,'\\"')+'"'}),b+="%0D%0A",b+=c.reduce(f,function(b,c){var d=a.call(this,c[0])||"";d='"'+(d+"").replace(/\"/g,'\\"')+'"';var f=c.slice(1).join(g);return e.spreadsheet.decimalSeparator!=="."&&(f=f.replace(/\./g,e.spreadsheet.decimalSeparator)),b+d+g+f+"%0D%0A"},"",this),Flotr.isIE&&Flotr.isIE<9?(b=b.replace(new RegExp(g,"g"),decodeURIComponent(g)).replace(/%0A/g,"\n").replace(/%0D/g,"\r"),window.open().document.write(b)):window.open("data:text/csv,"+b)}})}(),function(){var a=Flotr.DOM;Flotr.addPlugin("titles",{callbacks:{"flotr:afterdraw":function(){this.titles.drawTitles()}},drawTitles:function(){var b,c=this.options,d=c.grid.labelMargin,e=this.ctx,f=this.axes;if(!c.HtmlText&&this.textEnabled){var g={size:c.fontSize,color:c.grid.color,textAlign:"center"};c.subtitle&&Flotr.drawText(e,c.subtitle,this.plotOffset.left+this.plotWidth/2,this.titleHeight+this.subtitleHeight-2,g),g.weight=1.5,g.size*=1.5,c.title&&Flotr.drawText(e,c.title,this.plotOffset.left+this.plotWidth/2,this.titleHeight-2,g),g.weight=1.8,g.size*=.8,f.x.options.title&&f.x.used&&(g.textAlign=f.x.options.titleAlign||"center",g.textBaseline="top",g.angle=Flotr.toRad(f.x.options.titleAngle),g=Flotr.getBestTextAlign(g.angle,g),Flotr.drawText(e,f.x.options.title,this.plotOffset.left+this.plotWidth/2,this.plotOffset.top+f.x.maxLabel.height+this.plotHeight+2*d,g)),f.x2.options.title&&f.x2.used&&(g.textAlign=f.x2.options.titleAlign||"center",g.textBaseline="bottom",g.angle=Flotr.toRad(f.x2.options.titleAngle),g=Flotr.getBestTextAlign(g.angle,g),Flotr.drawText(e,f.x2.options.title,this.plotOffset.left+this.plotWidth/2,this.plotOffset.top-f.x2.maxLabel.height-2*d,g)),f.y.options.title&&f.y.used&&(g.textAlign=f.y.options.titleAlign||"right",g.textBaseline="middle",g.angle=Flotr.toRad(f.y.options.titleAngle),g=Flotr.getBestTextAlign(g.angle,g),Flotr.drawText(e,f.y.options.title,this.plotOffset.left-f.y.maxLabel.width-2*d,this.plotOffset.top+this.plotHeight/2,g)),f.y2.options.title&&f.y2.used&&(g.textAlign=f.y2.options.titleAlign||"left",g.textBaseline="middle",g.angle=Flotr.toRad(f.y2.options.titleAngle),g=Flotr.getBestTextAlign(g.angle,g),Flotr.drawText(e,f.y2.options.title,this.plotOffset.left+this.plotWidth+f.y2.maxLabel.width+2*d,this.plotOffset.top+this.plotHeight/2,g))}else{b=[],c.title&&b.push('<div style="position:absolute;top:0;left:',this.plotOffset.left,"px;font-size:1em;font-weight:bold;text-align:center;width:",this.plotWidth,'px;" class="flotr-title">',c.title,"</div>"),c.subtitle&&b.push('<div style="position:absolute;top:',this.titleHeight,"px;left:",this.plotOffset.left,"px;font-size:smaller;text-align:center;width:",this.plotWidth,'px;" class="flotr-subtitle">',c.subtitle,"</div>"),b.push("</div>"),b.push('<div class="flotr-axis-title" style="font-weight:bold;">'),f.x.options.title&&f.x.used&&b.push('<div style="position:absolute;top:',this.plotOffset.top+this.plotHeight+c.grid.labelMargin+f.x.titleSize.height,"px;left:",this.plotOffset.left,"px;width:",this.plotWidth,'px;text-align:center;" class="flotr-axis-title">',f.x.options.title,"</div>"),f.x2.options.title&&f.x2.used&&b.push('<div style="position:absolute;top:0;left:',this.plotOffset.left,"px;width:",this.plotWidth,'px;text-align:center;" class="flotr-axis-title">',f.x2.options.title,"</div>"),f.y.options.title&&f.y.used&&b.push('<div style="position:absolute;top:',this.plotOffset.top+this.plotHeight/2-f.y.titleSize.height/2,'px;left:0;text-align:right;" class="flotr-axis-title">',f.y.options.title,"</div>"),f.y2.options.title&&f.y2.used&&b.push('<div style="position:absolute;top:',this.plotOffset.top+this.plotHeight/2-f.y.titleSize.height/2,'px;right:0;text-align:right;" class="flotr-axis-title">',f.y2.options.title,"</div>"),b=b.join("");var h=a.create("div");a.setStyles({color:c.grid.color}),h.className="flotr-titles",a.insert(this.el,h),a.insert(h,b)}}})}();
+(function () {
+
+var
+  global = this,
+  previousFlotr = this.Flotr,
+  Flotr;
+
+Flotr = {
+  _: _,
+  bean: bean,
+  isIphone: /iphone/i.test(navigator.userAgent),
+  isIE: (navigator.appVersion.indexOf("MSIE") != -1 ? parseFloat(navigator.appVersion.split("MSIE")[1]) : false),
+  
+  /**
+   * An object of the registered graph types. Use Flotr.addType(type, object)
+   * to add your own type.
+   */
+  graphTypes: {},
+  
+  /**
+   * The list of the registered plugins
+   */
+  plugins: {},
+  
+  /**
+   * Can be used to add your own chart type. 
+   * @param {String} name - Type of chart, like 'pies', 'bars' etc.
+   * @param {String} graphType - The object containing the basic drawing functions (draw, etc)
+   */
+  addType: function(name, graphType){
+    Flotr.graphTypes[name] = graphType;
+    Flotr.defaultOptions[name] = graphType.options || {};
+    Flotr.defaultOptions.defaultType = Flotr.defaultOptions.defaultType || name;
+  },
+  
+  /**
+   * Can be used to add a plugin
+   * @param {String} name - The name of the plugin
+   * @param {String} plugin - The object containing the plugin's data (callbacks, options, function1, function2, ...)
+   */
+  addPlugin: function(name, plugin){
+    Flotr.plugins[name] = plugin;
+    Flotr.defaultOptions[name] = plugin.options || {};
+  },
+  
+  /**
+   * Draws the graph. This function is here for backwards compatibility with Flotr version 0.1.0alpha.
+   * You could also draw graphs by directly calling Flotr.Graph(element, data, options).
+   * @param {Element} el - element to insert the graph into
+   * @param {Object} data - an array or object of dataseries
+   * @param {Object} options - an object containing options
+   * @param {Class} _GraphKlass_ - (optional) Class to pass the arguments to, defaults to Flotr.Graph
+   * @return {Object} returns a new graph object and of course draws the graph.
+   */
+  draw: function(el, data, options, GraphKlass){  
+    GraphKlass = GraphKlass || Flotr.Graph;
+    return new GraphKlass(el, data, options);
+  },
+  
+  /**
+   * Recursively merges two objects.
+   * @param {Object} src - source object (likely the object with the least properties)
+   * @param {Object} dest - destination object (optional, object with the most properties)
+   * @return {Object} recursively merged Object
+   * @TODO See if we can't remove this.
+   */
+  merge: function(src, dest){
+    var i, v, result = dest || {};
+
+    for (i in src) {
+      v = src[i];
+      if (v && typeof(v) === 'object') {
+        if (v.constructor === Array) {
+          result[i] = this._.clone(v);
+        } else if (v.constructor !== RegExp && !this._.isElement(v)) {
+          result[i] = Flotr.merge(v, (dest ? dest[i] : undefined));
+        } else {
+          result[i] = v;
+        }
+      } else {
+        result[i] = v;
+      }
+    }
+
+    return result;
+  },
+  
+  /**
+   * Recursively clones an object.
+   * @param {Object} object - The object to clone
+   * @return {Object} the clone
+   * @TODO See if we can't remove this.
+   */
+  clone: function(object){
+    return Flotr.merge(object, {});
+  },
+  
+  /**
+   * Function calculates the ticksize and returns it.
+   * @param {Integer} noTicks - number of ticks
+   * @param {Integer} min - lower bound integer value for the current axis
+   * @param {Integer} max - upper bound integer value for the current axis
+   * @param {Integer} decimals - number of decimals for the ticks
+   * @return {Integer} returns the ticksize in pixels
+   */
+  getTickSize: function(noTicks, min, max, decimals){
+    var delta = (max - min) / noTicks,
+        magn = Flotr.getMagnitude(delta),
+        tickSize = 10,
+        norm = delta / magn; // Norm is between 1.0 and 10.0.
+        
+    if(norm < 1.5) tickSize = 1;
+    else if(norm < 2.25) tickSize = 2;
+    else if(norm < 3) tickSize = ((decimals === 0) ? 2 : 2.5);
+    else if(norm < 7.5) tickSize = 5;
+    
+    return tickSize * magn;
+  },
+  
+  /**
+   * Default tick formatter.
+   * @param {String, Integer} val - tick value integer
+   * @param {Object} axisOpts - the axis' options
+   * @return {String} formatted tick string
+   */
+  defaultTickFormatter: function(val, axisOpts){
+    return val+'';
+  },
+  
+  /**
+   * Formats the mouse tracker values.
+   * @param {Object} obj - Track value Object {x:..,y:..}
+   * @return {String} Formatted track string
+   */
+  defaultTrackFormatter: function(obj){
+    return '('+obj.x+', '+obj.y+')';
+  }, 
+  
+  /**
+   * Utility function to convert file size values in bytes to kB, MB, ...
+   * @param value {Number} - The value to convert
+   * @param precision {Number} - The number of digits after the comma (default: 2)
+   * @param base {Number} - The base (default: 1000)
+   */
+  engineeringNotation: function(value, precision, base){
+    var sizes =         ['Y','Z','E','P','T','G','M','k',''],
+        fractionSizes = ['y','z','a','f','p','n','µ','m',''],
+        total = sizes.length;
+
+    base = base || 1000;
+    precision = Math.pow(10, precision || 2);
+
+    if (value === 0) return 0;
+
+    if (value > 1) {
+      while (total-- && (value >= base)) value /= base;
+    }
+    else {
+      sizes = fractionSizes;
+      total = sizes.length;
+      while (total-- && (value < 1)) value *= base;
+    }
+
+    return (Math.round(value * precision) / precision) + sizes[total];
+  },
+  
+  /**
+   * Returns the magnitude of the input value.
+   * @param {Integer, Float} x - integer or float value
+   * @return {Integer, Float} returns the magnitude of the input value
+   */
+  getMagnitude: function(x){
+    return Math.pow(10, Math.floor(Math.log(x) / Math.LN10));
+  },
+  toPixel: function(val){
+    return Math.floor(val)+0.5;//((val-Math.round(val) < 0.4) ? (Math.floor(val)-0.5) : val);
+  },
+  toRad: function(angle){
+    return -angle * (Math.PI/180);
+  },
+  floorInBase: function(n, base) {
+    return base * Math.floor(n / base);
+  },
+  drawText: function(ctx, text, x, y, style) {
+    if (!ctx.fillText) {
+      ctx.drawText(text, x, y, style);
+      return;
+    }
+    
+    style = this._.extend({
+      size: Flotr.defaultOptions.fontSize,
+      color: '#000000',
+      textAlign: 'left',
+      textBaseline: 'bottom',
+      weight: 1,
+      angle: 0
+    }, style);
+    
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(style.angle);
+    ctx.fillStyle = style.color;
+    ctx.font = (style.weight > 1 ? "bold " : "") + (style.size*1.3) + "px sans-serif";
+    ctx.textAlign = style.textAlign;
+    ctx.textBaseline = style.textBaseline;
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+  },
+  getBestTextAlign: function(angle, style) {
+    style = style || {textAlign: 'center', textBaseline: 'middle'};
+    angle += Flotr.getTextAngleFromAlign(style);
+    
+    if (Math.abs(Math.cos(angle)) > 10e-3) 
+      style.textAlign    = (Math.cos(angle) > 0 ? 'right' : 'left');
+    
+    if (Math.abs(Math.sin(angle)) > 10e-3) 
+      style.textBaseline = (Math.sin(angle) > 0 ? 'top' : 'bottom');
+    
+    return style;
+  },
+  alignTable: {
+    'right middle' : 0,
+    'right top'    : Math.PI/4,
+    'center top'   : Math.PI/2,
+    'left top'     : 3*(Math.PI/4),
+    'left middle'  : Math.PI,
+    'left bottom'  : -3*(Math.PI/4),
+    'center bottom': -Math.PI/2,
+    'right bottom' : -Math.PI/4,
+    'center middle': 0
+  },
+  getTextAngleFromAlign: function(style) {
+    return Flotr.alignTable[style.textAlign+' '+style.textBaseline] || 0;
+  },
+  noConflict : function () {
+    global.Flotr = previousFlotr;
+    return this;
+  }
+};
+
+global.Flotr = Flotr;
+
+})();
+
+/**
+ * Flotr Defaults
+ */
+Flotr.defaultOptions = {
+  colors: ['#00A8F0', '#C0D800', '#CB4B4B', '#4DA74D', '#9440ED'], //=> The default colorscheme. When there are > 5 series, additional colors are generated.
+  ieBackgroundColor: '#FFFFFF', // Background color for excanvas clipping
+  title: null,             // => The graph's title
+  subtitle: null,          // => The graph's subtitle
+  shadowSize: 4,           // => size of the 'fake' shadow
+  defaultType: null,       // => default series type
+  HtmlText: true,          // => wether to draw the text using HTML or on the canvas
+  fontColor: '#545454',    // => default font color
+  fontSize: 7.5,           // => canvas' text font size
+  resolution: 1,           // => resolution of the graph, to have printer-friendly graphs !
+  parseFloat: true,        // => whether to preprocess data for floats (ie. if input is string)
+  xaxis: {
+    ticks: null,           // => format: either [1, 3] or [[1, 'a'], 3]
+    minorTicks: null,      // => format: either [1, 3] or [[1, 'a'], 3]
+    showLabels: true,      // => setting to true will show the axis ticks labels, hide otherwise
+    showMinorLabels: false,// => true to show the axis minor ticks labels, false to hide
+    labelsAngle: 0,        // => labels' angle, in degrees
+    title: null,           // => axis title
+    titleAngle: 0,         // => axis title's angle, in degrees
+    noTicks: 5,            // => number of ticks for automagically generated ticks
+    minorTickFreq: null,   // => number of minor ticks between major ticks for autogenerated ticks
+    tickFormatter: Flotr.defaultTickFormatter, // => fn: number, Object -> string
+    tickDecimals: null,    // => no. of decimals, null means auto
+    min: null,             // => min. value to show, null means set automatically
+    max: null,             // => max. value to show, null means set automatically
+    autoscale: false,      // => Turns autoscaling on with true
+    autoscaleMargin: 0,    // => margin in % to add if auto-setting min/max
+    color: null,           // => color of the ticks
+    mode: 'normal',        // => can be 'time' or 'normal'
+    timeFormat: null,
+    scaling: 'linear',     // => Scaling, can be 'linear' or 'logarithmic'
+    base: Math.E,
+    titleAlign: 'center',
+    margin: true           // => Turn off margins with false
+  },
+  x2axis: {},
+  yaxis: {
+    ticks: null,           // => format: either [1, 3] or [[1, 'a'], 3]
+    minorTicks: null,      // => format: either [1, 3] or [[1, 'a'], 3]
+    showLabels: true,      // => setting to true will show the axis ticks labels, hide otherwise
+    showMinorLabels: false,// => true to show the axis minor ticks labels, false to hide
+    labelsAngle: 0,        // => labels' angle, in degrees
+    title: null,           // => axis title
+    titleAngle: 90,        // => axis title's angle, in degrees
+    noTicks: 5,            // => number of ticks for automagically generated ticks
+    minorTickFreq: null,   // => number of minor ticks between major ticks for autogenerated ticks
+    tickFormatter: Flotr.defaultTickFormatter, // => fn: number, Object -> string
+    tickDecimals: null,    // => no. of decimals, null means auto
+    min: null,             // => min. value to show, null means set automatically
+    max: null,             // => max. value to show, null means set automatically
+    autoscale: false,      // => Turns autoscaling on with true
+    autoscaleMargin: 0,    // => margin in % to add if auto-setting min/max
+    color: null,           // => The color of the ticks
+    scaling: 'linear',     // => Scaling, can be 'linear' or 'logarithmic'
+    base: Math.E,
+    titleAlign: 'center',
+    margin: true           // => Turn off margins with false
+  },
+  y2axis: {
+    titleAngle: 270
+  },
+  grid: {
+    color: '#545454',      // => primary color used for outline and labels
+    backgroundColor: null, // => null for transparent, else color
+    backgroundImage: null, // => background image. String or object with src, left and top
+    watermarkAlpha: 0.4,   // => 
+    tickColor: '#DDDDDD',  // => color used for the ticks
+    labelMargin: 3,        // => margin in pixels
+    verticalLines: true,   // => whether to show gridlines in vertical direction
+    minorVerticalLines: null, // => whether to show gridlines for minor ticks in vertical dir.
+    horizontalLines: true, // => whether to show gridlines in horizontal direction
+    minorHorizontalLines: null, // => whether to show gridlines for minor ticks in horizontal dir.
+    outlineWidth: 1,       // => width of the grid outline/border in pixels
+    circular: false        // => if set to true, the grid will be circular, must be used when radars are drawn
+  },
+  mouse: {
+    track: false,          // => true to track the mouse, no tracking otherwise
+    trackAll: false,
+    position: 'se',        // => position of the value box (default south-east)
+    relative: false,       // => next to the mouse cursor
+    trackFormatter: Flotr.defaultTrackFormatter, // => formats the values in the value box
+    margin: 5,             // => margin in pixels of the valuebox
+    lineColor: '#FF3F19',  // => line color of points that are drawn when mouse comes near a value of a series
+    trackDecimals: 1,      // => decimals for the track values
+    sensibility: 2,        // => the lower this number, the more precise you have to aim to show a value
+    trackY: true,          // => whether or not to track the mouse in the y axis
+    radius: 3,             // => radius of the track point
+    fillColor: null,       // => color to fill our select bar with only applies to bar and similar graphs (only bars for now)
+    fillOpacity: 0.4       // => opacity of the fill color, set to 1 for a solid fill, 0 hides the fill 
+  }
+};
+
+/**
+ * Flotr Color
+ */
+
+(function () {
+
+var
+  _ = Flotr._;
+
+// Constructor
+function Color (r, g, b, a) {
+  this.rgba = ['r','g','b','a'];
+  var x = 4;
+  while(-1<--x){
+    this[this.rgba[x]] = arguments[x] || ((x==3) ? 1.0 : 0);
+  }
+  this.normalize();
+}
+
+// Constants
+var COLOR_NAMES = {
+  aqua:[0,255,255],azure:[240,255,255],beige:[245,245,220],black:[0,0,0],blue:[0,0,255],
+  brown:[165,42,42],cyan:[0,255,255],darkblue:[0,0,139],darkcyan:[0,139,139],darkgrey:[169,169,169],
+  darkgreen:[0,100,0],darkkhaki:[189,183,107],darkmagenta:[139,0,139],darkolivegreen:[85,107,47],
+  darkorange:[255,140,0],darkorchid:[153,50,204],darkred:[139,0,0],darksalmon:[233,150,122],
+  darkviolet:[148,0,211],fuchsia:[255,0,255],gold:[255,215,0],green:[0,128,0],indigo:[75,0,130],
+  khaki:[240,230,140],lightblue:[173,216,230],lightcyan:[224,255,255],lightgreen:[144,238,144],
+  lightgrey:[211,211,211],lightpink:[255,182,193],lightyellow:[255,255,224],lime:[0,255,0],magenta:[255,0,255],
+  maroon:[128,0,0],navy:[0,0,128],olive:[128,128,0],orange:[255,165,0],pink:[255,192,203],purple:[128,0,128],
+  violet:[128,0,128],red:[255,0,0],silver:[192,192,192],white:[255,255,255],yellow:[255,255,0]
+};
+
+Color.prototype = {
+  scale: function(rf, gf, bf, af){
+    var x = 4;
+    while (-1 < --x) {
+      if (!_.isUndefined(arguments[x])) this[this.rgba[x]] *= arguments[x];
+    }
+    return this.normalize();
+  },
+  alpha: function(alpha) {
+    if (!_.isUndefined(alpha) && !_.isNull(alpha)) {
+      this.a = alpha;
+    }
+    return this.normalize();
+  },
+  clone: function(){
+    return new Color(this.r, this.b, this.g, this.a);
+  },
+  limit: function(val,minVal,maxVal){
+    return Math.max(Math.min(val, maxVal), minVal);
+  },
+  normalize: function(){
+    var limit = this.limit;
+    this.r = limit(parseInt(this.r, 10), 0, 255);
+    this.g = limit(parseInt(this.g, 10), 0, 255);
+    this.b = limit(parseInt(this.b, 10), 0, 255);
+    this.a = limit(this.a, 0, 1);
+    return this;
+  },
+  distance: function(color){
+    if (!color) return;
+    color = new Color.parse(color);
+    var dist = 0, x = 3;
+    while(-1<--x){
+      dist += Math.abs(this[this.rgba[x]] - color[this.rgba[x]]);
+    }
+    return dist;
+  },
+  toString: function(){
+    return (this.a >= 1.0) ? 'rgb('+[this.r,this.g,this.b].join(',')+')' : 'rgba('+[this.r,this.g,this.b,this.a].join(',')+')';
+  },
+  contrast: function () {
+    var
+      test = 1 - ( 0.299 * this.r + 0.587 * this.g + 0.114 * this.b) / 255;
+    return (test < 0.5 ? '#000000' : '#ffffff');
+  }
+};
+
+_.extend(Color, {
+  /**
+   * Parses a color string and returns a corresponding Color.
+   * The different tests are in order of probability to improve speed.
+   * @param {String, Color} str - string thats representing a color
+   * @return {Color} returns a Color object or false
+   */
+  parse: function(color){
+    if (color instanceof Color) return color;
+
+    var result;
+
+    // #a0b1c2
+    if((result = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/.exec(color)))
+      return new Color(parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16));
+
+    // rgb(num,num,num)
+    if((result = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/.exec(color)))
+      return new Color(parseInt(result[1], 10), parseInt(result[2], 10), parseInt(result[3], 10));
+  
+    // #fff
+    if((result = /#([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/.exec(color)))
+      return new Color(parseInt(result[1]+result[1],16), parseInt(result[2]+result[2],16), parseInt(result[3]+result[3],16));
+  
+    // rgba(num,num,num,num)
+    if((result = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(color)))
+      return new Color(parseInt(result[1], 10), parseInt(result[2], 10), parseInt(result[3], 10), parseFloat(result[4]));
+      
+    // rgb(num%,num%,num%)
+    if((result = /rgb\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*\)/.exec(color)))
+      return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55);
+  
+    // rgba(num%,num%,num%,num)
+    if((result = /rgba\(\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\%\s*,\s*([0-9]+(?:\.[0-9]+)?)\s*\)/.exec(color)))
+      return new Color(parseFloat(result[1])*2.55, parseFloat(result[2])*2.55, parseFloat(result[3])*2.55, parseFloat(result[4]));
+
+    // Otherwise, we're most likely dealing with a named color.
+    var name = (color+'').replace(/^\s*([\S\s]*?)\s*$/, '$1').toLowerCase();
+    if(name == 'transparent'){
+      return new Color(255, 255, 255, 0);
+    }
+    return (result = COLOR_NAMES[name]) ? new Color(result[0], result[1], result[2]) : new Color(0, 0, 0, 0);
+  },
+
+  /**
+   * Process color and options into color style.
+   */
+  processColor: function(color, options) {
+
+    var opacity = options.opacity;
+    if (!color) return 'rgba(0, 0, 0, 0)';
+    if (color instanceof Color) return color.alpha(opacity).toString();
+    if (_.isString(color)) return Color.parse(color).alpha(opacity).toString();
+    
+    var grad = color.colors ? color : {colors: color};
+    
+    if (!options.ctx) {
+      if (!_.isArray(grad.colors)) return 'rgba(0, 0, 0, 0)';
+      return Color.parse(_.isArray(grad.colors[0]) ? grad.colors[0][1] : grad.colors[0]).alpha(opacity).toString();
+    }
+    grad = _.extend({start: 'top', end: 'bottom'}, grad); 
+    
+    if (/top/i.test(grad.start))  options.x1 = 0;
+    if (/left/i.test(grad.start)) options.y1 = 0;
+    if (/bottom/i.test(grad.end)) options.x2 = 0;
+    if (/right/i.test(grad.end))  options.y2 = 0;
+
+    var i, c, stop, gradient = options.ctx.createLinearGradient(options.x1, options.y1, options.x2, options.y2);
+    for (i = 0; i < grad.colors.length; i++) {
+      c = grad.colors[i];
+      if (_.isArray(c)) {
+        stop = c[0];
+        c = c[1];
+      }
+      else stop = i / (grad.colors.length-1);
+      gradient.addColorStop(stop, Color.parse(c).alpha(opacity));
+    }
+    return gradient;
+  }
+});
+
+Flotr.Color = Color;
+
+})();
+
+/**
+ * Flotr Date
+ */
+Flotr.Date = {
+  format: function(d, format) {
+    if (!d) return;
+    
+    // We should maybe use an "official" date format spec, like PHP date() or ColdFusion 
+    // http://fr.php.net/manual/en/function.date.php
+    // http://livedocs.adobe.com/coldfusion/8/htmldocs/help.html?content=functions_c-d_29.html
+    var tokens = {
+      h: d.getUTCHours().toString(),
+      H: leftPad(d.getUTCHours()),
+      M: leftPad(d.getUTCMinutes()),
+      S: leftPad(d.getUTCSeconds()),
+      s: d.getUTCMilliseconds(),
+      d: d.getUTCDate().toString(),
+      m: (d.getUTCMonth() + 1).toString(),
+      y: d.getUTCFullYear().toString(),
+      b: Flotr.Date.monthNames[d.getUTCMonth()]
+    };
+
+    function leftPad(n){
+      n += '';
+      return n.length == 1 ? "0" + n : n;
+    }
+    
+    var r = [], c,
+        escape = false;
+    
+    for (var i = 0; i < format.length; ++i) {
+      c = format.charAt(i);
+      
+      if (escape) {
+        r.push(tokens[c] || c);
+        escape = false;
+      }
+      else if (c == "%")
+        escape = true;
+      else
+        r.push(c);
+    }
+    return r.join('');
+  },
+  getFormat: function(time, span) {
+    var tu = Flotr.Date.timeUnits;
+         if (time < tu.second) return "%h:%M:%S.%s";
+    else if (time < tu.minute) return "%h:%M:%S";
+    else if (time < tu.day)    return (span < 2 * tu.day) ? "%h:%M" : "%b %d %h:%M";
+    else if (time < tu.month)  return "%b %d";
+    else if (time < tu.year)   return (span < tu.year) ? "%b" : "%b %y";
+    else                       return "%y";
+  },
+  formatter: function (v, axis) {
+    var d = new Date(v);
+
+    // first check global format
+    if (axis.options.timeFormat)
+      return Flotr.Date.format(d, axis.options.timeFormat);
+    
+    var span = axis.max - axis.min,
+        t = axis.tickSize * Flotr.Date.timeUnits[axis.tickUnit];
+        
+    return Flotr.Date.format(d, Flotr.Date.getFormat(t, span));
+  },
+  generator: function(axis) {
+    var ticks = [],
+      d = new Date(axis.min),
+      tu = Flotr.Date.timeUnits;
+    
+    var step = axis.tickSize * tu[axis.tickUnit];
+
+    switch (axis.tickUnit) {
+      case "millisecond": d.setUTCMilliseconds(Flotr.floorInBase(d.getUTCMilliseconds(), axis.tickSize)); break;
+      case "second": d.setUTCSeconds(Flotr.floorInBase(d.getUTCSeconds(), axis.tickSize)); break;
+      case "minute": d.setUTCMinutes(Flotr.floorInBase(d.getUTCMinutes(), axis.tickSize)); break;
+      case "hour":   d.setUTCHours(Flotr.floorInBase(d.getUTCHours(), axis.tickSize)); break;
+      case "month":  d.setUTCMonth(Flotr.floorInBase(d.getUTCMonth(), axis.tickSize)); break;
+      case "year":   d.setUTCFullYear(Flotr.floorInBase(d.getUTCFullYear(), axis.tickSize));break;
+    }
+    
+    // reset smaller components
+    if (step >= tu.second)  d.setUTCMilliseconds(0);
+    if (step >= tu.minute)  d.setUTCSeconds(0);
+    if (step >= tu.hour)    d.setUTCMinutes(0);
+    if (step >= tu.day)     d.setUTCHours(0);
+    if (step >= tu.day * 4) d.setUTCDate(1);
+    if (step >= tu.year)    d.setUTCMonth(0);
+
+    var carry = 0, v = NaN, prev;
+    do {
+      prev = v;
+      v = d.getTime();
+      ticks.push({ v:v, label:Flotr.Date.formatter(v, axis) });
+      if (axis.tickUnit == "month") {
+        if (axis.tickSize < 1) {
+          /* a bit complicated - we'll divide the month up but we need to take care of fractions
+           so we don't end up in the middle of a day */
+          d.setUTCDate(1);
+          var start = d.getTime();
+          d.setUTCMonth(d.getUTCMonth() + 1);
+          var end = d.getTime();
+          d.setTime(v + carry * tu.hour + (end - start) * axis.tickSize);
+          carry = d.getUTCHours();
+          d.setUTCHours(0);
+        }
+        else
+          d.setUTCMonth(d.getUTCMonth() + axis.tickSize);
+      }
+      else if (axis.tickUnit == "year") {
+        d.setUTCFullYear(d.getUTCFullYear() + axis.tickSize);
+      }
+      else
+        d.setTime(v + step);
+
+    } while (v < axis.max && v != prev);
+    
+    return ticks;
+  },
+  timeUnits: {
+    millisecond: 1,
+    second: 1000,
+    minute: 1000 * 60,
+    hour:   1000 * 60 * 60,
+    day:    1000 * 60 * 60 * 24,
+    month:  1000 * 60 * 60 * 24 * 30,
+    year:   1000 * 60 * 60 * 24 * 365.2425
+  },
+  // the allowed tick sizes, after 1 year we use an integer algorithm
+  spec: [
+    [1, "millisecond"], [20, "millisecond"], [50, "millisecond"], [100, "millisecond"], [200, "millisecond"], [500, "millisecond"], 
+    [1, "second"],   [2, "second"],  [5, "second"], [10, "second"], [30, "second"], 
+    [1, "minute"],   [2, "minute"],  [5, "minute"], [10, "minute"], [30, "minute"], 
+    [1, "hour"],     [2, "hour"],    [4, "hour"],   [8, "hour"],    [12, "hour"],
+    [1, "day"],      [2, "day"],     [3, "day"],
+    [0.25, "month"], [0.5, "month"], [1, "month"],  [2, "month"],   [3, "month"], [6, "month"],
+    [1, "year"]
+  ],
+  monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+};
+
+(function () {
+
+var _ = Flotr._;
+
+Flotr.DOM = {
+  addClass: function(element, name){
+    var classList = (element.className ? element.className : '');
+      if (_.include(classList.split(/\s+/g), name)) return;
+    element.className = (classList ? classList + ' ' : '') + name;
+  },
+  /**
+   * Create an element.
+   */
+  create: function(tag){
+    return document.createElement(tag);
+  },
+  node: function(html) {
+    var div = Flotr.DOM.create('div'), n;
+    div.innerHTML = html;
+    n = div.children[0];
+    div.innerHTML = '';
+    return n;
+  },
+  /**
+   * Remove all children.
+   */
+  empty: function(element){
+    element.innerHTML = '';
+    /*
+    if (!element) return;
+    _.each(element.childNodes, function (e) {
+      Flotr.DOM.empty(e);
+      element.removeChild(e);
+    });
+    */
+  },
+  hide: function(element){
+    Flotr.DOM.setStyles(element, {display:'none'});
+  },
+  /**
+   * Insert a child.
+   * @param {Element} element
+   * @param {Element|String} Element or string to be appended.
+   */
+  insert: function(element, child){
+    if(_.isString(child))
+      element.innerHTML += child;
+    else if (_.isElement(child))
+      element.appendChild(child);
+  },
+  // @TODO find xbrowser implementation
+  opacity: function(element, opacity) {
+    element.style.opacity = opacity;
+  },
+  position: function(element, p){
+    if (!element.offsetParent)
+      return {left: (element.offsetLeft || 0), top: (element.offsetTop || 0)};
+
+    p = this.position(element.offsetParent);
+    p.left  += element.offsetLeft;
+    p.top   += element.offsetTop;
+    return p;
+  },
+  removeClass: function(element, name) {
+    var classList = (element.className ? element.className : '');
+    element.className = _.filter(classList.split(/\s+/g), function (c) {
+      if (c != name) return true; }
+    ).join(' ');
+  },
+  setStyles: function(element, o) {
+    _.each(o, function (value, key) {
+      element.style[key] = value;
+    });
+  },
+  show: function(element){
+    Flotr.DOM.setStyles(element, {display:''});
+  },
+  /**
+   * Return element size.
+   */
+  size: function(element){
+    return {
+      height : element.offsetHeight,
+      width : element.offsetWidth };
+  }
+};
+
+})();
+
+/**
+ * Flotr Event Adapter
+ */
+(function () {
+var
+  F = Flotr,
+  bean = F.bean;
+F.EventAdapter = {
+  observe: function(object, name, callback) {
+    bean.add(object, name, callback);
+    return this;
+  },
+  fire: function(object, name, args) {
+    bean.fire(object, name, args);
+    if (typeof(Prototype) != 'undefined')
+      Event.fire(object, name, args);
+    // @TODO Someone who uses mootools, add mootools adapter for existing applciations.
+    return this;
+  },
+  stopObserving: function(object, name, callback) {
+    bean.remove(object, name, callback);
+    return this;
+  },
+  eventPointer: function(e) {
+    if (!F._.isUndefined(e.touches) && e.touches.length > 0) {
+      return {
+        x : e.touches[0].pageX,
+        y : e.touches[0].pageY
+      };
+    } else if (!F._.isUndefined(e.changedTouches) && e.changedTouches.length > 0) {
+      return {
+        x : e.changedTouches[0].pageX,
+        y : e.changedTouches[0].pageY
+      };
+    } else if (e.pageX || e.pageY) {
+      return {
+        x : e.pageX,
+        y : e.pageY
+      };
+    } else if (e.clientX || e.clientY) {
+      var
+        d = document,
+        b = d.body,
+        de = d.documentElement;
+      return {
+        x: e.clientX + b.scrollLeft + de.scrollLeft,
+        y: e.clientY + b.scrollTop + de.scrollTop
+      };
+    }
+  }
+};
+})();
+
+/**
+ * Flotr Graph class that plots a graph on creation.
+ */
+(function () {
+
+var
+  D     = Flotr.DOM,
+  E     = Flotr.EventAdapter,
+  _     = Flotr._,
+  flotr = Flotr;
+/**
+ * Flotr Graph constructor.
+ * @param {Element} el - element to insert the graph into
+ * @param {Object} data - an array or object of dataseries
+ * @param {Object} options - an object containing options
+ */
+Graph = function(el, data, options){
+// Let's see if we can get away with out this [JS]
+//  try {
+    this._setEl(el);
+    this._initMembers();
+    this._initPlugins();
+
+    E.fire(this.el, 'flotr:beforeinit', [this]);
+
+    this.data = data;
+    this.series = flotr.Series.getSeries(data);
+    this._initOptions(options);
+    this._initGraphTypes();
+    this._initCanvas();
+    this._text = new flotr.Text({
+      element : this.el,
+      ctx : this.ctx,
+      html : this.options.HtmlText,
+      textEnabled : this.textEnabled
+    });
+    E.fire(this.el, 'flotr:afterconstruct', [this]);
+    this._initEvents();
+
+    this.findDataRanges();
+    this.calculateSpacing();
+
+    this.draw(_.bind(function() {
+      E.fire(this.el, 'flotr:afterinit', [this]);
+    }, this));
+/*
+    try {
+  } catch (e) {
+    try {
+      console.error(e);
+    } catch (e2) {}
+  }*/
+};
+
+Graph.prototype = {
+
+  destroy: function () {
+    _.each(this._handles, function (handle) {
+      E.stopObserving.apply(this, handle);
+    });
+    this._handles = [];
+    this.el.graph = null;
+  },
+
+  _observe: function (object, name, callback) {
+    E.observe.apply(this, arguments);
+    this._handles.push(arguments);
+    return this;
+  },
+  processColor: function(color, options){
+    var o = { x1: 0, y1: 0, x2: this.plotWidth, y2: this.plotHeight, opacity: 1, ctx: this.ctx };
+    _.extend(o, options);
+    return flotr.Color.processColor(color, o);
+  },
+  /**
+   * Function determines the min and max values for the xaxis and yaxis.
+   *
+   * TODO logarithmic range validation (consideration of 0)
+   */
+  findDataRanges: function(){
+    var a = this.axes,
+      xaxis, yaxis, range;
+
+    _.each(this.series, function (series) {
+      range = series.getRange();
+      if (range) {
+        xaxis = series.xaxis;
+        yaxis = series.yaxis;
+        xaxis.datamin = Math.min(range.xmin, xaxis.datamin);
+        xaxis.datamax = Math.max(range.xmax, xaxis.datamax);
+        yaxis.datamin = Math.min(range.ymin, yaxis.datamin);
+        yaxis.datamax = Math.max(range.ymax, yaxis.datamax);
+        xaxis.used = (xaxis.used || range.xused);
+        yaxis.used = (yaxis.used || range.yused);
+      }
+    }, this);
+
+    // Check for empty data, no data case (none used)
+    if (!a.x.used && !a.x2.used) a.x.used = true;
+    if (!a.y.used && !a.y2.used) a.y.used = true;
+
+    _.each(a, function (axis) {
+      axis.calculateRange();
+    });
+
+    var
+      types = _.keys(flotr.graphTypes),
+      drawn = false;
+
+    _.each(this.series, function (series) {
+      if (series.hide) return;
+      _.each(types, function (type) {
+        if (series[type] && series[type].show) {
+          this.extendRange(type, series);
+          drawn = true;
+        }
+      }, this);
+      if (!drawn) {
+        this.extendRange(this.options.defaultType, series);
+      }
+    }, this);
+  },
+
+  extendRange : function (type, series) {
+    if (this[type].extendRange) this[type].extendRange(series, series.data, series[type], this[type]);
+    if (this[type].extendYRange) this[type].extendYRange(series.yaxis, series.data, series[type], this[type]);
+    if (this[type].extendXRange) this[type].extendXRange(series.xaxis, series.data, series[type], this[type]);
+  },
+
+  /**
+   * Calculates axis label sizes.
+   */
+  calculateSpacing: function(){
+
+    var a = this.axes,
+        options = this.options,
+        series = this.series,
+        margin = options.grid.labelMargin,
+        T = this._text,
+        x = a.x,
+        x2 = a.x2,
+        y = a.y,
+        y2 = a.y2,
+        maxOutset = options.grid.outlineWidth,
+        i, j, l, dim;
+
+    // TODO post refactor, fix this
+    _.each(a, function (axis) {
+      axis.calculateTicks();
+      axis.calculateTextDimensions(T, options);
+    });
+
+    // Title height
+    dim = T.dimensions(
+      options.title,
+      {size: options.fontSize*1.5},
+      'font-size:1em;font-weight:bold;',
+      'flotr-title'
+    );
+    this.titleHeight = dim.height;
+
+    // Subtitle height
+    dim = T.dimensions(
+      options.subtitle,
+      {size: options.fontSize},
+      'font-size:smaller;',
+      'flotr-subtitle'
+    );
+    this.subtitleHeight = dim.height;
+
+    for(j = 0; j < options.length; ++j){
+      if (series[j].points.show){
+        maxOutset = Math.max(maxOutset, series[j].points.radius + series[j].points.lineWidth/2);
+      }
+    }
+
+    var p = this.plotOffset;
+    if (x.options.margin === false) {
+      p.bottom = 0;
+      p.top    = 0;
+    } else {
+      p.bottom += (options.grid.circular ? 0 : (x.used && x.options.showLabels ?  (x.maxLabel.height + margin) : 0)) +
+                  (x.used && x.options.title ? (x.titleSize.height + margin) : 0) + maxOutset;
+
+      p.top    += (options.grid.circular ? 0 : (x2.used && x2.options.showLabels ? (x2.maxLabel.height + margin) : 0)) +
+                  (x2.used && x2.options.title ? (x2.titleSize.height + margin) : 0) + this.subtitleHeight + this.titleHeight + maxOutset;
+    }
+    if (y.options.margin === false) {
+      p.left  = 0;
+      p.right = 0;
+    } else {
+      p.left   += (options.grid.circular ? 0 : (y.used && y.options.showLabels ?  (y.maxLabel.width + margin) : 0)) +
+                  (y.used && y.options.title ? (y.titleSize.width + margin) : 0) + maxOutset;
+
+      p.right  += (options.grid.circular ? 0 : (y2.used && y2.options.showLabels ? (y2.maxLabel.width + margin) : 0)) +
+                  (y2.used && y2.options.title ? (y2.titleSize.width + margin) : 0) + maxOutset;
+    }
+
+    p.top = Math.floor(p.top); // In order the outline not to be blured
+
+    this.plotWidth  = this.canvasWidth - p.left - p.right;
+    this.plotHeight = this.canvasHeight - p.bottom - p.top;
+
+    // TODO post refactor, fix this
+    x.length = x2.length = this.plotWidth;
+    y.length = y2.length = this.plotHeight;
+    y.offset = y2.offset = this.plotHeight;
+    x.setScale();
+    x2.setScale();
+    y.setScale();
+    y2.setScale();
+  },
+  /**
+   * Draws grid, labels, series and outline.
+   */
+  draw: function(after) {
+
+    var
+      context = this.ctx,
+      i;
+
+    E.fire(this.el, 'flotr:beforedraw', [this.series, this]);
+
+    if (this.series.length) {
+
+      context.save();
+      context.translate(this.plotOffset.left, this.plotOffset.top);
+
+      for (i = 0; i < this.series.length; i++) {
+        if (!this.series[i].hide) this.drawSeries(this.series[i]);
+      }
+
+      context.restore();
+      this.clip();
+    }
+
+    E.fire(this.el, 'flotr:afterdraw', [this.series, this]);
+    if (after) after();
+  },
+  /**
+   * Actually draws the graph.
+   * @param {Object} series - series to draw
+   */
+  drawSeries: function(series){
+
+    function drawChart (series, typeKey) {
+      var options = this.getOptions(series, typeKey);
+      this[typeKey].draw(options);
+    }
+
+    var drawn = false;
+    series = series || this.series;
+
+    _.each(flotr.graphTypes, function (type, typeKey) {
+      if (series[typeKey] && series[typeKey].show && this[typeKey]) {
+        drawn = true;
+        drawChart.call(this, series, typeKey);
+      }
+    }, this);
+
+    if (!drawn) drawChart.call(this, series, this.options.defaultType);
+  },
+
+  getOptions : function (series, typeKey) {
+    var
+      type = series[typeKey],
+      graphType = this[typeKey],
+      options = {
+        context     : this.ctx,
+        width       : this.plotWidth,
+        height      : this.plotHeight,
+        fontSize    : this.options.fontSize,
+        fontColor   : this.options.fontColor,
+        textEnabled : this.textEnabled,
+        htmlText    : this.options.HtmlText,
+        text        : this._text, // TODO Is this necessary?
+        data        : series.data,
+        color       : series.color,
+        shadowSize  : series.shadowSize,
+        xScale      : _.bind(series.xaxis.d2p, series.xaxis),
+        yScale      : _.bind(series.yaxis.d2p, series.yaxis)
+      };
+
+    options = flotr.merge(type, options);
+
+    // Fill
+    options.fillStyle = this.processColor(
+      type.fillColor || series.color,
+      {opacity: type.fillOpacity}
+    );
+
+    return options;
+  },
+  /**
+   * Calculates the coordinates from a mouse event object.
+   * @param {Event} event - Mouse Event object.
+   * @return {Object} Object with coordinates of the mouse.
+   */
+  getEventPosition: function (e){
+
+    var
+      d = document,
+      b = d.body,
+      de = d.documentElement,
+      axes = this.axes,
+      plotOffset = this.plotOffset,
+      lastMousePos = this.lastMousePos,
+      pointer = E.eventPointer(e),
+      dx = pointer.x - lastMousePos.pageX,
+      dy = pointer.y - lastMousePos.pageY,
+      r, rx, ry;
+
+    if ('ontouchstart' in this.el) {
+      r = D.position(this.overlay);
+      rx = pointer.x - r.left - plotOffset.left;
+      ry = pointer.y - r.top - plotOffset.top;
+    } else {
+      r = this.overlay.getBoundingClientRect();
+      rx = e.clientX - r.left - plotOffset.left - b.scrollLeft - de.scrollLeft;
+      ry = e.clientY - r.top - plotOffset.top - b.scrollTop - de.scrollTop;
+    }
+
+    return {
+      x:  axes.x.p2d(rx),
+      x2: axes.x2.p2d(rx),
+      y:  axes.y.p2d(ry),
+      y2: axes.y2.p2d(ry),
+      relX: rx,
+      relY: ry,
+      dX: dx,
+      dY: dy,
+      absX: pointer.x,
+      absY: pointer.y
+    };
+  },
+  /**
+   * Observes the 'click' event and fires the 'flotr:click' event.
+   * @param {Event} event - 'click' Event object.
+   */
+  clickHandler: function(event){
+    if(this.ignoreClick){
+      this.ignoreClick = false;
+      return this.ignoreClick;
+    }
+    E.fire(this.el, 'flotr:click', [this.getEventPosition(event), this]);
+  },
+  /**
+   * Observes mouse movement over the graph area. Fires the 'flotr:mousemove' event.
+   * @param {Event} event - 'mousemove' Event object.
+   */
+  mouseMoveHandler: function(event){
+    var pos = this.getEventPosition(event);
+    this.lastMousePos.pageX = pos.absX;
+    this.lastMousePos.pageY = pos.absY;
+    E.fire(this.el, 'flotr:mousemove', [event, pos, this]);
+  },
+  /**
+   * Observes the 'mousedown' event.
+   * @param {Event} event - 'mousedown' Event object.
+   */
+  mouseDownHandler: function (event){
+
+    /*
+    // @TODO Context menu?
+    if(event.isRightClick()) {
+      event.stop();
+
+      var overlay = this.overlay;
+      overlay.hide();
+
+      function cancelContextMenu () {
+        overlay.show();
+        E.stopObserving(document, 'mousemove', cancelContextMenu);
+      }
+      E.observe(document, 'mousemove', cancelContextMenu);
+      return;
+    }
+    */
+
+
+    if (this.mouseUpHandler) return;
+    this.mouseUpHandler = _.bind(function (e) {
+      E.stopObserving(document, 'mouseup', this.mouseUpHandler);
+      this.mouseUpHandler = null;
+      // @TODO why?
+      //e.stop();
+      E.fire(this.el, 'flotr:mouseup', [e, this]);
+    }, this);
+    E.observe(document, 'mouseup', this.mouseUpHandler);
+    E.fire(this.el, 'flotr:mousedown', [event, this]);
+    this.ignoreClick = false;
+  },
+  drawTooltip: function(content, x, y, options) {
+    var mt = this.getMouseTrack(),
+        style = 'opacity:0.7;background-color:#000;color:#fff;display:none;position:absolute;padding:2px 8px;-moz-border-radius:4px;border-radius:4px;white-space:nowrap;',
+        p = options.position,
+        m = options.margin,
+        plotOffset = this.plotOffset;
+
+    if(x !== null && y !== null){
+      if (!options.relative) { // absolute to the canvas
+             if(p.charAt(0) == 'n') style += 'top:' + (m + plotOffset.top) + 'px;bottom:auto;';
+        else if(p.charAt(0) == 's') style += 'bottom:' + (m + plotOffset.bottom) + 'px;top:auto;';
+             if(p.charAt(1) == 'e') style += 'right:' + (m + plotOffset.right) + 'px;left:auto;';
+        else if(p.charAt(1) == 'w') style += 'left:' + (m + plotOffset.left) + 'px;right:auto;';
+      }
+      else { // relative to the mouse
+             if(p.charAt(0) == 'n') style += 'bottom:' + (m - plotOffset.top - y + this.canvasHeight) + 'px;top:auto;';
+        else if(p.charAt(0) == 's') style += 'top:' + (m + plotOffset.top + y) + 'px;bottom:auto;';
+             if(p.charAt(1) == 'e') style += 'left:' + (m + plotOffset.left + x) + 'px;right:auto;';
+        else if(p.charAt(1) == 'w') style += 'right:' + (m - plotOffset.left - x + this.canvasWidth) + 'px;left:auto;';
+      }
+
+      mt.style.cssText = style;
+      D.empty(mt);
+      D.insert(mt, content);
+      D.show(mt);
+    }
+    else {
+      D.hide(mt);
+    }
+  },
+
+  clip: function () {
+
+    var
+      ctx = this.ctx,
+      o   = this.plotOffset,
+      w   = this.canvasWidth,
+      h   = this.canvasHeight;
+
+    if (flotr.isIE && flotr.isIE < 9) {
+      // Clipping for excanvas :-(
+      ctx.save();
+      ctx.fillStyle = this.processColor(this.options.ieBackgroundColor);
+      ctx.fillRect(0, 0, w, o.top);
+      ctx.fillRect(0, 0, o.left, h);
+      ctx.fillRect(0, h - o.bottom, w, o.bottom);
+      ctx.fillRect(w - o.right, 0, o.right,h);
+      ctx.restore();
+    } else {
+      ctx.clearRect(0, 0, w, o.top);
+      ctx.clearRect(0, 0, o.left, h);
+      ctx.clearRect(0, h - o.bottom, w, o.bottom);
+      ctx.clearRect(w - o.right, 0, o.right,h);
+    }
+  },
+
+  _initMembers: function() {
+    this._handles = [];
+    this.lastMousePos = {pageX: null, pageY: null };
+    this.plotOffset = {left: 0, right: 0, top: 0, bottom: 0};
+    this.ignoreClick = true;
+    this.prevHit = null;
+  },
+
+  _initGraphTypes: function() {
+    _.each(flotr.graphTypes, function(handler, graphType){
+      this[graphType] = flotr.clone(handler);
+    }, this);
+  },
+
+  _initEvents: function () {
+
+    var
+      el = this.el,
+      touchendHandler, movement, touchend;
+
+    if ('ontouchstart' in el) {
+
+      touchendHandler = _.bind(function (e) {
+        touchend = true;
+        E.stopObserving(document, 'touchend', touchendHandler);
+        E.fire(el, 'flotr:mouseup', [event, this]);
+        if (!movement) {
+          this.clickHandler(e);
+        }
+      }, this);
+
+      this._observe(this.overlay, 'touchstart', _.bind(function (e) {
+        movement = false;
+        touchend = false;
+        this.ignoreClick = false;
+        E.fire(el, 'flotr:mousedown', [event, this]);
+        this._observe(document, 'touchend', touchendHandler);
+      }, this));
+
+      this._observe(this.overlay, 'touchmove', _.bind(function (e) {
+
+        e.preventDefault();
+
+        movement = true;
+
+        var pageX = e.touches[0].pageX,
+          pageY = e.touches[0].pageY,
+          pos = this.getEventPosition(e.touches[0]);
+
+        this.lastMousePos.pageX = pageX;
+        this.lastMousePos.pageY = pageY;
+        if (!touchend) {
+          E.fire(el, 'flotr:mousemove', [event, pos, this]);
+        }
+      }, this));
+
+    } else {
+      this.
+        _observe(this.overlay, 'mousedown', _.bind(this.mouseDownHandler, this)).
+        _observe(el, 'mousemove', _.bind(this.mouseMoveHandler, this)).
+        _observe(this.overlay, 'click', _.bind(this.clickHandler, this)).
+        _observe(el, 'mouseout', function () {
+          E.fire(el, 'flotr:mouseout');
+        });
+    }
+  },
+
+  /**
+   * Initializes the canvas and it's overlay canvas element. When the browser is IE, this makes use
+   * of excanvas. The overlay canvas is inserted for displaying interactions. After the canvas elements
+   * are created, the elements are inserted into the container element.
+   */
+  _initCanvas: function(){
+    var el = this.el,
+      o = this.options,
+      children = el.children,
+      removedChildren = [],
+      child, i,
+      size, style;
+
+    // Empty the el
+    for (i = children.length; i--;) {
+      child = children[i];
+      if (!this.canvas && child.className === 'flotr-canvas') {
+        this.canvas = child;
+      } else if (!this.overlay && child.className === 'flotr-overlay') {
+        this.overlay = child;
+      } else {
+        removedChildren.push(child);
+      }
+    }
+    for (i = removedChildren.length; i--;) {
+      el.removeChild(removedChildren[i]);
+    }
+
+    D.setStyles(el, {position: 'relative'}); // For positioning labels and overlay.
+    size = D.size(el);
+
+    if(size.width <= 0 || size.height <= 0 || o.resolution <= 0){
+      throw 'Invalid dimensions for plot, width = ' + size.width + ', height = ' + size.height + ', resolution = ' + o.resolution;
+    }
+
+    // Main canvas for drawing graph types
+    this.canvas = getCanvas(this.canvas, 'canvas');
+    // Overlay canvas for interactive features
+    this.overlay = getCanvas(this.overlay, 'overlay');
+    this.ctx = getContext(this.canvas);
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.octx = getContext(this.overlay);
+    this.ctx.clearRect(0, 0, this.overlay.width, this.overlay.height);
+    this.canvasHeight = size.height*o.resolution;
+    this.canvasWidth = size.width*o.resolution;
+    this.textEnabled = !!this.ctx.drawText || !!this.ctx.fillText; // Enable text functions
+
+    function getCanvas(canvas, name){
+      if(!canvas){
+        canvas = D.create('canvas');
+        if (typeof FlashCanvas != "undefined" && typeof canvas.getContext === 'function') {
+          FlashCanvas.initElement(canvas);
+        }
+        canvas.className = 'flotr-'+name;
+        canvas.style.cssText = 'position:absolute;left:0px;top:0px;';
+        D.insert(el, canvas);
+      }
+      _.each(size, function(size, attribute){
+        D.show(canvas);
+        if (name == 'canvas' && canvas.getAttribute(attribute) === size) {
+          return;
+        }
+        canvas.setAttribute(attribute, size * o.resolution);
+        canvas.style[attribute] = size + 'px';
+      });
+      canvas.context_ = null; // Reset the ExCanvas context
+      return canvas;
+    }
+
+    function getContext(canvas){
+      if(window.G_vmlCanvasManager) window.G_vmlCanvasManager.initElement(canvas); // For ExCanvas
+      var context = canvas.getContext('2d');
+      if(!window.G_vmlCanvasManager) context.scale(o.resolution, o.resolution);
+      return context;
+    }
+  },
+
+  _initPlugins: function(){
+    // TODO Should be moved to flotr and mixed in.
+    _.each(flotr.plugins, function(plugin, name){
+      _.each(plugin.callbacks, function(fn, c){
+        this._observe(this.el, c, _.bind(fn, this));
+      }, this);
+      this[name] = flotr.clone(plugin);
+      _.each(this[name], function(fn, p){
+        if (_.isFunction(fn))
+          this[name][p] = _.bind(fn, this);
+      }, this);
+    }, this);
+  },
+
+  /**
+   * Sets options and initializes some variables and color specific values, used by the constructor.
+   * @param {Object} opts - options object
+   */
+  _initOptions: function(opts){
+    var options = flotr.clone(flotr.defaultOptions);
+    options.x2axis = _.extend(_.clone(options.xaxis), options.x2axis);
+    options.y2axis = _.extend(_.clone(options.yaxis), options.y2axis);
+    this.options = flotr.merge(opts || {}, options);
+
+    if (this.options.grid.minorVerticalLines === null &&
+      this.options.xaxis.scaling === 'logarithmic') {
+      this.options.grid.minorVerticalLines = true;
+    }
+    if (this.options.grid.minorHorizontalLines === null &&
+      this.options.yaxis.scaling === 'logarithmic') {
+      this.options.grid.minorHorizontalLines = true;
+    }
+
+    E.fire(this.el, 'flotr:afterinitoptions', [this]);
+
+    this.axes = flotr.Axis.getAxes(this.options);
+
+    // Initialize some variables used throughout this function.
+    var assignedColors = [],
+        colors = [],
+        ln = this.series.length,
+        neededColors = this.series.length,
+        oc = this.options.colors,
+        usedColors = [],
+        variation = 0,
+        c, i, j, s;
+
+    // Collect user-defined colors from series.
+    for(i = neededColors - 1; i > -1; --i){
+      c = this.series[i].color;
+      if(c){
+        --neededColors;
+        if(_.isNumber(c)) assignedColors.push(c);
+        else usedColors.push(flotr.Color.parse(c));
+      }
+    }
+
+    // Calculate the number of colors that need to be generated.
+    for(i = assignedColors.length - 1; i > -1; --i)
+      neededColors = Math.max(neededColors, assignedColors[i] + 1);
+
+    // Generate needed number of colors.
+    for(i = 0; colors.length < neededColors;){
+      c = (oc.length == i) ? new flotr.Color(100, 100, 100) : flotr.Color.parse(oc[i]);
+
+      // Make sure each serie gets a different color.
+      var sign = variation % 2 == 1 ? -1 : 1,
+          factor = 1 + sign * Math.ceil(variation / 2) * 0.2;
+      c.scale(factor, factor, factor);
+
+      /**
+       * @todo if we're getting too close to something else, we should probably skip this one
+       */
+      colors.push(c);
+
+      if(++i >= oc.length){
+        i = 0;
+        ++variation;
+      }
+    }
+
+    // Fill the options with the generated colors.
+    for(i = 0, j = 0; i < ln; ++i){
+      s = this.series[i];
+
+      // Assign the color.
+      if (!s.color){
+        s.color = colors[j++].toString();
+      }else if(_.isNumber(s.color)){
+        s.color = colors[s.color].toString();
+      }
+
+      // Every series needs an axis
+      if (!s.xaxis) s.xaxis = this.axes.x;
+           if (s.xaxis == 1) s.xaxis = this.axes.x;
+      else if (s.xaxis == 2) s.xaxis = this.axes.x2;
+
+      if (!s.yaxis) s.yaxis = this.axes.y;
+           if (s.yaxis == 1) s.yaxis = this.axes.y;
+      else if (s.yaxis == 2) s.yaxis = this.axes.y2;
+
+      // Apply missing options to the series.
+      for (var t in flotr.graphTypes){
+        s[t] = _.extend(_.clone(this.options[t]), s[t]);
+      }
+      s.mouse = _.extend(_.clone(this.options.mouse), s.mouse);
+
+      if (_.isUndefined(s.shadowSize)) s.shadowSize = this.options.shadowSize;
+    }
+  },
+
+  _setEl: function(el) {
+    if (!el) throw 'The target container doesn\'t exist';
+    if (!el.clientWidth) throw 'The target container must be visible';
+    this.el = el;
+
+    if (this.el.graph) this.el.graph.destroy();
+
+    this.el.graph = this;
+  }
+};
+
+Flotr.Graph = Graph;
+
+})();
+
+/**
+ * Flotr Axis Library
+ */
+
+(function () {
+
+var
+  _ = Flotr._,
+  LOGARITHMIC = 'logarithmic';
+
+function Axis (o) {
+
+  this.orientation = 1;
+  this.offset = 0;
+  this.datamin = Number.MAX_VALUE;
+  this.datamax = -Number.MAX_VALUE;
+
+  _.extend(this, o);
+
+  this._setTranslations();
+}
+
+
+// Prototype
+Axis.prototype = {
+
+  setScale : function () {
+    var length = this.length;
+    if (this.options.scaling == LOGARITHMIC) {
+      this.scale = length / (log(this.max, this.options.base) - log(this.min, this.options.base));
+    } else {
+      this.scale = length / (this.max - this.min);
+    }
+  },
+
+  calculateTicks : function () {
+    var options = this.options;
+
+    this.ticks = [];
+    this.minorTicks = [];
+    
+    // User Ticks
+    if(options.ticks){
+      this._cleanUserTicks(options.ticks, this.ticks);
+      this._cleanUserTicks(options.minorTicks || [], this.minorTicks);
+    }
+    else {
+      if (options.mode == 'time') {
+        this._calculateTimeTicks();
+      } else if (options.scaling === 'logarithmic') {
+        this._calculateLogTicks();
+      } else {
+        this._calculateTicks();
+      }
+    }
+  },
+
+  /**
+   * Calculates the range of an axis to apply autoscaling.
+   */
+  calculateRange: function () {
+
+    if (!this.used) return;
+
+    var axis  = this,
+      o       = axis.options,
+      min     = o.min !== null ? o.min : axis.datamin,
+      max     = o.max !== null ? o.max : axis.datamax,
+      margin  = o.autoscaleMargin;
+        
+    if (o.scaling == 'logarithmic') {
+      if (min <= 0) min = axis.datamin;
+
+      // Let it widen later on
+      if (max <= 0) max = min;
+    }
+
+    if (max == min) {
+      var widen = max ? 0.01 : 1.00;
+      min -= widen;
+      max += widen;
+    }
+
+    if (o.scaling === 'logarithmic') {
+      if (min < 0) min = max / o.base;  // Could be the result of widening
+
+      var maxexp = Math.log(max);
+      if (o.base != Math.E) maxexp /= Math.log(o.base);
+      maxexp = Math.ceil(maxexp);
+
+      var minexp = Math.log(min);
+      if (o.base != Math.E) minexp /= Math.log(o.base);
+      minexp = Math.ceil(minexp);
+      
+      axis.tickSize = Flotr.getTickSize(o.noTicks, minexp, maxexp, o.tickDecimals === null ? 0 : o.tickDecimals);
+                        
+      // Try to determine a suitable amount of miniticks based on the length of a decade
+      if (o.minorTickFreq === null) {
+        if (maxexp - minexp > 10)
+          o.minorTickFreq = 0;
+        else if (maxexp - minexp > 5)
+          o.minorTickFreq = 2;
+        else
+          o.minorTickFreq = 5;
+      }
+    } else {
+      axis.tickSize = Flotr.getTickSize(o.noTicks, min, max, o.tickDecimals);
+    }
+
+    axis.min = min;
+    axis.max = max; //extendRange may use axis.min or axis.max, so it should be set before it is caled
+
+    // Autoscaling. @todo This probably fails with log scale. Find a testcase and fix it
+    if(o.min === null && o.autoscale){
+      axis.min -= axis.tickSize * margin;
+      // Make sure we don't go below zero if all values are positive.
+      if(axis.min < 0 && axis.datamin >= 0) axis.min = 0;
+      axis.min = axis.tickSize * Math.floor(axis.min / axis.tickSize);
+    }
+    
+    if(o.max === null && o.autoscale){
+      axis.max += axis.tickSize * margin;
+      if(axis.max > 0 && axis.datamax <= 0 && axis.datamax != axis.datamin) axis.max = 0;        
+      axis.max = axis.tickSize * Math.ceil(axis.max / axis.tickSize);
+    }
+
+    if (axis.min == axis.max) axis.max = axis.min + 1;
+  },
+
+  calculateTextDimensions : function (T, options) {
+
+    var maxLabel = '',
+      length,
+      i;
+
+    if (this.options.showLabels) {
+      for (i = 0; i < this.ticks.length; ++i) {
+        length = this.ticks[i].label.length;
+        if (length > maxLabel.length){
+          maxLabel = this.ticks[i].label;
+        }
+      }
+    }
+
+    this.maxLabel = T.dimensions(
+      maxLabel,
+      {size:options.fontSize, angle: Flotr.toRad(this.options.labelsAngle)},
+      'font-size:smaller;',
+      'flotr-grid-label'
+    );
+
+    this.titleSize = T.dimensions(
+      this.options.title, 
+      {size:options.fontSize*1.2, angle: Flotr.toRad(this.options.titleAngle)},
+      'font-weight:bold;',
+      'flotr-axis-title'
+    );
+  },
+
+  _cleanUserTicks : function (ticks, axisTicks) {
+
+    var axis = this, options = this.options,
+      v, i, label, tick;
+
+    if(_.isFunction(ticks)) ticks = ticks({min : axis.min, max : axis.max});
+
+    for(i = 0; i < ticks.length; ++i){
+      tick = ticks[i];
+      if(typeof(tick) === 'object'){
+        v = tick[0];
+        label = (tick.length > 1) ? tick[1] : options.tickFormatter(v, {min : axis.min, max : axis.max});
+      } else {
+        v = tick;
+        label = options.tickFormatter(v, {min : this.min, max : this.max});
+      }
+      axisTicks[i] = { v: v, label: label };
+    }
+  },
+
+  _calculateTimeTicks : function () {
+    var axis = this,
+        tu = Flotr.Date.timeUnits,
+        spec = Flotr.Date.spec,
+        delta = (axis.max - axis.min) / axis.options.noTicks,
+        size, unit, i;
+
+    for (i = 0; i < spec.length - 1; ++i) {
+      var d = spec[i][0] * tu[spec[i][1]];
+      if (delta < (d + spec[i+1][0] * tu[spec[i+1][1]]) / 2 && d >= axis.tickSize)
+        break;
+    }
+    size = spec[i][0];
+    unit = spec[i][1];
+    
+    // special-case the possibility of several years
+    if (unit == "year") {
+      size = Flotr.getTickSize(axis.options.noTicks*tu.year, axis.min, axis.max, 0);
+    }
+    
+    axis.tickSize = size;
+    axis.tickUnit = unit;
+    axis.ticks = Flotr.Date.generator(axis);
+  },
+
+  _calculateLogTicks : function () {
+
+    var axis = this,
+      o = axis.options,
+      v,
+      decadeStart;
+
+    var max = Math.log(axis.max);
+    if (o.base != Math.E) max /= Math.log(o.base);
+    max = Math.ceil(max);
+
+    var min = Math.log(axis.min);
+    if (o.base != Math.E) min /= Math.log(o.base);
+    min = Math.ceil(min);
+    
+    for (i = min; i < max; i += axis.tickSize) {
+      decadeStart = (o.base == Math.E) ? Math.exp(i) : Math.pow(o.base, i);
+      // Next decade begins here:
+      var decadeEnd = decadeStart * ((o.base == Math.E) ? Math.exp(axis.tickSize) : Math.pow(o.base, axis.tickSize));
+      var stepSize = (decadeEnd - decadeStart) / o.minorTickFreq;
+      
+      axis.ticks.push({v: decadeStart, label: o.tickFormatter(decadeStart, {min : axis.min, max : axis.max})});
+      for (v = decadeStart + stepSize; v < decadeEnd; v += stepSize)
+        axis.minorTicks.push({v: v, label: o.tickFormatter(v, {min : axis.min, max : axis.max})});
+    }
+    
+    // Always show the value at the would-be start of next decade (end of this decade)
+    decadeStart = (o.base == Math.E) ? Math.exp(i) : Math.pow(o.base, i);
+    axis.ticks.push({v: decadeStart, label: o.tickFormatter(decadeStart, {min : axis.min, max : axis.max})});
+  },
+
+  _calculateTicks : function () {
+
+    var axis      = this,
+        o         = axis.options,
+        tickSize  = axis.tickSize,
+        min       = axis.min,
+        max       = axis.max,
+        start     = tickSize * Math.ceil(min / tickSize), // Round to nearest multiple of tick size.
+        decimals,
+        minorTickSize,
+        v, v2,
+        i, j;
+    
+    if (o.minorTickFreq)
+      minorTickSize = tickSize / o.minorTickFreq;
+                      
+    // Then store all possible ticks.
+    for (i = 0; (v = v2 = start + i * tickSize) <= max; ++i){
+      
+      // Round (this is always needed to fix numerical instability).
+      decimals = o.tickDecimals;
+      if (decimals === null) decimals = 1 - Math.floor(Math.log(tickSize) / Math.LN10);
+      if (decimals < 0) decimals = 0;
+      
+      v = v.toFixed(decimals);
+      axis.ticks.push({ v: v, label: o.tickFormatter(v, {min : axis.min, max : axis.max}) });
+
+      if (o.minorTickFreq) {
+        for (j = 0; j < o.minorTickFreq && (i * tickSize + j * minorTickSize) < max; ++j) {
+          v = (v2 + j * minorTickSize).toFixed(decimals);
+          axis.minorTicks.push({ v: v, label: o.tickFormatter(v, {min : axis.min, max : axis.max}) });
+        }
+      }
+    }
+
+  },
+
+  _setTranslations : function (logarithmic) {
+    this.d2p = (logarithmic ? d2pLog : d2p);
+    this.p2d = (logarithmic ? p2dLog : p2d);
+  }
+};
+
+
+// Static Methods
+_.extend(Axis, {
+  getAxes : function (options) {
+    return {
+      x:  new Axis({options: options.xaxis,  n: 1, length: this.plotWidth}),
+      x2: new Axis({options: options.x2axis, n: 2, length: this.plotWidth}),
+      y:  new Axis({options: options.yaxis,  n: 1, length: this.plotHeight, offset: this.plotHeight, orientation: -1}),
+      y2: new Axis({options: options.y2axis, n: 2, length: this.plotHeight, offset: this.plotHeight, orientation: -1})
+    };
+  }
+});
+
+
+// Helper Methods
+
+function d2p (dataValue) {
+  return this.offset + this.orientation * (dataValue - this.min) * this.scale;
+}
+
+function p2d (pointValue) {
+  return (this.offset + this.orientation * pointValue) / this.scale + this.min;
+}
+
+function d2pLog (dataValue) {
+  return this.offset + this.orientation * (log(dataValue, this.options.base) - log(this.min, this.options.base)) * this.scale;
+}
+
+function p2dLog (pointValue) {
+  return exp((this.offset + this.orientation * pointValue) / this.scale + log(this.min, this.options.base), this.options.base);
+}
+
+function log (value, base) {
+  value = Math.log(Math.max(value, Number.MIN_VALUE));
+  if (base !== Math.E) 
+    value /= Math.log(base);
+  return value;
+}
+
+function exp (value, base) {
+  return (base === Math.E) ? Math.exp(value) : Math.pow(base, value);
+}
+
+Flotr.Axis = Axis;
+
+})();
+
+/**
+ * Flotr Series Library
+ */
+
+(function () {
+
+var
+  _ = Flotr._;
+
+function Series (o) {
+  _.extend(this, o);
+}
+
+Series.prototype = {
+
+  getRange: function () {
+
+    var
+      data = this.data,
+      length = data.length,
+      xmin = Number.MAX_VALUE,
+      ymin = Number.MAX_VALUE,
+      xmax = -Number.MAX_VALUE,
+      ymax = -Number.MAX_VALUE,
+      xused = false,
+      yused = false,
+      x, y, i;
+
+    if (length < 0 || this.hide) return false;
+
+    for (i = 0; i < length; i++) {
+      x = data[i][0];
+      y = data[i][1];
+      if (x < xmin) { xmin = x; xused = true; }
+      if (x > xmax) { xmax = x; xused = true; }
+      if (y < ymin) { ymin = y; yused = true; }
+      if (y > ymax) { ymax = y; yused = true; }
+    }
+
+    return {
+      xmin : xmin,
+      xmax : xmax,
+      ymin : ymin,
+      ymax : ymax,
+      xused : xused,
+      yused : yused
+    };
+  }
+};
+
+_.extend(Series, {
+  /**
+   * Collects dataseries from input and parses the series into the right format. It returns an Array 
+   * of Objects each having at least the 'data' key set.
+   * @param {Array, Object} data - Object or array of dataseries
+   * @return {Array} Array of Objects parsed into the right format ({(...,) data: [[x1,y1], [x2,y2], ...] (, ...)})
+   */
+  getSeries: function(data){
+    return _.map(data, function(s){
+      var series;
+      if (s.data) {
+        series = new Series();
+        _.extend(series, s);
+      } else {
+        series = new Series({data:s});
+      }
+      return series;
+    });
+  }
+});
+
+Flotr.Series = Series;
+
+})();
+
+/**
+ * Text Utilities
+ */
+(function () {
+
+var
+  F = Flotr,
+  D = F.DOM,
+  _ = F._,
+
+Text = function (o) {
+  this.o = o;
+};
+
+Text.prototype = {
+
+  dimensions : function (text, canvasStyle, htmlStyle, className) {
+
+    if (!text) return { width : 0, height : 0 };
+    
+    return (this.o.html) ?
+      this.html(text, this.o.element, htmlStyle, className) : 
+      this.canvas(text, canvasStyle);
+  },
+
+  canvas : function (text, style) {
+
+    if (!this.o.textEnabled) return;
+    style = style || {};
+
+    var
+      metrics = this.measureText(text, style),
+      width = metrics.width,
+      height = style.size || F.defaultOptions.fontSize,
+      angle = style.angle || 0,
+      cosAngle = Math.cos(angle),
+      sinAngle = Math.sin(angle),
+      widthPadding = 2,
+      heightPadding = 6,
+      bounds;
+
+    bounds = {
+      width: Math.abs(cosAngle * width) + Math.abs(sinAngle * height) + widthPadding,
+      height: Math.abs(sinAngle * width) + Math.abs(cosAngle * height) + heightPadding
+    };
+
+    return bounds;
+  },
+
+  html : function (text, element, style, className) {
+
+    var div = D.create('div');
+
+    D.setStyles(div, { 'position' : 'absolute', 'top' : '-10000px' });
+    D.insert(div, '<div style="'+style+'" class="'+className+' flotr-dummy-div">' + text + '</div>');
+    D.insert(this.o.element, div);
+
+    return D.size(div);
+  },
+
+  measureText : function (text, style) {
+
+    var
+      context = this.o.ctx,
+      metrics;
+
+    if (!context.fillText || (F.isIphone && context.measure)) {
+      return { width : context.measure(text, style)};
+    }
+
+    style = _.extend({
+      size: F.defaultOptions.fontSize,
+      weight: 1,
+      angle: 0
+    }, style);
+
+    context.save();
+    context.font = (style.weight > 1 ? "bold " : "") + (style.size*1.3) + "px sans-serif";
+    metrics = context.measureText(text);
+    context.restore();
+
+    return metrics;
+  }
+};
+
+Flotr.Text = Text;
+
+})();
+
+/** Lines **/
+Flotr.addType('lines', {
+  options: {
+    show: false,           // => setting to true will show lines, false will hide
+    lineWidth: 2,          // => line width in pixels
+    fill: false,           // => true to fill the area from the line to the x axis, false for (transparent) no fill
+    fillBorder: false,     // => draw a border around the fill
+    fillColor: null,       // => fill color
+    fillOpacity: 0.4,      // => opacity of the fill color, set to 1 for a solid fill, 0 hides the fill
+    steps: false,          // => draw steps
+    stacked: false         // => setting to true will show stacked lines, false will show normal lines
+  },
+
+  stack : {
+    values : []
+  },
+
+  /**
+   * Draws lines series in the canvas element.
+   * @param {Object} options
+   */
+  draw : function (options) {
+
+    var
+      context     = options.context,
+      lineWidth   = options.lineWidth,
+      shadowSize  = options.shadowSize,
+      offset;
+
+    context.save();
+    context.lineJoin = 'round';
+
+    if (shadowSize) {
+
+      context.lineWidth = shadowSize / 2;
+      offset = lineWidth / 2 + context.lineWidth / 2;
+      
+      // @TODO do this instead with a linear gradient
+      context.strokeStyle = "rgba(0,0,0,0.1)";
+      this.plot(options, offset + shadowSize / 2, false);
+
+      context.strokeStyle = "rgba(0,0,0,0.2)";
+      this.plot(options, offset, false);
+    }
+
+    context.lineWidth = lineWidth;
+    context.strokeStyle = options.color;
+
+    this.plot(options, 0, true);
+
+    context.restore();
+  },
+
+  plot : function (options, shadowOffset, incStack) {
+
+    var
+      context   = options.context,
+      width     = options.plotWidth, 
+      height    = options.plotHeight,
+      xScale    = options.xScale,
+      yScale    = options.yScale,
+      data      = options.data, 
+      stack     = options.stacked ? this.stack : false,
+      length    = data.length - 1,
+      prevx     = null,
+      prevy     = null,
+      zero      = yScale(0),
+      x1, x2, y1, y2, stack1, stack2, i;
+      
+    if (length < 1) return;
+
+    context.beginPath();
+
+    for (i = 0; i < length; ++i) {
+
+      // To allow empty values
+      if (data[i][1] === null || data[i+1][1] === null) continue;
+
+      // Zero is infinity for log scales
+      // TODO handle zero for logarithmic
+      // if (xa.options.scaling === 'logarithmic' && (data[i][0] <= 0 || data[i+1][0] <= 0)) continue;
+      // if (ya.options.scaling === 'logarithmic' && (data[i][1] <= 0 || data[i+1][1] <= 0)) continue;
+      
+      x1 = xScale(data[i][0]);
+      x2 = xScale(data[i+1][0]);
+      
+      if (stack) {
+
+        stack1 = stack.values[data[i][0]] || 0;
+        stack2 = stack.values[data[i+1][0]] || stack.values[data[i][0]] || 0;
+
+        y1 = yScale(data[i][1] + stack1);
+        y2 = yScale(data[i+1][1] + stack2);
+        
+        if(incStack){
+          stack.values[data[i][0]] = data[i][1]+stack1;
+            
+          if(i == length-1)
+            stack.values[data[i+1][0]] = data[i+1][1]+stack2;
+        }
+      }
+      else{
+        y1 = yScale(data[i][1]);
+        y2 = yScale(data[i+1][1]);
+      }
+
+      if ((y1 >= height && y2 >= width) || 
+        (y1 <= 0 && y2 <= 0) ||
+        (x1 <= 0 && x2 <= 0) ||
+        (x1 >= width && x2 >= width)) continue;
+
+      if((prevx != x1) || (prevy != y1 + shadowOffset))
+        context.moveTo(x1, y1 + shadowOffset);
+      
+      prevx = x2;
+      prevy = y2 + shadowOffset;
+      if (options.steps) {
+        context.lineTo(prevx + shadowOffset / 2, y1 + shadowOffset);
+        context.lineTo(prevx + shadowOffset / 2, prevy);
+      } else {
+        context.lineTo(prevx, prevy);
+      }
+    }
+    
+    if (!options.fill || options.fill && !options.fillBorder) context.stroke();
+
+    // TODO stacked lines
+    if(!shadowOffset && options.fill){
+      x1 = xScale(data[0][0]);
+      context.fillStyle = options.fillStyle;
+      context.lineTo(x2, zero);
+      context.lineTo(x1, zero);
+      context.lineTo(x1, yScale(data[0][1]));
+      context.fill();
+      if (options.fillBorder) {
+        context.stroke();
+      }
+    }
+
+    context.closePath();
+  },
+
+  // Perform any pre-render precalculations (this should be run on data first)
+  // - Pie chart total for calculating measures
+  // - Stacks for lines and bars
+  // precalculate : function () {
+  // }
+  //
+  //
+  // Get any bounds after pre calculation (axis can fetch this if does not have explicit min/max)
+  // getBounds : function () {
+  // }
+  // getMin : function () {
+  // }
+  // getMax : function () {
+  // }
+  //
+  //
+  // Padding around rendered elements
+  // getPadding : function () {
+  // }
+
+  extendYRange : function (axis, data, options, lines) {
+
+    var o = axis.options;
+
+    // If stacked and auto-min
+    if (options.stacked && ((!o.max && o.max !== 0) || (!o.min && o.min !== 0))) {
+
+      var
+        newmax = axis.max,
+        newmin = axis.min,
+        positiveSums = lines.positiveSums || {},
+        negativeSums = lines.negativeSums || {},
+        x, j;
+
+      for (j = 0; j < data.length; j++) {
+
+        x = data[j][0] + '';
+
+        // Positive
+        if (data[j][1] > 0) {
+          positiveSums[x] = (positiveSums[x] || 0) + data[j][1];
+          newmax = Math.max(newmax, positiveSums[x]);
+        }
+
+        // Negative
+        else {
+          negativeSums[x] = (negativeSums[x] || 0) + data[j][1];
+          newmin = Math.min(newmin, negativeSums[x]);
+        }
+      }
+
+      lines.negativeSums = negativeSums;
+      lines.positiveSums = positiveSums;
+
+      axis.max = newmax;
+      axis.min = newmin;
+    }
+
+    if (options.steps) {
+
+      this.hit = function (options) {
+        var
+          data = options.data,
+          args = options.args,
+          yScale = options.yScale,
+          mouse = args[0],
+          length = data.length,
+          n = args[1],
+          x = mouse.x,
+          relY = mouse.relY,
+          i;
+
+        for (i = 0; i < length - 1; i++) {
+          if (x >= data[i][0] && x <= data[i+1][0]) {
+            if (Math.abs(yScale(data[i][1]) - relY) < 8) {
+              n.x = data[i][0];
+              n.y = data[i][1];
+              n.index = i;
+              n.seriesIndex = options.index;
+            }
+            break;
+          }
+        }
+      };
+
+      this.drawHit = function (options) {
+        var
+          context = options.context,
+          args    = options.args,
+          data    = options.data,
+          xScale  = options.xScale,
+          index   = args.index,
+          x       = xScale(args.x),
+          y       = options.yScale(args.y),
+          x2;
+
+        if (data.length - 1 > index) {
+          x2 = options.xScale(data[index + 1][0]);
+          context.save();
+          context.strokeStyle = options.color;
+          context.lineWidth = options.lineWidth;
+          context.beginPath();
+          context.moveTo(x, y);
+          context.lineTo(x2, y);
+          context.stroke();
+          context.closePath();
+          context.restore();
+        }
+      };
+
+      this.clearHit = function (options) {
+        var
+          context = options.context,
+          args    = options.args,
+          data    = options.data,
+          xScale  = options.xScale,
+          width   = options.lineWidth,
+          index   = args.index,
+          x       = xScale(args.x),
+          y       = options.yScale(args.y),
+          x2;
+
+        if (data.length - 1 > index) {
+          x2 = options.xScale(data[index + 1][0]);
+          context.clearRect(x - width, y - width, x2 - x + 2 * width, 2 * width);
+        }
+      };
+    }
+  }
+
+});
+
+/** Bars **/
+Flotr.addType('bars', {
+
+  options: {
+    show: false,           // => setting to true will show bars, false will hide
+    lineWidth: 2,          // => in pixels
+    barWidth: 1,           // => in units of the x axis
+    fill: true,            // => true to fill the area from the line to the x axis, false for (transparent) no fill
+    fillColor: null,       // => fill color
+    fillOpacity: 0.4,      // => opacity of the fill color, set to 1 for a solid fill, 0 hides the fill
+    horizontal: false,     // => horizontal bars (x and y inverted)
+    stacked: false,        // => stacked bar charts
+    centered: true,        // => center the bars to their x axis value
+    topPadding: 0.1        // => top padding in percent
+  },
+
+  stack : { 
+    positive : [],
+    negative : [],
+    _positive : [], // Shadow
+    _negative : []  // Shadow
+  },
+
+  draw : function (options) {
+    var
+      context = options.context;
+
+    context.save();
+    context.lineJoin = 'miter';
+    // @TODO linewidth not interpreted the right way.
+    context.lineWidth = options.lineWidth;
+    context.strokeStyle = options.color;
+    if (options.fill) context.fillStyle = options.fillStyle;
+    
+    this.plot(options);
+
+    context.restore();
+  },
+
+  plot : function (options) {
+
+    var
+      data            = options.data,
+      context         = options.context,
+      shadowSize      = options.shadowSize,
+      i, geometry, left, top, width, height;
+
+    if (data.length < 1) return;
+
+    this.translate(context, options.horizontal);
+
+    for (i = 0; i < data.length; i++) {
+
+      geometry = this.getBarGeometry(data[i][0], data[i][1], options);
+      if (geometry === null) continue;
+
+      left    = geometry.left;
+      top     = geometry.top;
+      width   = geometry.width;
+      height  = geometry.height;
+
+      if (options.fill) context.fillRect(left, top, width, height);
+      if (shadowSize) {
+        context.save();
+        context.fillStyle = 'rgba(0,0,0,0.05)';
+        context.fillRect(left + shadowSize, top + shadowSize, width, height);
+        context.restore();
+      }
+      if (options.lineWidth) {
+        context.strokeRect(left, top, width, height);
+      }
+    }
+  },
+
+  translate : function (context, horizontal) {
+    if (horizontal) {
+      context.rotate(-Math.PI / 2);
+      context.scale(-1, 1);
+    }
+  },
+
+  getBarGeometry : function (x, y, options) {
+
+    var
+      horizontal    = options.horizontal,
+      barWidth      = options.barWidth,
+      centered      = options.centered,
+      stack         = options.stacked ? this.stack : false,
+      lineWidth     = options.lineWidth,
+      bisection     = centered ? barWidth / 2 : 0,
+      xScale        = horizontal ? options.yScale : options.xScale,
+      yScale        = horizontal ? options.xScale : options.yScale,
+      xValue        = horizontal ? y : x,
+      yValue        = horizontal ? x : y,
+      stackOffset   = 0,
+      stackValue, left, right, top, bottom;
+
+    // Stacked bars
+    if (stack) {
+      stackValue          = yValue > 0 ? stack.positive : stack.negative;
+      stackOffset         = stackValue[xValue] || stackOffset;
+      stackValue[xValue]  = stackOffset + yValue;
+    }
+
+    left    = xScale(xValue - bisection);
+    right   = xScale(xValue + barWidth - bisection);
+    top     = yScale(yValue + stackOffset);
+    bottom  = yScale(stackOffset);
+
+    // TODO for test passing... probably looks better without this
+    if (bottom < 0) bottom = 0;
+
+    // TODO Skipping...
+    // if (right < xa.min || left > xa.max || top < ya.min || bottom > ya.max) continue;
+
+    return (x === null || y === null) ? null : {
+      x         : xValue,
+      y         : yValue,
+      xScale    : xScale,
+      yScale    : yScale,
+      top       : top,
+      left      : Math.min(left, right) - lineWidth / 2,
+      width     : Math.abs(right - left) - lineWidth,
+      height    : bottom - top
+    };
+  },
+
+  hit : function (options) {
+    var
+      data = options.data,
+      args = options.args,
+      mouse = args[0],
+      n = args[1],
+      x = mouse.x,
+      y = mouse.y,
+      hitGeometry = this.getBarGeometry(x, y, options),
+      width = hitGeometry.width / 2,
+      left = hitGeometry.left,
+      geometry, i;
+
+    for (i = data.length; i--;) {
+      geometry = this.getBarGeometry(data[i][0], data[i][1], options);
+      if (geometry.y > hitGeometry.y && Math.abs(left - geometry.left) < width) {
+        n.x = data[i][0];
+        n.y = data[i][1];
+        n.index = i;
+        n.seriesIndex = options.index;
+      }
+    }
+  },
+
+  drawHit : function (options) {
+    // TODO hits for stacked bars; implement using calculateStack option?
+    var
+      context     = options.context,
+      args        = options.args,
+      geometry    = this.getBarGeometry(args.x, args.y, options),
+      left        = geometry.left,
+      top         = geometry.top,
+      width       = geometry.width,
+      height      = geometry.height;
+
+    context.save();
+    context.strokeStyle = options.color;
+    context.lineWidth = options.lineWidth;
+    this.translate(context, options.horizontal);
+
+    // Draw highlight
+    context.beginPath();
+    context.moveTo(left, top + height);
+    context.lineTo(left, top);
+    context.lineTo(left + width, top);
+    context.lineTo(left + width, top + height);
+    if (options.fill) {
+      context.fillStyle = options.fillStyle;
+      context.fill();
+    }
+    context.stroke();
+    context.closePath();
+
+    context.restore();
+  },
+
+  clearHit: function (options) {
+    var
+      context     = options.context,
+      args        = options.args,
+      geometry    = this.getBarGeometry(args.x, args.y, options),
+      left        = geometry.left,
+      width       = geometry.width,
+      top         = geometry.top,
+      height      = geometry.height,
+      lineWidth   = 2 * options.lineWidth;
+
+    context.save();
+    this.translate(context, options.horizontal);
+    context.clearRect(
+      left - lineWidth,
+      Math.min(top, top + height) - lineWidth,
+      width + 2 * lineWidth,
+      Math.abs(height) + 2 * lineWidth
+    );
+    context.restore();
+  },
+
+  extendXRange : function (axis, data, options, bars) {
+    this._extendRange(axis, data, options, bars);
+  },
+
+  extendYRange : function (axis, data, options, bars) {
+    this._extendRange(axis, data, options, bars);
+  },
+  _extendRange: function (axis, data, options, bars) {
+
+    var
+      max = axis.options.max;
+
+    if (_.isNumber(max) || _.isString(max)) return; 
+
+    var
+      newmin = axis.min,
+      newmax = axis.max,
+      horizontal = options.horizontal,
+      orientation = axis.orientation,
+      positiveSums = this.positiveSums || {},
+      negativeSums = this.negativeSums || {},
+      value, datum, index, j;
+
+    // Sides of bars
+    if ((orientation == 1 && !horizontal) || (orientation == -1 && horizontal)) {
+      if (options.centered) {
+        newmax = Math.max(axis.datamax + options.barWidth, newmax);
+        newmin = Math.min(axis.datamin - options.barWidth, newmin);
+      }
+    }
+
+    if (options.stacked && 
+        ((orientation == 1 && horizontal) || (orientation == -1 && !horizontal))){
+
+      for (j = data.length; j--;) {
+        value = data[j][(orientation == 1 ? 1 : 0)]+'';
+        datum = data[j][(orientation == 1 ? 0 : 1)];
+
+        // Positive
+        if (datum > 0) {
+          positiveSums[value] = (positiveSums[value] || 0) + datum;
+          newmax = Math.max(newmax, positiveSums[value]);
+        }
+
+        // Negative
+        else {
+          negativeSums[value] = (negativeSums[value] || 0) + datum;
+          newmin = Math.min(newmin, negativeSums[value]);
+        }
+      }
+    }
+
+    // End of bars
+    if ((orientation == 1 && horizontal) || (orientation == -1 && !horizontal)) {
+      if (options.topPadding && (axis.max === axis.datamax || (options.stacked && this.stackMax !== newmax))) {
+        newmax += options.topPadding * (newmax - newmin);
+      }
+    }
+
+    this.stackMin = newmin;
+    this.stackMax = newmax;
+    this.negativeSums = negativeSums;
+    this.positiveSums = positiveSums;
+
+    axis.max = newmax;
+    axis.min = newmin;
+  }
+
+});
+
+/** Points **/
+Flotr.addType('points', {
+  options: {
+    show: false,           // => setting to true will show points, false will hide
+    radius: 3,             // => point radius (pixels)
+    lineWidth: 2,          // => line width in pixels
+    fill: true,            // => true to fill the points with a color, false for (transparent) no fill
+    fillColor: '#FFFFFF',  // => fill color
+    fillOpacity: 0.4       // => opacity of color inside the points
+  },
+
+  draw : function (options) {
+    var
+      context     = options.context,
+      lineWidth   = options.lineWidth,
+      shadowSize  = options.shadowSize;
+
+    context.save();
+
+    if (shadowSize > 0) {
+      context.lineWidth = shadowSize / 2;
+      
+      context.strokeStyle = 'rgba(0,0,0,0.1)';
+      this.plot(options, shadowSize / 2 + context.lineWidth / 2);
+
+      context.strokeStyle = 'rgba(0,0,0,0.2)';
+      this.plot(options, context.lineWidth / 2);
+    }
+
+    context.lineWidth = options.lineWidth;
+    context.strokeStyle = options.color;
+    context.fillStyle = options.fillColor || options.color;
+
+    this.plot(options);
+    context.restore();
+  },
+
+  plot : function (options, offset) {
+    var
+      data    = options.data,
+      context = options.context,
+      xScale  = options.xScale,
+      yScale  = options.yScale,
+      i, x, y;
+      
+    for (i = data.length - 1; i > -1; --i) {
+      y = data[i][1];
+      if (y === null) continue;
+
+      x = xScale(data[i][0]);
+      y = yScale(y);
+
+      if (x < 0 || x > options.width || y < 0 || y > options.height) continue;
+      
+      context.beginPath();
+      if (offset) {
+        context.arc(x, y + offset, options.radius, 0, Math.PI, false);
+      } else {
+        context.arc(x, y, options.radius, 0, 2 * Math.PI, true);
+        if (options.fill) context.fill();
+      }
+      context.stroke();
+      context.closePath();
+    }
+  }
+});
+
+/** 
+ * Selection Handles Plugin
+ *
+ *
+ * Options
+ *  show - True enables the handles plugin.
+ *  drag - Left and Right drag handles
+ *  scroll - Scrolling handle
+ */
+(function () {
+
+function isLeftClick (e, type) {
+  return (e.which ? (e.which === 1) : (e.button === 0 || e.button === 1));
+}
+
+function boundX(x, graph) {
+  return Math.min(Math.max(0, x), graph.plotWidth - 1);
+}
+
+function boundY(y, graph) {
+  return Math.min(Math.max(0, y), graph.plotHeight);
+}
+
+var
+  D = Flotr.DOM,
+  E = Flotr.EventAdapter,
+  _ = Flotr._;
+
+
+Flotr.addPlugin('selection', {
+
+  options: {
+    mode: null,            // => one of null, 'x', 'y' or 'xy'
+    color: '#B6D9FF',      // => selection box color
+    fps: 20                // => frames-per-second
+  },
+
+  callbacks: {
+    'flotr:mouseup' : function (event) {
+      if (!this.options.selection || !this.options.selection.mode) return;
+      if (this.selection.interval) clearInterval(this.selection.interval);
+
+      var pointer = E.eventPointer(event);
+      this.selection.setSelectionPos(this.selection.selection.second, {pageX:pointer.x, pageY:pointer.y});
+      this.selection.clearSelection();
+
+      if(this.selection.selecting && this.selection.selectionIsSane()){
+        this.selection.drawSelection();
+        this.selection.fireSelectEvent();
+        this.ignoreClick = true;
+      }
+    },
+    'flotr:mousedown' : function (event) {
+      if (!this.options.selection || !this.options.selection.mode) return;
+      if (!this.options.selection.mode || (!isLeftClick(event) && _.isUndefined(event.touches))) return;
+
+      var pointer = E.eventPointer(event);
+
+      this.selection.setSelectionPos(this.selection.selection.first, {pageX:pointer.x, pageY:pointer.y});
+
+      if (this.selection.interval) clearInterval(this.selection.interval);
+
+      this.lastMousePos.pageX = null;
+      this.selection.selecting = false;
+      this.selection.interval = setInterval(
+        _.bind(this.selection.updateSelection, this),
+        1000/this.options.selection.fps
+      );
+    }
+  },
+
+  // TODO This isn't used.  Maybe it belongs in the draw area and fire select event methods?
+  getArea: function() {
+
+    var s = this.selection.selection,
+      first = s.first,
+      second = s.second;
+
+    return {
+      x1: Math.min(first.x, second.x),
+      x2: Math.max(first.x, second.x),
+      y1: Math.min(first.y, second.y),
+      y2: Math.max(first.y, second.y)
+    };
+  },
+
+  selection: {first: {x: -1, y: -1}, second: {x: -1, y: -1}},
+  prevSelection: null,
+  interval: null,
+
+  /**
+   * Fires the 'flotr:select' event when the user made a selection.
+   */
+  fireSelectEvent: function(name){
+    var a = this.axes,
+        s = this.selection.selection,
+        x1, x2, y1, y2;
+
+    name = name || 'select';
+
+    x1 = a.x.p2d(s.first.x);
+    x2 = a.x.p2d(s.second.x);
+    y1 = a.y.p2d(s.first.y);
+    y2 = a.y.p2d(s.second.y);
+
+    E.fire(this.el, 'flotr:'+name, [{
+      x1:Math.min(x1, x2), 
+      y1:Math.min(y1, y2), 
+      x2:Math.max(x1, x2), 
+      y2:Math.max(y1, y2),
+      xfirst:x1, xsecond:x2, yfirst:y1, ysecond:y2
+    }, this]);
+  },
+
+  /**
+   * Allows the user the manually select an area.
+   * @param {Object} area - Object with coordinates to select.
+   */
+  setSelection: function(area, preventEvent){
+    var options = this.options,
+      xa = this.axes.x,
+      ya = this.axes.y,
+      vertScale = ya.scale,
+      hozScale = xa.scale,
+      selX = options.selection.mode.indexOf('x') != -1,
+      selY = options.selection.mode.indexOf('y') != -1,
+      s = this.selection.selection;
+    
+    this.selection.clearSelection();
+
+    s.first.y  = boundY((selX && !selY) ? 0 : (ya.max - area.y1) * vertScale, this);
+    s.second.y = boundY((selX && !selY) ? this.plotHeight - 1: (ya.max - area.y2) * vertScale, this);
+    s.first.x  = boundX((selY && !selX) ? 0 : area.x1, this);
+    s.second.x = boundX((selY && !selX) ? this.plotWidth : area.x2, this);
+    
+    this.selection.drawSelection();
+    if (!preventEvent)
+      this.selection.fireSelectEvent();
+  },
+
+  /**
+   * Calculates the position of the selection.
+   * @param {Object} pos - Position object.
+   * @param {Event} event - Event object.
+   */
+  setSelectionPos: function(pos, pointer) {
+    var options = this.options,
+        offset = D.position(this.overlay),
+        s = this.selection.selection;
+
+    if(options.selection.mode.indexOf('x') == -1){
+      pos.x = (pos == s.first) ? 0 : this.plotWidth;         
+    }else{
+      pos.x = boundX(pointer.pageX - offset.left - this.plotOffset.left, this);
+    }
+
+    if (options.selection.mode.indexOf('y') == -1){
+      pos.y = (pos == s.first) ? 0 : this.plotHeight - 1;
+    }else{
+      pos.y = boundY(pointer.pageY - offset.top - this.plotOffset.top, this);
+    }
+  },
+  /**
+   * Draws the selection box.
+   */
+  drawSelection: function() {
+
+    this.selection.fireSelectEvent('selecting');
+
+    var s = this.selection.selection,
+      octx = this.octx,
+      options = this.options,
+      plotOffset = this.plotOffset,
+      prevSelection = this.selection.prevSelection;
+    
+    if (prevSelection &&
+      s.first.x == prevSelection.first.x &&
+      s.first.y == prevSelection.first.y && 
+      s.second.x == prevSelection.second.x &&
+      s.second.y == prevSelection.second.y) {
+      return;
+    }
+
+    octx.save();
+    octx.strokeStyle = this.processColor(options.selection.color, {opacity: 0.8});
+    octx.lineWidth = 1;
+    octx.lineJoin = 'miter';
+    octx.fillStyle = this.processColor(options.selection.color, {opacity: 0.4});
+
+    this.selection.prevSelection = {
+      first: { x: s.first.x, y: s.first.y },
+      second: { x: s.second.x, y: s.second.y }
+    };
+
+    var x = Math.min(s.first.x, s.second.x),
+        y = Math.min(s.first.y, s.second.y),
+        w = Math.abs(s.second.x - s.first.x),
+        h = Math.abs(s.second.y - s.first.y);
+
+    octx.fillRect(x + plotOffset.left+0.5, y + plotOffset.top+0.5, w, h);
+    octx.strokeRect(x + plotOffset.left+0.5, y + plotOffset.top+0.5, w, h);
+    octx.restore();
+  },
+
+  /**
+   * Updates (draws) the selection box.
+   */
+  updateSelection: function(){
+    if (!this.lastMousePos.pageX) return;
+
+    this.selection.selecting = true;
+    this.selection.setSelectionPos(this.selection.selection.second, this.lastMousePos);
+
+    this.selection.clearSelection();
+    
+    if(this.selection.selectionIsSane()) {
+      this.selection.drawSelection();
+    }
+  },
+
+  /**
+   * Removes the selection box from the overlay canvas.
+   */
+  clearSelection: function() {
+    if (!this.selection.prevSelection) return;
+      
+    var prevSelection = this.selection.prevSelection,
+      lw = 1,
+      plotOffset = this.plotOffset,
+      x = Math.min(prevSelection.first.x, prevSelection.second.x),
+      y = Math.min(prevSelection.first.y, prevSelection.second.y),
+      w = Math.abs(prevSelection.second.x - prevSelection.first.x),
+      h = Math.abs(prevSelection.second.y - prevSelection.first.y);
+    
+    this.octx.clearRect(x + plotOffset.left - lw + 0.5,
+                        y + plotOffset.top - lw,
+                        w + 2 * lw + 0.5,
+                        h + 2 * lw + 0.5);
+    
+    this.selection.prevSelection = null;
+  },
+  /**
+   * Determines whether or not the selection is sane and should be drawn.
+   * @return {Boolean} - True when sane, false otherwise.
+   */
+  selectionIsSane: function(){
+    var s = this.selection.selection;
+    return Math.abs(s.second.x - s.first.x) >= 5 || 
+           Math.abs(s.second.y - s.first.y) >= 5;
+  }
+
+});
+
+})();
+
+(function () {
+
+var
+  D = Flotr.DOM,
+  _ = Flotr._;
+
+Flotr.addPlugin('legend', {
+  options: {
+    show: true,            // => setting to true will show the legend, hide otherwise
+    noColumns: 1,          // => number of colums in legend table // @todo: doesn't work for HtmlText = false
+    labelFormatter: function(v){return v;}, // => fn: string -> string
+    labelBoxBorderColor: '#CCCCCC', // => border color for the little label boxes
+    labelBoxWidth: 14,
+    labelBoxHeight: 10,
+    labelBoxMargin: 5,
+    labelBoxOpacity: 0.4,
+    container: null,       // => container (as jQuery object) to put legend in, null means default on top of graph
+    position: 'nw',        // => position of default legend container within plot
+    margin: 5,             // => distance from grid edge to default legend container within plot
+    backgroundColor: null, // => null means auto-detect
+    backgroundOpacity: 0.85// => set to 0 to avoid background, set to 1 for a solid background
+  },
+  callbacks: {
+    'flotr:afterinit': function() {
+      this.legend.insertLegend();
+    }
+  },
+  /**
+   * Adds a legend div to the canvas container or draws it on the canvas.
+   */
+  insertLegend: function(){
+
+    if(!this.options.legend.show)
+      return;
+
+    var series      = this.series,
+      plotOffset    = this.plotOffset,
+      options       = this.options,
+      legend        = options.legend,
+      fragments     = [],
+      rowStarted    = false, 
+      ctx           = this.ctx,
+      itemCount     = _.filter(series, function(s) {return (s.label && !s.hide);}).length,
+      p             = legend.position, 
+      m             = legend.margin,
+      i, label, color;
+
+    if (itemCount) {
+      if (!options.HtmlText && this.textEnabled && !legend.container) {
+        var style = {
+          size: options.fontSize*1.1,
+          color: options.grid.color
+        };
+
+        var lbw = legend.labelBoxWidth,
+            lbh = legend.labelBoxHeight,
+            lbm = legend.labelBoxMargin,
+            offsetX = plotOffset.left + m,
+            offsetY = plotOffset.top + m;
+        
+        // We calculate the labels' max width
+        var labelMaxWidth = 0;
+        for(i = series.length - 1; i > -1; --i){
+          if(!series[i].label || series[i].hide) continue;
+          label = legend.labelFormatter(series[i].label);
+          labelMaxWidth = Math.max(labelMaxWidth, this._text.measureText(label, style).width);
+        }
+        
+        var legendWidth  = Math.round(lbw + lbm*3 + labelMaxWidth),
+            legendHeight = Math.round(itemCount*(lbm+lbh) + lbm);
+        
+        if(p.charAt(0) == 's') offsetY = plotOffset.top + this.plotHeight - (m + legendHeight);
+        if(p.charAt(1) == 'e') offsetX = plotOffset.left + this.plotWidth - (m + legendWidth);
+        
+        // Legend box
+        color = this.processColor(legend.backgroundColor || 'rgb(240,240,240)', {opacity: legend.backgroundOpacity || 0.1});
+        
+        ctx.fillStyle = color;
+        ctx.fillRect(offsetX, offsetY, legendWidth, legendHeight);
+        ctx.strokeStyle = legend.labelBoxBorderColor;
+        ctx.strokeRect(Flotr.toPixel(offsetX), Flotr.toPixel(offsetY), legendWidth, legendHeight);
+        
+        // Legend labels
+        var x = offsetX + lbm;
+        var y = offsetY + lbm;
+        for(i = 0; i < series.length; i++){
+          if(!series[i].label || series[i].hide) continue;
+          label = legend.labelFormatter(series[i].label);
+          
+          ctx.fillStyle = series[i].color;
+          ctx.fillRect(x, y, lbw-1, lbh-1);
+          
+          ctx.strokeStyle = legend.labelBoxBorderColor;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(Math.ceil(x)-1.5, Math.ceil(y)-1.5, lbw+2, lbh+2);
+          
+          // Legend text
+          Flotr.drawText(ctx, label, x + lbw + lbm, y + lbh, style);
+          
+          y += lbh + lbm;
+        }
+      }
+      else {
+        for(i = 0; i < series.length; ++i){
+          if(!series[i].label || series[i].hide) continue;
+          
+          if(i % legend.noColumns === 0){
+            fragments.push(rowStarted ? '</tr><tr>' : '<tr>');
+            rowStarted = true;
+          }
+           
+          // @TODO remove requirement on bars
+          var s = series[i],
+            boxWidth = legend.labelBoxWidth,
+            boxHeight = legend.labelBoxHeight,
+            opacityValue = (s.bars ? s.bars.fillOpacity : legend.labelBoxOpacity),
+            opacity = 'opacity:' + opacityValue + ';filter:alpha(opacity=' + opacityValue*100 + ');';
+
+          label = legend.labelFormatter(s.label);
+          color = 'background-color:' + ((s.bars && s.bars.show && s.bars.fillColor && s.bars.fill) ? s.bars.fillColor : s.color) + ';';
+          
+          fragments.push(
+            '<td class="flotr-legend-color-box">',
+              '<div style="border:1px solid ', legend.labelBoxBorderColor, ';padding:1px">',
+                '<div style="width:', (boxWidth-1), 'px;height:', (boxHeight-1), 'px;border:1px solid ', series[i].color, '">', // Border
+                  '<div style="width:', boxWidth, 'px;height:', boxHeight, 'px;', 'opacity:.4;', color, '"></div>', // Background
+                '</div>',
+              '</div>',
+            '</td>',
+            '<td class="flotr-legend-label">', label, '</td>'
+          );
+        }
+        if(rowStarted) fragments.push('</tr>');
+          
+        if(fragments.length > 0){
+          var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join('') + '</table>';
+          if(legend.container){
+            D.insert(legend.container, table);
+          }
+          else {
+            var styles = {position: 'absolute', 'z-index': 2};
+            
+                 if(p.charAt(0) == 'n') { styles.top = (m + plotOffset.top) + 'px'; styles.bottom = 'auto'; }
+            else if(p.charAt(0) == 's') { styles.bottom = (m + plotOffset.bottom) + 'px'; styles.top = 'auto'; }
+                 if(p.charAt(1) == 'e') { styles.right = (m + plotOffset.right) + 'px'; styles.left = 'auto'; }
+            else if(p.charAt(1) == 'w') { styles.left = (m + plotOffset.left) + 'px'; styles.right = 'auto'; }
+                 
+            var div = D.create('div'), size;
+            div.className = 'flotr-legend';
+            D.setStyles(div, styles);
+            D.insert(div, table);
+            D.insert(this.el, div);
+            
+            if(!legend.backgroundOpacity)
+              return;
+
+            var c = legend.backgroundColor || options.grid.backgroundColor || '#ffffff';
+
+            _.extend(styles, D.size(div), {
+              'backgroundColor': c,
+              'z-index': 1
+            });
+            styles.width += 'px';
+            styles.height += 'px';
+
+             // Put in the transparent background separately to avoid blended labels and
+            div = D.create('div');
+            div.className = 'flotr-legend-bg';
+            D.setStyles(div, styles);
+            D.opacity(div, legend.backgroundOpacity);
+            D.insert(div, ' ');
+            D.insert(this.el, div);
+          }
+        }
+      }
+    }
+  }
+});
+})();
+
+(function () {
+
+var
+  D = Flotr.DOM,
+  _ = Flotr._,
+  flotr = Flotr,
+  S_MOUSETRACK = 'opacity:0.7;background-color:#000;color:#fff;display:none;position:absolute;padding:2px 8px;-moz-border-radius:4px;border-radius:4px;white-space:nowrap;';
+
+Flotr.addPlugin('hit', {
+  callbacks: {
+    'flotr:mousemove': function(e, pos) {
+      this.hit.track(pos);
+    },
+    'flotr:click': function(pos) {
+      this.hit.track(pos);
+    },
+    'flotr:mouseout': function() {
+      this.hit.clearHit();
+    }
+  },
+  track : function (pos) {
+    if (this.options.mouse.track || _.any(this.series, function(s){return s.mouse && s.mouse.track;})) {
+      this.hit.hit(pos);
+    }
+  },
+  /**
+   * Try a method on a graph type.  If the method exists, execute it.
+   * @param {Object} series
+   * @param {String} method  Method name.
+   * @param {Array} args  Arguments applied to method.
+   * @return executed successfully or failed.
+   */
+  executeOnType: function(s, method, args){
+    var
+      success = false,
+      options;
+
+    if (!_.isArray(s)) s = [s];
+
+    function e(s, index) {
+      _.each(_.keys(flotr.graphTypes), function (type) {
+        if (s[type] && s[type].show && this[type][method]) {
+          options = this.getOptions(s, type);
+
+          options.fill = !!s.mouse.fillColor;
+          options.fillStyle = this.processColor(s.mouse.fillColor || '#ffffff', {opacity: s.mouse.fillOpacity});
+          options.color = s.mouse.lineColor;
+          options.context = this.octx;
+          options.index = index;
+
+          if (args) options.args = args;
+          this[type][method].call(this[type], options);
+          success = true;
+        }
+      }, this);
+    }
+    _.each(s, e, this);
+
+    return success;
+  },
+  /**
+   * Updates the mouse tracking point on the overlay.
+   */
+  drawHit: function(n){
+    var octx = this.octx,
+      s = n.series;
+
+    if (s.mouse.lineColor) {
+      octx.save();
+      octx.lineWidth = (s.points ? s.points.lineWidth : 1);
+      octx.strokeStyle = s.mouse.lineColor;
+      octx.fillStyle = this.processColor(s.mouse.fillColor || '#ffffff', {opacity: s.mouse.fillOpacity});
+      octx.translate(this.plotOffset.left, this.plotOffset.top);
+
+      if (!this.hit.executeOnType(s, 'drawHit', n)) {
+        var xa = n.xaxis,
+          ya = n.yaxis;
+
+        octx.beginPath();
+          // TODO fix this (points) should move to general testable graph mixin
+          octx.arc(xa.d2p(n.x), ya.d2p(n.y), s.points.radius || s.mouse.radius, 0, 2 * Math.PI, true);
+          octx.fill();
+          octx.stroke();
+        octx.closePath();
+      }
+      octx.restore();
+    }
+    this.prevHit = n;
+  },
+  /**
+   * Removes the mouse tracking point from the overlay.
+   */
+  clearHit: function(){
+    var prev = this.prevHit,
+        octx = this.octx,
+        plotOffset = this.plotOffset;
+    octx.save();
+    octx.translate(plotOffset.left, plotOffset.top);
+    if (prev) {
+      if (!this.hit.executeOnType(prev.series, 'clearHit', this.prevHit)) {
+        // TODO fix this (points) should move to general testable graph mixin
+        var
+          s = prev.series,
+          lw = (s.points ? s.points.lineWidth : 1);
+          offset = (s.points.radius || s.mouse.radius) + lw;
+        octx.clearRect(
+          prev.xaxis.d2p(prev.x) - offset,
+          prev.yaxis.d2p(prev.y) - offset,
+          offset*2,
+          offset*2
+        );
+      }
+      D.hide(this.mouseTrack);
+      this.prevHit = null;
+    }
+    octx.restore();
+  },
+  /**
+   * Retrieves the nearest data point from the mouse cursor. If it's within
+   * a certain range, draw a point on the overlay canvas and display the x and y
+   * value of the data.
+   * @param {Object} mouse - Object that holds the relative x and y coordinates of the cursor.
+   */
+  hit: function(mouse){
+
+    var
+      options = this.options,
+      prevHit = this.prevHit,
+      closest, sensibility, dataIndex, seriesIndex, series, value, xaxis, yaxis;
+
+    if (this.series.length === 0) return;
+
+    // Nearest data element.
+    // dist, x, y, relX, relY, absX, absY, sAngle, eAngle, fraction, mouse,
+    // xaxis, yaxis, series, index, seriesIndex
+    n = {
+      relX : mouse.relX,
+      relY : mouse.relY,
+      absX : mouse.absX,
+      absY : mouse.absY
+    };
+
+    if (options.mouse.trackY &&
+        !options.mouse.trackAll &&
+        this.hit.executeOnType(this.series, 'hit', [mouse, n]))
+      {
+
+      if (!_.isUndefined(n.seriesIndex)) {
+        series    = this.series[n.seriesIndex];
+        n.series  = series;
+        n.mouse   = series.mouse;
+        n.xaxis   = series.xaxis;
+        n.yaxis   = series.yaxis;
+      }
+    } else {
+
+      closest = this.hit.closest(mouse);
+
+      if (closest) {
+
+        closest     = options.mouse.trackY ? closest.point : closest.x;
+        seriesIndex = closest.seriesIndex;
+        series      = this.series[seriesIndex];
+        xaxis       = series.xaxis;
+        yaxis       = series.yaxis;
+        sensibility = 2 * series.mouse.sensibility;
+
+        if
+          (options.mouse.trackAll ||
+          (closest.distanceX < sensibility / xaxis.scale &&
+          (!options.mouse.trackY || closest.distanceY < sensibility / yaxis.scale)))
+        {
+          n.series      = series;
+          n.xaxis       = series.xaxis;
+          n.yaxis       = series.yaxis;
+          n.mouse       = series.mouse;
+          n.x           = closest.x;
+          n.y           = closest.y;
+          n.dist        = closest.distance;
+          n.index       = closest.dataIndex;
+          n.seriesIndex = seriesIndex;
+        }
+      }
+    }
+
+    if (!prevHit || (prevHit.index !== n.index || prevHit.seriesIndex !== n.seriesIndex)) {
+      this.hit.clearHit();
+      if (n.series && n.mouse && n.mouse.track) {
+        this.hit.drawMouseTrack(n);
+        this.hit.drawHit(n);
+        Flotr.EventAdapter.fire(this.el, 'flotr:hit', [n, this]);
+      }
+    }
+  },
+
+  closest : function (mouse) {
+
+    var
+      series    = this.series,
+      options   = this.options,
+      mouseX    = mouse.x,
+      mouseY    = mouse.y,
+      compare   = Number.MAX_VALUE,
+      compareX  = Number.MAX_VALUE,
+      closest   = {},
+      closestX  = {},
+      check     = false,
+      serie, data,
+      distance, distanceX, distanceY,
+      x, y, i, j;
+
+    function setClosest (o) {
+      o.distance = distance;
+      o.distanceX = distanceX;
+      o.distanceY = distanceY;
+      o.seriesIndex = i;
+      o.dataIndex = j;
+      o.x = x;
+      o.y = y;
+    }
+
+    for (i = 0; i < series.length; i++) {
+
+      serie = series[i];
+      data = serie.data;
+
+      if (data.length) check = true;
+
+      for (j = data.length; j--;) {
+
+        x = data[j][0];
+        y = data[j][1];
+
+        if (x === null || y === null) continue;
+
+        distanceX = Math.abs(x - mouseX);
+        distanceY = Math.abs(y - mouseY);
+
+        // Skip square root for speed
+        distance = distanceX * distanceX + distanceY * distanceY;
+
+        if (distance < compare) {
+          compare = distance;
+          setClosest(closest);
+        }
+
+        if (distanceX < compareX) {
+          compareX = distanceX;
+          setClosest(closestX);
+        }
+      }
+    }
+
+    return check ? {
+      point : closest,
+      x : closestX
+    } : false;
+  },
+
+  drawMouseTrack : function (n) {
+
+    var
+      pos         = '', 
+      s           = n.series,
+      p           = n.mouse.position, 
+      m           = n.mouse.margin,
+      elStyle     = S_MOUSETRACK,
+      mouseTrack  = this.mouseTrack,
+      plotOffset  = this.plotOffset,
+      left        = plotOffset.left,
+      right       = plotOffset.right,
+      bottom      = plotOffset.bottom,
+      top         = plotOffset.top,
+      decimals    = n.mouse.trackDecimals,
+      options     = this.options;
+
+    // Create
+    if (!mouseTrack) {
+      mouseTrack = D.node('<div class="flotr-mouse-value"></div>');
+      this.mouseTrack = mouseTrack;
+      D.insert(this.el, mouseTrack);
+    }
+
+    if (!n.mouse.relative) { // absolute to the canvas
+
+      if      (p.charAt(0) == 'n') pos += 'top:' + (m + top) + 'px;bottom:auto;';
+      else if (p.charAt(0) == 's') pos += 'bottom:' + (m + bottom) + 'px;top:auto;';
+      if      (p.charAt(1) == 'e') pos += 'right:' + (m + right) + 'px;left:auto;';
+      else if (p.charAt(1) == 'w') pos += 'left:' + (m + left) + 'px;right:auto;';
+
+    // Bars
+    } else if (s.bars.show) {
+        pos += 'bottom:' + (m - top - n.yaxis.d2p(n.y/2) + this.canvasHeight) + 'px;top:auto;';
+        pos += 'left:' + (m + left + n.xaxis.d2p(n.x - options.bars.barWidth/2)) + 'px;right:auto;';
+
+    // Pie
+    } else if (s.pie.show) {
+      var center = {
+          x: (this.plotWidth)/2,
+          y: (this.plotHeight)/2
+        },
+        radius = (Math.min(this.canvasWidth, this.canvasHeight) * s.pie.sizeRatio) / 2,
+        bisection = n.sAngle<n.eAngle ? (n.sAngle + n.eAngle) / 2: (n.sAngle + n.eAngle + 2* Math.PI) / 2;
+      
+      pos += 'bottom:' + (m - top - center.y - Math.sin(bisection) * radius/2 + this.canvasHeight) + 'px;top:auto;';
+      pos += 'left:' + (m + left + center.x + Math.cos(bisection) * radius/2) + 'px;right:auto;';
+
+    // Default
+    } else {
+      if      (p.charAt(0) == 'n') pos += 'bottom:' + (m - top - n.yaxis.d2p(n.y) + this.canvasHeight) + 'px;top:auto;';
+      else if (p.charAt(0) == 's') pos += 'top:' + (m + top + n.yaxis.d2p(n.y)) + 'px;bottom:auto;';
+      if      (p.charAt(1) == 'e') pos += 'left:' + (m + left + n.xaxis.d2p(n.x)) + 'px;right:auto;';
+      else if (p.charAt(1) == 'w') pos += 'right:' + (m - left - n.xaxis.d2p(n.x) + this.canvasWidth) + 'px;left:auto;';
+    }
+
+    elStyle += pos;
+    mouseTrack.style.cssText = elStyle;
+
+    if (!decimals || decimals < 0) decimals = 0;
+    
+    mouseTrack.innerHTML = n.mouse.trackFormatter({
+      x: n.x.toFixed(decimals), 
+      y: n.y.toFixed(decimals), 
+      series: n.series, 
+      index: n.index,
+      nearest: n,
+      fraction: n.fraction
+    });
+
+    D.show(mouseTrack);
+  }
+
+});
+})();
+
+(function () {
+
+var D = Flotr.DOM;
+
+Flotr.addPlugin('labels', {
+
+  callbacks : {
+    'flotr:afterdraw' : function () {
+      this.labels.draw();
+    }
+  },
+
+  draw: function(){
+    // Construct fixed width label boxes, which can be styled easily.
+    var
+      axis, tick, left, top, xBoxWidth,
+      radius, sides, coeff, angle,
+      div, i, html = '',
+      noLabels = 0,
+      options  = this.options,
+      ctx      = this.ctx,
+      a        = this.axes,
+      style    = { size: options.fontSize };
+
+    for (i = 0; i < a.x.ticks.length; ++i){
+      if (a.x.ticks[i].label) { ++noLabels; }
+    }
+    xBoxWidth = this.plotWidth / noLabels;
+
+    if (options.grid.circular) {
+      ctx.save();
+      ctx.translate(this.plotOffset.left + this.plotWidth / 2,
+          this.plotOffset.top + this.plotHeight / 2);
+
+      radius = this.plotHeight * options.radar.radiusRatio / 2 + options.fontSize;
+      sides  = this.axes.x.ticks.length;
+      coeff  = 2 * (Math.PI / sides);
+      angle  = -Math.PI / 2;
+
+      drawLabelCircular(this, a.x, false);
+      drawLabelCircular(this, a.x, true);
+      drawLabelCircular(this, a.y, false);
+      drawLabelCircular(this, a.y, true);
+      ctx.restore();
+    }
+
+    if (!options.HtmlText && this.textEnabled) {
+      drawLabelNoHtmlText(this, a.x, 'center', 'top');
+      drawLabelNoHtmlText(this, a.x2, 'center', 'bottom');
+      drawLabelNoHtmlText(this, a.y, 'right', 'middle');
+      drawLabelNoHtmlText(this, a.y2, 'left', 'middle');
+    
+    } else if ((
+        a.x.options.showLabels ||
+        a.x2.options.showLabels ||
+        a.y.options.showLabels ||
+        a.y2.options.showLabels) &&
+        !options.grid.circular
+      ) {
+
+      html = '';
+
+      drawLabelHtml(this, a.x);
+      drawLabelHtml(this, a.x2);
+      drawLabelHtml(this, a.y);
+      drawLabelHtml(this, a.y2);
+
+      ctx.stroke();
+      ctx.restore();
+      div = D.create('div');
+      D.setStyles(div, {
+        fontSize: 'smaller',
+        color: options.grid.color
+      });
+      div.className = 'flotr-labels';
+      D.insert(this.el, div);
+      D.insert(div, html);
+    }
+
+    function drawLabelCircular (graph, axis, minorTicks) {
+      var
+        ticks   = minorTicks ? axis.minorTicks : axis.ticks,
+        isX     = axis.orientation === 1,
+        isFirst = axis.n === 1,
+        style, offset;
+
+      style = {
+        color        : axis.options.color || options.grid.color,
+        angle        : Flotr.toRad(axis.options.labelsAngle),
+        textBaseline : 'middle'
+      };
+
+      for (i = 0; i < ticks.length &&
+          (minorTicks ? axis.options.showMinorLabels : axis.options.showLabels); ++i){
+        tick = ticks[i];
+        tick.label += '';
+        if (!tick.label || !tick.label.length) { continue; }
+
+        x = Math.cos(i * coeff + angle) * radius;
+        y = Math.sin(i * coeff + angle) * radius;
+
+        style.textAlign = isX ? (Math.abs(x) < 0.1 ? 'center' : (x < 0 ? 'right' : 'left')) : 'left';
+
+        Flotr.drawText(
+          ctx, tick.label,
+          isX ? x : 3,
+          isX ? y : -(axis.ticks[i].v / axis.max) * (radius - options.fontSize),
+          style
+        );
+      }
+    }
+
+    function drawLabelNoHtmlText (graph, axis, textAlign, textBaseline)  {
+      var
+        isX     = axis.orientation === 1,
+        isFirst = axis.n === 1,
+        style, offset;
+
+      style = {
+        color        : axis.options.color || options.grid.color,
+        textAlign    : textAlign,
+        textBaseline : textBaseline,
+        angle : Flotr.toRad(axis.options.labelsAngle)
+      };
+      style = Flotr.getBestTextAlign(style.angle, style);
+
+      for (i = 0; i < axis.ticks.length && continueShowingLabels(axis); ++i) {
+
+        tick = axis.ticks[i];
+        if (!tick.label || !tick.label.length) { continue; }
+
+        offset = axis.d2p(tick.v);
+        if (offset < 0 ||
+            offset > (isX ? graph.plotWidth : graph.plotHeight)) { continue; }
+
+        Flotr.drawText(
+          ctx, tick.label,
+          leftOffset(graph, isX, isFirst, offset),
+          topOffset(graph, isX, isFirst, offset),
+          style
+        );
+
+        // Only draw on axis y2
+        if (!isX && !isFirst) {
+          ctx.save();
+          ctx.strokeStyle = style.color;
+          ctx.beginPath();
+          ctx.moveTo(graph.plotOffset.left + graph.plotWidth - 8, graph.plotOffset.top + axis.d2p(tick.v));
+          ctx.lineTo(graph.plotOffset.left + graph.plotWidth, graph.plotOffset.top + axis.d2p(tick.v));
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function continueShowingLabels (axis) {
+        return axis.options.showLabels && axis.used;
+      }
+      function leftOffset (graph, isX, isFirst, offset) {
+        return graph.plotOffset.left +
+          (isX ? offset :
+            (isFirst ?
+              -options.grid.labelMargin :
+              options.grid.labelMargin + graph.plotWidth));
+      }
+      function topOffset (graph, isX, isFirst, offset) {
+        return graph.plotOffset.top +
+          (isX ? options.grid.labelMargin : offset) +
+          ((isX && isFirst) ? graph.plotHeight : 0);
+      }
+    }
+
+    function drawLabelHtml (graph, axis) {
+      var
+        isX     = axis.orientation === 1,
+        isFirst = axis.n === 1,
+        left, style, top,
+        offset = graph.plotOffset, name;
+
+      if (!isX && !isFirst) {
+        ctx.save();
+        ctx.strokeStyle = axis.options.color || options.grid.color;
+        ctx.beginPath();
+      }
+
+      if (axis.options.showLabels && (isFirst ? true : axis.used)) {
+        for (i = 0; i < axis.ticks.length; ++i) {
+          tick = axis.ticks[i];
+          if (!tick.label || !tick.label.length ||
+              ((isX ? offset.left : offset.top) + axis.d2p(tick.v) < 0) ||
+              ((isX ? offset.left : offset.top) + axis.d2p(tick.v) > (isX ? graph.canvasWidth : graph.canvasHeight))) {
+            continue;
+          }
+          top = offset.top +
+            (isX ?
+              ((isFirst ? 1 : -1 ) * (graph.plotHeight + options.grid.labelMargin)) :
+              axis.d2p(tick.v) - axis.maxLabel.height / 2);
+          left = isX ? (offset.left + axis.d2p(tick.v) - xBoxWidth / 2) : 0;
+
+          if (i === 0) {
+            name = ' first';
+          } else if (i === axis.ticks.length - 1) {
+            name = ' last';
+          } else {
+            name = '';
+          }
+
+          html += [
+            '<div style="position:absolute; text-align:' + (isX ? 'center' : 'right') + '; ',
+            'top:' + top + 'px; ',
+            ((!isX && !isFirst) ? 'right:' : 'left:') + left + 'px; ',
+            'width:' + (isX ? xBoxWidth : ((isFirst ? offset.left : offset.right) - options.grid.labelMargin)) + 'px; ',
+            axis.options.color ? ('color:' + axis.options.color + '; ') : ' ',
+            '" class="flotr-grid-label' + name + '">' + tick.label + '</div>'
+          ].join(' ');
+          
+          if (!isX && !isFirst) {
+            ctx.moveTo(offset.left + graph.plotWidth - 8, offset.top + axis.d2p(tick.v));
+            ctx.lineTo(offset.left + graph.plotWidth, offset.top + axis.d2p(tick.v));
+          }
+        }
+      }
+    }
+  }
+
+});
+})();
+
+(function () {
+
+var
+  D = Flotr.DOM,
+  _ = Flotr._;
+
+Flotr.addPlugin('legend', {
+  options: {
+    show: true,            // => setting to true will show the legend, hide otherwise
+    noColumns: 1,          // => number of colums in legend table // @todo: doesn't work for HtmlText = false
+    labelFormatter: function(v){return v;}, // => fn: string -> string
+    labelBoxBorderColor: '#CCCCCC', // => border color for the little label boxes
+    labelBoxWidth: 14,
+    labelBoxHeight: 10,
+    labelBoxMargin: 5,
+    labelBoxOpacity: 0.4,
+    container: null,       // => container (as jQuery object) to put legend in, null means default on top of graph
+    position: 'nw',        // => position of default legend container within plot
+    margin: 5,             // => distance from grid edge to default legend container within plot
+    backgroundColor: null, // => null means auto-detect
+    backgroundOpacity: 0.85// => set to 0 to avoid background, set to 1 for a solid background
+  },
+  callbacks: {
+    'flotr:afterinit': function() {
+      this.legend.insertLegend();
+    }
+  },
+  /**
+   * Adds a legend div to the canvas container or draws it on the canvas.
+   */
+  insertLegend: function(){
+
+    if(!this.options.legend.show)
+      return;
+
+    var series      = this.series,
+      plotOffset    = this.plotOffset,
+      options       = this.options,
+      legend        = options.legend,
+      fragments     = [],
+      rowStarted    = false, 
+      ctx           = this.ctx,
+      itemCount     = _.filter(series, function(s) {return (s.label && !s.hide);}).length,
+      p             = legend.position, 
+      m             = legend.margin,
+      i, label, color;
+
+    if (itemCount) {
+      if (!options.HtmlText && this.textEnabled && !legend.container) {
+        var style = {
+          size: options.fontSize*1.1,
+          color: options.grid.color
+        };
+
+        var lbw = legend.labelBoxWidth,
+            lbh = legend.labelBoxHeight,
+            lbm = legend.labelBoxMargin,
+            offsetX = plotOffset.left + m,
+            offsetY = plotOffset.top + m;
+        
+        // We calculate the labels' max width
+        var labelMaxWidth = 0;
+        for(i = series.length - 1; i > -1; --i){
+          if(!series[i].label || series[i].hide) continue;
+          label = legend.labelFormatter(series[i].label);
+          labelMaxWidth = Math.max(labelMaxWidth, this._text.measureText(label, style).width);
+        }
+        
+        var legendWidth  = Math.round(lbw + lbm*3 + labelMaxWidth),
+            legendHeight = Math.round(itemCount*(lbm+lbh) + lbm);
+        
+        if(p.charAt(0) == 's') offsetY = plotOffset.top + this.plotHeight - (m + legendHeight);
+        if(p.charAt(1) == 'e') offsetX = plotOffset.left + this.plotWidth - (m + legendWidth);
+        
+        // Legend box
+        color = this.processColor(legend.backgroundColor || 'rgb(240,240,240)', {opacity: legend.backgroundOpacity || 0.1});
+        
+        ctx.fillStyle = color;
+        ctx.fillRect(offsetX, offsetY, legendWidth, legendHeight);
+        ctx.strokeStyle = legend.labelBoxBorderColor;
+        ctx.strokeRect(Flotr.toPixel(offsetX), Flotr.toPixel(offsetY), legendWidth, legendHeight);
+        
+        // Legend labels
+        var x = offsetX + lbm;
+        var y = offsetY + lbm;
+        for(i = 0; i < series.length; i++){
+          if(!series[i].label || series[i].hide) continue;
+          label = legend.labelFormatter(series[i].label);
+          
+          ctx.fillStyle = series[i].color;
+          ctx.fillRect(x, y, lbw-1, lbh-1);
+          
+          ctx.strokeStyle = legend.labelBoxBorderColor;
+          ctx.lineWidth = 1;
+          ctx.strokeRect(Math.ceil(x)-1.5, Math.ceil(y)-1.5, lbw+2, lbh+2);
+          
+          // Legend text
+          Flotr.drawText(ctx, label, x + lbw + lbm, y + lbh, style);
+          
+          y += lbh + lbm;
+        }
+      }
+      else {
+        for(i = 0; i < series.length; ++i){
+          if(!series[i].label || series[i].hide) continue;
+          
+          if(i % legend.noColumns === 0){
+            fragments.push(rowStarted ? '</tr><tr>' : '<tr>');
+            rowStarted = true;
+          }
+           
+          // @TODO remove requirement on bars
+          var s = series[i],
+            boxWidth = legend.labelBoxWidth,
+            boxHeight = legend.labelBoxHeight,
+            opacityValue = (s.bars ? s.bars.fillOpacity : legend.labelBoxOpacity),
+            opacity = 'opacity:' + opacityValue + ';filter:alpha(opacity=' + opacityValue*100 + ');';
+
+          label = legend.labelFormatter(s.label);
+          color = 'background-color:' + ((s.bars && s.bars.show && s.bars.fillColor && s.bars.fill) ? s.bars.fillColor : s.color) + ';';
+          
+          fragments.push(
+            '<td class="flotr-legend-color-box">',
+              '<div style="border:1px solid ', legend.labelBoxBorderColor, ';padding:1px">',
+                '<div style="width:', (boxWidth-1), 'px;height:', (boxHeight-1), 'px;border:1px solid ', series[i].color, '">', // Border
+                  '<div style="width:', boxWidth, 'px;height:', boxHeight, 'px;', 'opacity:.4;', color, '"></div>', // Background
+                '</div>',
+              '</div>',
+            '</td>',
+            '<td class="flotr-legend-label">', label, '</td>'
+          );
+        }
+        if(rowStarted) fragments.push('</tr>');
+          
+        if(fragments.length > 0){
+          var table = '<table style="font-size:smaller;color:' + options.grid.color + '">' + fragments.join('') + '</table>';
+          if(legend.container){
+            D.insert(legend.container, table);
+          }
+          else {
+            var styles = {position: 'absolute', 'z-index': 2};
+            
+                 if(p.charAt(0) == 'n') { styles.top = (m + plotOffset.top) + 'px'; styles.bottom = 'auto'; }
+            else if(p.charAt(0) == 's') { styles.bottom = (m + plotOffset.bottom) + 'px'; styles.top = 'auto'; }
+                 if(p.charAt(1) == 'e') { styles.right = (m + plotOffset.right) + 'px'; styles.left = 'auto'; }
+            else if(p.charAt(1) == 'w') { styles.left = (m + plotOffset.left) + 'px'; styles.right = 'auto'; }
+                 
+            var div = D.create('div'), size;
+            div.className = 'flotr-legend';
+            D.setStyles(div, styles);
+            D.insert(div, table);
+            D.insert(this.el, div);
+            
+            if(!legend.backgroundOpacity)
+              return;
+
+            var c = legend.backgroundColor || options.grid.backgroundColor || '#ffffff';
+
+            _.extend(styles, D.size(div), {
+              'backgroundColor': c,
+              'z-index': 1
+            });
+            styles.width += 'px';
+            styles.height += 'px';
+
+             // Put in the transparent background separately to avoid blended labels and
+            div = D.create('div');
+            div.className = 'flotr-legend-bg';
+            D.setStyles(div, styles);
+            D.opacity(div, legend.backgroundOpacity);
+            D.insert(div, ' ');
+            D.insert(this.el, div);
+          }
+        }
+      }
+    }
+  }
+});
+})();
+
+(function () {
+
+var D = Flotr.DOM;
+
+Flotr.addPlugin('titles', {
+  callbacks: {
+    'flotr:afterdraw': function() {
+      this.titles.drawTitles();
+    }
+  },
+  /**
+   * Draws the title and the subtitle
+   */
+  drawTitles : function () {
+    var html,
+        options = this.options,
+        margin = options.grid.labelMargin,
+        ctx = this.ctx,
+        a = this.axes;
+    
+    if (!options.HtmlText && this.textEnabled) {
+      var style = {
+        size: options.fontSize,
+        color: options.grid.color,
+        textAlign: 'center'
+      };
+      
+      // Add subtitle
+      if (options.subtitle){
+        Flotr.drawText(
+          ctx, options.subtitle,
+          this.plotOffset.left + this.plotWidth/2, 
+          this.titleHeight + this.subtitleHeight - 2,
+          style
+        );
+      }
+      
+      style.weight = 1.5;
+      style.size *= 1.5;
+      
+      // Add title
+      if (options.title){
+        Flotr.drawText(
+          ctx, options.title,
+          this.plotOffset.left + this.plotWidth/2, 
+          this.titleHeight - 2,
+          style
+        );
+      }
+      
+      style.weight = 1.8;
+      style.size *= 0.8;
+      
+      // Add x axis title
+      if (a.x.options.title && a.x.used){
+        style.textAlign = a.x.options.titleAlign || 'center';
+        style.textBaseline = 'top';
+        style.angle = Flotr.toRad(a.x.options.titleAngle);
+        style = Flotr.getBestTextAlign(style.angle, style);
+        Flotr.drawText(
+          ctx, a.x.options.title,
+          this.plotOffset.left + this.plotWidth/2, 
+          this.plotOffset.top + a.x.maxLabel.height + this.plotHeight + 2 * margin,
+          style
+        );
+      }
+      
+      // Add x2 axis title
+      if (a.x2.options.title && a.x2.used){
+        style.textAlign = a.x2.options.titleAlign || 'center';
+        style.textBaseline = 'bottom';
+        style.angle = Flotr.toRad(a.x2.options.titleAngle);
+        style = Flotr.getBestTextAlign(style.angle, style);
+        Flotr.drawText(
+          ctx, a.x2.options.title,
+          this.plotOffset.left + this.plotWidth/2, 
+          this.plotOffset.top - a.x2.maxLabel.height - 2 * margin,
+          style
+        );
+      }
+      
+      // Add y axis title
+      if (a.y.options.title && a.y.used){
+        style.textAlign = a.y.options.titleAlign || 'right';
+        style.textBaseline = 'middle';
+        style.angle = Flotr.toRad(a.y.options.titleAngle);
+        style = Flotr.getBestTextAlign(style.angle, style);
+        Flotr.drawText(
+          ctx, a.y.options.title,
+          this.plotOffset.left - a.y.maxLabel.width - 2 * margin, 
+          this.plotOffset.top + this.plotHeight / 2,
+          style
+        );
+      }
+      
+      // Add y2 axis title
+      if (a.y2.options.title && a.y2.used){
+        style.textAlign = a.y2.options.titleAlign || 'left';
+        style.textBaseline = 'middle';
+        style.angle = Flotr.toRad(a.y2.options.titleAngle);
+        style = Flotr.getBestTextAlign(style.angle, style);
+        Flotr.drawText(
+          ctx, a.y2.options.title,
+          this.plotOffset.left + this.plotWidth + a.y2.maxLabel.width + 2 * margin, 
+          this.plotOffset.top + this.plotHeight / 2,
+          style
+        );
+      }
+    } 
+    else {
+      html = [];
+      
+      // Add title
+      if (options.title)
+        html.push(
+          '<div style="position:absolute;top:0;left:', 
+          this.plotOffset.left, 'px;font-size:1em;font-weight:bold;text-align:center;width:',
+          this.plotWidth,'px;" class="flotr-title">', options.title, '</div>'
+        );
+      
+      // Add subtitle
+      if (options.subtitle)
+        html.push(
+          '<div style="position:absolute;top:', this.titleHeight, 'px;left:', 
+          this.plotOffset.left, 'px;font-size:smaller;text-align:center;width:',
+          this.plotWidth, 'px;" class="flotr-subtitle">', options.subtitle, '</div>'
+        );
+
+      html.push('</div>');
+      
+      html.push('<div class="flotr-axis-title" style="font-weight:bold;">');
+      
+      // Add x axis title
+      if (a.x.options.title && a.x.used)
+        html.push(
+          '<div style="position:absolute;top:', 
+          (this.plotOffset.top + this.plotHeight + options.grid.labelMargin + a.x.titleSize.height), 
+          'px;left:', this.plotOffset.left, 'px;width:', this.plotWidth, 
+          'px;text-align:center;" class="flotr-axis-title">', a.x.options.title, '</div>'
+        );
+      
+      // Add x2 axis title
+      if (a.x2.options.title && a.x2.used)
+        html.push(
+          '<div style="position:absolute;top:0;left:', this.plotOffset.left, 'px;width:', 
+          this.plotWidth, 'px;text-align:center;" class="flotr-axis-title">', a.x2.options.title, '</div>'
+        );
+      
+      // Add y axis title
+      if (a.y.options.title && a.y.used)
+        html.push(
+          '<div style="position:absolute;top:', 
+          (this.plotOffset.top + this.plotHeight/2 - a.y.titleSize.height/2), 
+          'px;left:0;text-align:right;" class="flotr-axis-title">', a.y.options.title, '</div>'
+        );
+      
+      // Add y2 axis title
+      if (a.y2.options.title && a.y2.used)
+        html.push(
+          '<div style="position:absolute;top:', 
+          (this.plotOffset.top + this.plotHeight/2 - a.y.titleSize.height/2), 
+          'px;right:0;text-align:right;" class="flotr-axis-title">', a.y2.options.title, '</div>'
+        );
+      
+      html = html.join('');
+
+      var div = D.create('div');
+      D.setStyles({
+        color: options.grid.color 
+      });
+      div.className = 'flotr-titles';
+      D.insert(this.el, div);
+      D.insert(div, html);
+    }
+  }
+});
+})();
+
 /** 
  * Selection Handles Plugin
  *
@@ -52,13 +5322,202 @@ null,function(a,b){return"');"+b.replace(/\\'/g,"'").replace(/[\r\n\t]/g," ")+"_
  *  drag - Left and Right drag handles
  *  scroll - Scrolling handle
  */
-(function(){function b(){var b=this.options,c=this.handles,d=this.el,e,f;if(!b.selection.mode||!b.handles.show||"ontouchstart"in d)return;c.initialized=!0,container=a.node('<div class="flotr-handles"></div>'),b=b.handles,b.drag&&(f=a.node('<div class="flotr-handles-handle flotr-handles-drag flotr-handles-right"></div>'),e=a.node('<div class="flotr-handles-handle flotr-handles-drag flotr-handles-left"></div>'),a.insert(container,f),a.insert(container,e),a.hide(e),a.hide(f),c.left=e,c.right=f,this._observe(e,"mousedown",function(){c.moveHandler=i}),this._observe(f,"mousedown",function(){c.moveHandler=j})),b.scroll&&(scroll=a.node('<div class="flotr-handles-handle flotr-handles-scroll"></div>'),a.insert(container,scroll),a.hide(scroll),c.scroll=scroll,this._observe(scroll,"mousedown",function(){c.moveHandler=k})),this._observe(document,"mouseup",function(){c.moveHandler=null}),a.insert(d,container)}function c(a){if(!this.handles.initialized)return;var b=this.handles,c=this.options.handles,f=b.left,g=b.right,h=b.scroll;c&&(c.drag&&(d(this,f,a.x1),d(this,g,a.x2)),c.scroll&&e(this,h,a.x1,a.x2))}function d(b,c,d){a.show(c);var e=a.size(c),f=Math.round(b.axes.x.d2p(d)-e.width/2),g=(b.plotHeight-e.height)/2;a.setStyles(c,{left:f+"px",top:g+"px"})}function e(b,c,d,e){a.show(c);var f=a.size(c),g=Math.round(b.axes.x.d2p(d)),h=b.plotHeight-f.height/2,i=b.axes.x.d2p(e)-b.axes.x.d2p(d);a.setStyles(c,{left:g+"px",top:h+"px",width:i+"px"})}function f(){if(!this.handles.initialized)return;var b=this.handles;b&&(a.hide(b.left),a.hide(b.right),a.hide(b.scroll))}function g(a,b){if(!this.handles.initialized)return;if(!this.handles.moveHandler)return;var c=b.dX,d=this.selection.selection,e=this.selection.getArea(),f=this.handles;f.moveHandler(e,c),h(e,f),this.selection.setSelection(e)}function h(a,b){var c=b.moveHandler;a.x1>a.x2&&(c==i?c=j:c==j&&(c=i),b.moveHandler=c)}function i(a,b){a.x1+=b}function j(a,b){a.x2+=b}function k(a,b){a.x1+=b,a.x2+=b}var a=Flotr.DOM;Flotr.addPlugin("handles",{options:{show:!1,drag:!0,scroll:!0},callbacks:{"flotr:afterinit":b,"flotr:select":c,"flotr:mousedown":f,"flotr:mousemove":g}})})();
+(function () {
+
+var D = Flotr.DOM;
+
+Flotr.addPlugin('handles', {
+
+  options: {
+    show: false,
+    drag: true,
+    scroll: true
+  },
+
+  callbacks: {
+    'flotr:afterinit': init,
+    'flotr:select': handleSelect,
+    'flotr:mousedown': reset,
+    'flotr:mousemove': mouseMoveHandler
+  }
+
+});
+
+
+function init() {
+
+  var
+    options = this.options,
+    handles = this.handles,
+    el = this.el,
+    scroll, left, right, container;
+
+  if (!options.selection.mode || !options.handles.show || 'ontouchstart' in el) return;
+
+  handles.initialized = true;
+
+  container = D.node('<div class="flotr-handles"></div>');
+  options = options.handles;
+
+  // Drag handles
+  if (options.drag) {
+    right = D.node('<div class="flotr-handles-handle flotr-handles-drag flotr-handles-right"></div>');
+    left  = D.node('<div class="flotr-handles-handle flotr-handles-drag flotr-handles-left"></div>');
+    D.insert(container, right);
+    D.insert(container, left);
+    D.hide(left);
+    D.hide(right);
+    handles.left = left;
+    handles.right = right;
+
+    this._observe(left, 'mousedown', function () {
+      handles.moveHandler = leftMoveHandler;
+    });
+    this._observe(right, 'mousedown', function () {
+      handles.moveHandler = rightMoveHandler;
+    });
+  }
+
+  // Scroll handle
+  if (options.scroll) {
+    scroll = D.node('<div class="flotr-handles-handle flotr-handles-scroll"></div>');
+    D.insert(container, scroll);
+    D.hide(scroll);
+    handles.scroll = scroll;
+    this._observe(scroll, 'mousedown', function () {
+      handles.moveHandler = scrollMoveHandler;
+    });
+  }
+
+  this._observe(document, 'mouseup', function() {
+    handles.moveHandler = null;
+  });
+
+  D.insert(el, container);
+}
+
+
+function handleSelect(selection) {
+
+  if (!this.handles.initialized) return;
+
+  var
+    handles = this.handles,
+    options = this.options.handles,
+    left = handles.left,
+    right = handles.right,
+    scroll = handles.scroll;
+
+  if (options) {
+    if (options.drag) {
+      positionDrag(this, left, selection.x1);
+      positionDrag(this, right, selection.x2);
+    }
+
+    if (options.scroll) {
+      positionScroll(
+        this,
+        scroll,
+        selection.x1,
+        selection.x2
+      );
+    }
+  }
+}
+
+function positionDrag(graph, handle, x) {
+
+  D.show(handle);
+
+  var size = D.size(handle),
+    l = Math.round(graph.axes.x.d2p(x) - size.width / 2),
+    t = (graph.plotHeight - size.height) / 2;
+
+  D.setStyles(handle, {
+    'left' : l+'px',
+    'top'  : t+'px'
+  });
+}
+
+function positionScroll(graph, handle, x1, x2) {
+
+  D.show(handle);
+
+  var size = D.size(handle),
+    l = Math.round(graph.axes.x.d2p(x1)),
+    t = (graph.plotHeight) - size.height / 2,
+    w = (graph.axes.x.d2p(x2) - graph.axes.x.d2p(x1));
+
+  D.setStyles(handle, {
+    'left' : l+'px',
+    'top'  : t+'px',
+    'width': w+'px'
+  });
+}
+
+function reset() {
+
+  if (!this.handles.initialized) return;
+
+  var
+    handles = this.handles;
+  if (handles) {
+    D.hide(handles.left);
+    D.hide(handles.right);
+    D.hide(handles.scroll);
+  }
+}
+
+function mouseMoveHandler(e, position) {
+
+  if (!this.handles.initialized) return;
+  if (!this.handles.moveHandler) return;
+
+  var
+    delta = position.dX,
+    selection = this.selection.selection,
+    area = this.selection.getArea(),
+    handles = this.handles;
+
+  handles.moveHandler(area, delta);
+  checkSwap(area, handles);
+
+  this.selection.setSelection(area);
+}
+
+function checkSwap (area, handles) {
+  var moveHandler = handles.moveHandler;
+  if (area.x1 > area.x2) {
+    if (moveHandler == leftMoveHandler) {
+      moveHandler = rightMoveHandler;
+    } else if (moveHandler == rightMoveHandler) {
+      moveHandler = leftMoveHandler;
+    }
+    handles.moveHandler = moveHandler;
+  }
+}
+
+function leftMoveHandler(area, delta) {
+  area.x1 += delta;
+}
+
+function rightMoveHandler(area, delta) {
+  area.x2 += delta;
+}
+
+function scrollMoveHandler(area, delta) {
+  area.x1 += delta;
+  area.x2 += delta;
+}
+
+})();
 /*!
   * Bonzo: DOM Utility (c) Dustin Diaz 2011
   * https://github.com/ded/bonzo
   * License MIT
   */
-!function(a,b){typeof define=="function"?define(b):typeof module!="undefined"?module.exports=b():this[a]=b()}("bonzo",function(){function x(a){return new RegExp("(^|\\s+)"+a+"(\\s+|$)")}function y(a,b,c){for(var d=0,e=a.length;d<e;d++)b.call(c||a[d],a[d],d,a);return a}function z(a){return a.replace(/-(.)/g,function(a,b){return b.toUpperCase()})}function A(a){return a&&a.nodeName&&a.nodeType==1}function B(a,b,c,d){for(d=0,j=a.length;d<j;++d)if(b.call(c,a[d],d,a))return!0;return!1}function D(a,b,c){var d=0,g=b||this,h=[],i=f&&typeof a=="string"&&a.charAt(0)!="<"?function(b){return(b=f(a))&&(b.selected=1)&&b}():a;return y(J(i),function(a){y(g,function(b){var f=!b[e]||b[e]&&!b[e][e]?function(){var a=b.cloneNode(!0);return g.$&&g.cloneEvents&&g.$(a).cloneEvents(b),a}():b;c(a,f),h[d]=f,d++})},this),y(h,function(a,b){g[b]=a}),g.length=d,g}function E(a,b,c){var d=N(a),e=d.css("position"),f=d.offset(),g="relative",h=e==g,i=[parseInt(d.css("left"),10),parseInt(d.css("top"),10)];e=="static"&&(d.css("position",g),e=g),isNaN(i[0])&&(i[0]=h?0:a.offsetLeft),isNaN(i[1])&&(i[1]=h?0:a.offsetTop),b!=null&&(a.style.left=b-f.left+i[0]+q),c!=null&&(a.style.top=c-f.top+i[1]+q)}function F(a,b){return x(b).test(a.className)}function G(a,b){a.className=w(a.className+" "+b)}function H(a,b){a.className=w(a.className.replace(x(b)," "))}function I(a){this.length=0;if(a){a=typeof a!="string"&&!a.nodeType&&typeof a.length!="undefined"?a:[a],this.length=a.length;for(var b=0;b<a.length;b++)this[b]=a[b]}}function J(a){return typeof a=="string"?N.create(a):A(a)?[a]:a}function K(a,c,d){var e=this[0];return a==null&&c==null?(L(e)?M():{x:e.scrollLeft,y:e.scrollTop})[d]:(L(e)?b.scrollTo(a,c):(a!=null&&(e.scrollLeft=a),c!=null&&(e.scrollTop=c)),this)}function L(a){return a===b||/^(?:body|html)$/i.test(a.tagName)}function M(){return{x:b.pageXOffset||d.scrollLeft,y:b.pageYOffset||d.scrollTop}}function N(a,b){return new I(a,b)}var a=this,b=window,c=b.document,d=c.documentElement,e="parentNode",f=null,g=/^checked|value|selected$/,h=/select|fieldset|table|tbody|tfoot|td|tr|colgroup/i,i="table",k={thead:i,tbody:i,tfoot:i,tr:"tbody",th:"tr",td:"tr",fieldset:"form",option:"select"},l=/^checked|selected$/,m=/msie/i.test(navigator.userAgent),n=[],o=0,p=/^-?[\d\.]+$/,q="px",r="setAttribute",s="getAttribute",t=/(^\s*|\s*$)/g,u={lineHeight:1,zoom:1,zIndex:1,opacity:1},v=function(){var a=["webkitTransform","MozTransform","OTransform","msTransform","Transform"],b;for(b=0;b<a.length;b++)if(a[b]in c.createElement("a").style)return a[b]}(),w=String.prototype.trim?function(a){return a.trim()}:function(a){return a.replace(t,"")},C=c.defaultView&&c.defaultView.getComputedStyle?function(a,b){b=b=="transform"?v:b,b=b=="transform-origin"?v+"Origin":b;var d=null;b=="float"&&(b="cssFloat");var e=c.defaultView.getComputedStyle(a,"");return e&&(d=e[z(b)]),a.style[b]||d}:m&&d.currentStyle?function(a,b){b=z(b),b=b=="float"?"styleFloat":b;if(b=="opacity"){var c=100;try{c=a.filters["DXImageTransform.Microsoft.Alpha"].opacity}catch(d){try{c=a.filters("alpha").opacity}catch(e){}}return c/100}var f=a.currentStyle?a.currentStyle[b]:null;return a.style[b]||f}:function(a,b){return a.style[z(b)]};I.prototype={get:function(a){return this[a]},each:function(a,b){return y(this,a,b)},map:function(a,b){var c=[],d,e;for(e=0;e<this.length;e++)d=a.call(this,this[e],e),b?b(d)&&c.push(d):c.push(d);return c},first:function(){return N(this[0])},last:function(){return N(this[this.length-1])},html:function(a,b){function f(b){while(b.firstChild)b.removeChild(b.firstChild);y(J(a),function(a){b.appendChild(a)})}var c=b?d.textContent===null?"innerText":"textContent":"innerHTML",e;return typeof a!="undefined"?this.each(function(b){(e=b.tagName.match(h))?f(b,e[0]):b[c]=a}):this[0]?this[0][c]:""},text:function(a){return this.html(a,1)},addClass:function(a){return this.each(function(b){F(b,a)||G(b,a)})},removeClass:function(a){return this.each(function(b){F(b,a)&&H(b,a)})},hasClass:function(a){return B(this,function(b){return F(b,a)})},toggleClass:function(a,b){return this.each(function(c){typeof b!="undefined"?b?G(c,a):H(c,a):F(c,a)?H(c,a):G(c,a)})},show:function(a){return this.each(function(b){b.style.display=a||""})},hide:function(a){return this.each(function(a){a.style.display="none"})},append:function(a){return this.each(function(b){y(J(a),function(a){b.appendChild(a)})})},prepend:function(a){return this.each(function(b){var c=b.firstChild;y(J(a),function(a){b.insertBefore(a,c)})})},appendTo:function(a,b){return D.call(this,a,b,function(a,b){a.appendChild(b)})},prependTo:function(a,b){return D.call(this,a,b,function(a,b){a.insertBefore(b,a.firstChild)})},next:function(){return this.related("nextSibling")},previous:function(){return this.related("previousSibling")},related:function(a){return this.map(function(b){b=b[a];while(b&&b.nodeType!==1)b=b[a];return b||0},function(a){return a})},before:function(a){return this.each(function(b){y(N.create(a),function(a){b[e].insertBefore(a,b)})})},after:function(a){return this.each(function(b){y(N.create(a),function(a){b[e].insertBefore(a,b.nextSibling)})})},insertBefore:function(a,b){return D.call(this,a,b,function(a,b){a[e].insertBefore(b,a)})},insertAfter:function(a,b){return D.call(this,a,b,function(a,b){var c=a.nextSibling;c?a[e].insertBefore(b,c):a[e].appendChild(b)})},css:function(a,d,e){function g(a,b,c){for(var d in f)f.hasOwnProperty(d)&&(c=f[d],(b=z(d))&&p.test(c)&&!(b in u)&&(c+=q),b=b=="transform"?v:b,b=b=="transformOrigin"?v+"Origin":b,a.style[b]=c)}if(d===undefined&&typeof a=="string")return d=this[0],d?d==c||d==b?(e=d==c?N.doc():N.viewport(),a=="width"?e.width:a=="height"?e.height:""):C(d,a):null;var f=a;typeof a=="string"&&(f={},f[a]=d),m&&f.opacity&&(f.filter="alpha(opacity="+f.opacity*100+")",f.zoom=a.zoom||1,delete f.opacity);if(d=f["float"])m?f.styleFloat=d:f.cssFloat=d,delete f["float"];return this.each(g)},offset:function(a,b){if(typeof a=="number"||typeof b=="number")return this.each(function(c){E(c,a,b)});var c=this[0],d=c.offsetWidth,e=c.offsetHeight,f=c.offsetTop,g=c.offsetLeft;while(c=c.offsetParent)f=f+c.offsetTop,g=g+c.offsetLeft;return{top:f,left:g,height:e,width:d}},attr:function(a,b){var c=this[0];if(typeof a=="string"||a instanceof String)return typeof b=="undefined"?g.test(a)?l.test(a)&&typeof c[a]=="string"?!0:c[a]:c[s](a):this.each(function(c){g.test(a)?c[a]=b:c[r](a,b)});for(var d in a)a.hasOwnProperty(d)&&this.attr(d,a[d]);return this},val:function(a){return typeof a=="string"?this.attr("value",a):this[0].value},removeAttr:function(a){return this.each(function(b){l.test(a)?b[a]=!1:b.removeAttribute(a)})},data:function(a,b){var c=this[0];if(typeof b=="undefined"){c[s]("data-node-uid")||c[r]("data-node-uid",++o);var d=c[s]("data-node-uid");return n[d]||(n[d]={}),n[d][a]}return this.each(function(c){c[s]("data-node-uid")||c[r]("data-node-uid",++o);var d=c[s]("data-node-uid"),e=n[d]||(n[d]={});e[a]=b})},remove:function(){return this.each(function(a){a[e]&&a[e].removeChild(a)})},empty:function(){return this.each(function(a){while(a.firstChild)a.removeChild(a.firstChild)})},detach:function(){return this.map(function(a){return a[e].removeChild(a)})},scrollTop:function(a){return K.call(this,null,a,"y")},scrollLeft:function(a){return K.call(this,a,null,"x")},toggle:function(a){return this.each(function(a){a.style.display=a.offsetWidth||a.offsetHeight?"none":"block"}),a&&a(),this}},N.setQueryEngine=function(a){f=a,delete N.setQueryEngine},N.aug=function(a,b){for(var c in a)a.hasOwnProperty(c)&&((b||I.prototype)[c]=a[c])},N.create=function(a){return typeof a=="string"?function(){var b=/^<([^\s>]+)/.exec(a),d=c.createElement(b&&k[b[1].toLowerCase()]||"div"),e=[];d.innerHTML=a;var f=d.childNodes;d=d.firstChild,e.push(d);while(d=d.nextSibling)d.nodeType==1&&e.push(d);return e}():A(a)?[a.cloneNode(!0)]:[]},N.doc=function(){var a=this.viewport();return{width:Math.max(c.body.scrollWidth,d.scrollWidth,a.width),height:Math.max(c.body.scrollHeight,d.scrollHeight,a.height)}},N.firstChild=function(a){for(var b=a.childNodes,c=0,d=b&&b.length||0,e;c<d;c++)b[c].nodeType===1&&(e=b[d=c]);return e},N.viewport=function(){return{width:m?d.clientWidth:self.innerWidth,height:m?d.clientHeight:self.innerHeight}},N.isAncestor="compareDocumentPosition"in d?function(a,b){return(a.compareDocumentPosition(b)&16)==16}:"contains"in d?function(a,b){return a!==b&&a.contains(b)}:function(a,b){while(b=b[e])if(b===a)return!0;return!1};var O=a.bonzo;return N.noConflict=function(){return a.bonzo=O,this},N})// Envision.js
+!function(a,b){typeof define=="function"?define(b):typeof module!="undefined"?module.exports=b():this[a]=b()}("bonzo",function(){function x(a){return new RegExp("(^|\\s+)"+a+"(\\s+|$)")}function y(a,b,c){for(var d=0,e=a.length;d<e;d++)b.call(c||a[d],a[d],d,a);return a}function z(a){return a.replace(/-(.)/g,function(a,b){return b.toUpperCase()})}function A(a){return a&&a.nodeName&&a.nodeType==1}function B(a,b,c,d){for(d=0,j=a.length;d<j;++d)if(b.call(c,a[d],d,a))return!0;return!1}function D(a,b,c){var d=0,g=b||this,h=[],i=f&&typeof a=="string"&&a.charAt(0)!="<"?function(b){return(b=f(a))&&(b.selected=1)&&b}():a;return y(J(i),function(a){y(g,function(b){var f=!b[e]||b[e]&&!b[e][e]?function(){var a=b.cloneNode(!0);return g.$&&g.cloneEvents&&g.$(a).cloneEvents(b),a}():b;c(a,f),h[d]=f,d++})},this),y(h,function(a,b){g[b]=a}),g.length=d,g}function E(a,b,c){var d=N(a),e=d.css("position"),f=d.offset(),g="relative",h=e==g,i=[parseInt(d.css("left"),10),parseInt(d.css("top"),10)];e=="static"&&(d.css("position",g),e=g),isNaN(i[0])&&(i[0]=h?0:a.offsetLeft),isNaN(i[1])&&(i[1]=h?0:a.offsetTop),b!=null&&(a.style.left=b-f.left+i[0]+q),c!=null&&(a.style.top=c-f.top+i[1]+q)}function F(a,b){return x(b).test(a.className)}function G(a,b){a.className=w(a.className+" "+b)}function H(a,b){a.className=w(a.className.replace(x(b)," "))}function I(a){this.length=0;if(a){a=typeof a!="string"&&!a.nodeType&&typeof a.length!="undefined"?a:[a],this.length=a.length;for(var b=0;b<a.length;b++)this[b]=a[b]}}function J(a){return typeof a=="string"?N.create(a):A(a)?[a]:a}function K(a,c,d){var e=this[0];return a==null&&c==null?(L(e)?M():{x:e.scrollLeft,y:e.scrollTop})[d]:(L(e)?b.scrollTo(a,c):(a!=null&&(e.scrollLeft=a),c!=null&&(e.scrollTop=c)),this)}function L(a){return a===b||/^(?:body|html)$/i.test(a.tagName)}function M(){return{x:b.pageXOffset||d.scrollLeft,y:b.pageYOffset||d.scrollTop}}function N(a,b){return new I(a,b)}var a=this,b=window,c=b.document,d=c.documentElement,e="parentNode",f=null,g=/^checked|value|selected$/,h=/select|fieldset|table|tbody|tfoot|td|tr|colgroup/i,i="table",k={thead:i,tbody:i,tfoot:i,tr:"tbody",th:"tr",td:"tr",fieldset:"form",option:"select"},l=/^checked|selected$/,m=/msie/i.test(navigator.userAgent),n=[],o=0,p=/^-?[\d\.]+$/,q="px",r="setAttribute",s="getAttribute",t=/(^\s*|\s*$)/g,u={lineHeight:1,zoom:1,zIndex:1,opacity:1},v=function(){var a=["webkitTransform","MozTransform","OTransform","msTransform","Transform"],b;for(b=0;b<a.length;b++)if(a[b]in c.createElement("a").style)return a[b]}(),w=String.prototype.trim?function(a){return a.trim()}:function(a){return a.replace(t,"")},C=c.defaultView&&c.defaultView.getComputedStyle?function(a,b){b=b=="transform"?v:b,b=b=="transform-origin"?v+"Origin":b;var d=null;b=="float"&&(b="cssFloat");var e=c.defaultView.getComputedStyle(a,"");return e&&(d=e[z(b)]),a.style[b]||d}:m&&d.currentStyle?function(a,b){b=z(b),b=b=="float"?"styleFloat":b;if(b=="opacity"){var c=100;try{c=a.filters["DXImageTransform.Microsoft.Alpha"].opacity}catch(d){try{c=a.filters("alpha").opacity}catch(e){}}return c/100}var f=a.currentStyle?a.currentStyle[b]:null;return a.style[b]||f}:function(a,b){return a.style[z(b)]};I.prototype={get:function(a){return this[a]},each:function(a,b){return y(this,a,b)},map:function(a,b){var c=[],d,e;for(e=0;e<this.length;e++)d=a.call(this,this[e],e),b?b(d)&&c.push(d):c.push(d);return c},first:function(){return N(this[0])},last:function(){return N(this[this.length-1])},html:function(a,b){function f(b){while(b.firstChild)b.removeChild(b.firstChild);y(J(a),function(a){b.appendChild(a)})}var c=b?d.textContent===null?"innerText":"textContent":"innerHTML",e;return typeof a!="undefined"?this.each(function(b){(e=b.tagName.match(h))?f(b,e[0]):b[c]=a}):this[0]?this[0][c]:""},text:function(a){return this.html(a,1)},addClass:function(a){return this.each(function(b){F(b,a)||G(b,a)})},removeClass:function(a){return this.each(function(b){F(b,a)&&H(b,a)})},hasClass:function(a){return B(this,function(b){return F(b,a)})},toggleClass:function(a,b){return this.each(function(c){typeof b!="undefined"?b?G(c,a):H(c,a):F(c,a)?H(c,a):G(c,a)})},show:function(a){return this.each(function(b){b.style.display=a||""})},hide:function(a){return this.each(function(a){a.style.display="none"})},append:function(a){return this.each(function(b){y(J(a),function(a){b.appendChild(a)})})},prepend:function(a){return this.each(function(b){var c=b.firstChild;y(J(a),function(a){b.insertBefore(a,c)})})},appendTo:function(a,b){return D.call(this,a,b,function(a,b){a.appendChild(b)})},prependTo:function(a,b){return D.call(this,a,b,function(a,b){a.insertBefore(b,a.firstChild)})},next:function(){return this.related("nextSibling")},previous:function(){return this.related("previousSibling")},related:function(a){return this.map(function(b){b=b[a];while(b&&b.nodeType!==1)b=b[a];return b||0},function(a){return a})},before:function(a){return this.each(function(b){y(N.create(a),function(a){b[e].insertBefore(a,b)})})},after:function(a){return this.each(function(b){y(N.create(a),function(a){b[e].insertBefore(a,b.nextSibling)})})},insertBefore:function(a,b){return D.call(this,a,b,function(a,b){a[e].insertBefore(b,a)})},insertAfter:function(a,b){return D.call(this,a,b,function(a,b){var c=a.nextSibling;c?a[e].insertBefore(b,c):a[e].appendChild(b)})},css:function(a,d,e){function g(a,b,c){for(var d in f)f.hasOwnProperty(d)&&(c=f[d],(b=z(d))&&p.test(c)&&!(b in u)&&(c+=q),b=b=="transform"?v:b,b=b=="transformOrigin"?v+"Origin":b,a.style[b]=c)}if(d===undefined&&typeof a=="string")return d=this[0],d?d==c||d==b?(e=d==c?N.doc():N.viewport(),a=="width"?e.width:a=="height"?e.height:""):C(d,a):null;var f=a;typeof a=="string"&&(f={},f[a]=d),m&&f.opacity&&(f.filter="alpha(opacity="+f.opacity*100+")",f.zoom=a.zoom||1,delete f.opacity);if(d=f["float"])m?f.styleFloat=d:f.cssFloat=d,delete f["float"];return this.each(g)},offset:function(a,b){if(typeof a=="number"||typeof b=="number")return this.each(function(c){E(c,a,b)});var c=this[0],d=c.offsetWidth,e=c.offsetHeight,f=c.offsetTop,g=c.offsetLeft;while(c=c.offsetParent)f=f+c.offsetTop,g=g+c.offsetLeft;return{top:f,left:g,height:e,width:d}},attr:function(a,b){var c=this[0];if(typeof a=="string"||a instanceof String)return typeof b=="undefined"?g.test(a)?l.test(a)&&typeof c[a]=="string"?!0:c[a]:c[s](a):this.each(function(c){g.test(a)?c[a]=b:c[r](a,b)});for(var d in a)a.hasOwnProperty(d)&&this.attr(d,a[d]);return this},val:function(a){return typeof a=="string"?this.attr("value",a):this[0].value},removeAttr:function(a){return this.each(function(b){l.test(a)?b[a]=!1:b.removeAttribute(a)})},data:function(a,b){var c=this[0];if(typeof b=="undefined"){c[s]("data-node-uid")||c[r]("data-node-uid",++o);var d=c[s]("data-node-uid");return n[d]||(n[d]={}),n[d][a]}return this.each(function(c){c[s]("data-node-uid")||c[r]("data-node-uid",++o);var d=c[s]("data-node-uid"),e=n[d]||(n[d]={});e[a]=b})},remove:function(){return this.each(function(a){a[e]&&a[e].removeChild(a)})},empty:function(){return this.each(function(a){while(a.firstChild)a.removeChild(a.firstChild)})},detach:function(){return this.map(function(a){return a[e].removeChild(a)})},scrollTop:function(a){return K.call(this,null,a,"y")},scrollLeft:function(a){return K.call(this,a,null,"x")},toggle:function(a){return this.each(function(a){a.style.display=a.offsetWidth||a.offsetHeight?"none":"block"}),a&&a(),this}},N.setQueryEngine=function(a){f=a,delete N.setQueryEngine},N.aug=function(a,b){for(var c in a)a.hasOwnProperty(c)&&((b||I.prototype)[c]=a[c])},N.create=function(a){return typeof a=="string"?function(){var b=/^<([^\s>]+)/.exec(a),d=c.createElement(b&&k[b[1].toLowerCase()]||"div"),e=[];d.innerHTML=a;var f=d.childNodes;d=d.firstChild,e.push(d);while(d=d.nextSibling)d.nodeType==1&&e.push(d);return e}():A(a)?[a.cloneNode(!0)]:[]},N.doc=function(){var a=this.viewport();return{width:Math.max(c.body.scrollWidth,d.scrollWidth,a.width),height:Math.max(c.body.scrollHeight,d.scrollHeight,a.height)}},N.firstChild=function(a){for(var b=a.childNodes,c=0,d=b&&b.length||0,e;c<d;c++)b[c].nodeType===1&&(e=b[d=c]);return e},N.viewport=function(){return{width:m?d.clientWidth:self.innerWidth,height:m?d.clientHeight:self.innerHeight}},N.isAncestor="compareDocumentPosition"in d?function(a,b){return(a.compareDocumentPosition(b)&16)==16}:"contains"in d?function(a,b){return a!==b&&a.contains(b)}:function(a,b){while(b=b[e])if(b===a)return!0;return!1};var O=a.bonzo;return N.noConflict=function(){return a.bonzo=O,this},N});
+// Envision.js
 // (c) 2012 Carl Sutherland, Humble Software
 // Distributed under the MIT License
 // Source: http://www.github.com/HumbleSoftware/envisionjs
@@ -458,7 +5917,8 @@ Component.prototype = {
     if (options[attribute]) {
       bonzo(node).css(attribute, options[attribute]);
     } else {
-      options[attribute] = parseInt(bonzo(node).css(attribute), 10);
+      //options[attribute] = parseInt(bonzo(node).css(attribute), 10);
+      options[attribute] = node.clientWidth;
     }
     this[attribute] = options[attribute];
   }
@@ -1869,11 +7329,19 @@ function getDefaults () {
     detail : {
       name : 'envision-timeseries-detail',
       config : {
+        'lite-lines' : {
+            lineWidth : 1,
+            show : true
+        }
       }
     },
     summary : {
       name : 'envision-timeseries-summary',
       config : {
+        'lite-lines' : {
+            lineWidth : 1,
+            show : true
+        },
         handles : {
           show : true
         },
@@ -2003,5 +7471,4 @@ Zoom.prototype = {
 V.templates.Zoom = Zoom;
 
 })();
-;
 ;
