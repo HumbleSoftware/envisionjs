@@ -104,10 +104,6 @@ Component.prototype = {
     }
   },
 
-  getData : function () {
-    return this.data;
-  },
-
   /**
    * Trigger an event on the component's API.
    *
