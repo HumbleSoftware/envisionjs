@@ -2466,7 +2466,9 @@ Graph.prototype = {
       dX: dx,
       dY: dy,
       absX: pointer.x,
-      absY: pointer.y
+      absY: pointer.y,
+      pageX: pointer.x,
+      pageY: pointer.y
     };
   },
   /**
@@ -2485,9 +2487,9 @@ Graph.prototype = {
    * @param {Event} event - 'mousemove' Event object.
    */
   mouseMoveHandler: function(event){
+    if (this.mouseDownMoveHandler) return;
     var pos = this.getEventPosition(event);
-    this.lastMousePos.pageX = pos.absX;
-    this.lastMousePos.pageY = pos.absY;
+    this.lastMousePos = pos;
     E.fire(this.el, 'flotr:mousemove', [event, pos, this]);
   },
   /**
@@ -2513,16 +2515,23 @@ Graph.prototype = {
     }
     */
 
-
     if (this.mouseUpHandler) return;
     this.mouseUpHandler = _.bind(function (e) {
       E.stopObserving(document, 'mouseup', this.mouseUpHandler);
+      E.stopObserving(document, 'mousemove', this.mouseDownMoveHandler);
+      this.mouseDownMoveHandler = null;
       this.mouseUpHandler = null;
       // @TODO why?
       //e.stop();
       E.fire(this.el, 'flotr:mouseup', [e, this]);
     }, this);
+    this.mouseDownMoveHandler = _.bind(function (e) {
+        var pos = this.getEventPosition(e);
+        this.lastMousePos = pos;
+        E.fire(this.el, 'flotr:mousemove', [event, pos, this]);
+    }, this);
     E.observe(document, 'mouseup', this.mouseUpHandler);
+    E.observe(document, 'mousemove', this.mouseDownMoveHandler);
     E.fire(this.el, 'flotr:mousedown', [event, this]);
     this.ignoreClick = false;
   },
@@ -5868,7 +5877,7 @@ Component.prototype = {
    */
   draw : function (data, options) {
     if (this.api) {
-      this.api.draw(data || this.options.data, options, this.node, this.options.skipPreprocess);
+      this.api.draw(data || this.options.data, options, this.node, this.options.skipPreprocess, this.options.processData);
     }
   },
 
@@ -6458,7 +6467,7 @@ Child.prototype = {
     this.flotr.destroy();
   },
 
-  draw : function (data, flotr, node, skipPreprocess) {
+  draw : function (data, flotr, node, skipPreprocess, processData) {
 
     var
       o           = this.options,
@@ -6486,7 +6495,7 @@ Child.prototype = {
         var
           isObject = !_.isArray(d),
           unprocessed = isObject ? d.data : d,
-          processed = this._processData(unprocessed, flotr),
+          processed = this._processData(unprocessed, flotr, node, processData),
           x = processed[0],
           y = processed[1],
           data = [],
@@ -6513,12 +6522,11 @@ Child.prototype = {
     this.flotr = Flotr.draw(node, flotrData, flotr);
   },
 
-  _processData : function (data, flotr) {
+  _processData : function (data, flotr, node, processData) {
 
     var
       options     = this.options,
-      process     = options.processData,
-      resolution  = options.width,
+      resolution  = node.clientWidth,
       axis        = flotr.xaxis,
       min         = axis.min,
       max         = axis.max,
@@ -6526,9 +6534,9 @@ Child.prototype = {
 
     if (_.isFunction(data)) {
       return data(min, max, resolution);
-    } else if (process) {
+    } else if (processData) {
       preprocessor = new V.Preprocessor({data : data});
-      process.apply(this, [{
+      processData.apply(this, [{
         preprocessor : preprocessor,
         min : min,
         max : max,
