@@ -21,7 +21,7 @@ Child.prototype = {
     this.flotr.destroy();
   },
 
-  draw : function (data, flotr, node, skipPreprocess) {
+  draw : function (data, flotr, node, skipPreprocess, processData) {
 
     var
       o           = this.options,
@@ -49,7 +49,7 @@ Child.prototype = {
         var
           isObject = !_.isArray(d),
           unprocessed = isObject ? d.data : d,
-          processed = this._processData(unprocessed, flotr, node),
+          processed = this._processData(unprocessed, flotr, node, processData),
           x = processed[0],
           y = processed[1],
           data = [],
@@ -76,11 +76,10 @@ Child.prototype = {
     this.flotr = Flotr.draw(node, flotrData, flotr);
   },
 
-  _processData : function (data, flotr, node) {
+  _processData : function (data, flotr, node, processData) {
 
     var
       options     = this.options,
-      process     = options.processData,
       resolution  = node.clientWidth,
       axis        = flotr.xaxis,
       min         = axis.min,
@@ -89,9 +88,9 @@ Child.prototype = {
 
     if (_.isFunction(data)) {
       return data(min, max, resolution);
-    } else if (process) {
+    } else if (processData) {
       preprocessor = new V.Preprocessor({data : data});
-      process.apply(this, [{
+      processData.apply(this, [{
         preprocessor : preprocessor,
         min : min,
         max : max,

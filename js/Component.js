@@ -99,7 +99,7 @@ Component.prototype = {
    */
   draw : function (data, options) {
     if (this.api) {
-      this.api.draw(data || this.options.data, options, this.node, this.options.skipPreprocess);
+      this.api.draw(data || this.options.data, options, this.node, this.options.skipPreprocess, this.options.processData);
     }
   },
 
