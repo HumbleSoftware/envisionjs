@@ -49,7 +49,7 @@ Child.prototype = {
         var
           isObject = !_.isArray(d),
           unprocessed = isObject ? d.data : d,
-          processed = this._processData(unprocessed, flotr),
+          processed = this._processData(unprocessed, flotr, node),
           x = processed[0],
           y = processed[1],
           data = [],
@@ -76,12 +76,12 @@ Child.prototype = {
     this.flotr = Flotr.draw(node, flotrData, flotr);
   },
 
-  _processData : function (data, flotr) {
+  _processData : function (data, flotr, node) {
 
     var
       options     = this.options,
       process     = options.processData,
-      resolution  = options.width,
+      resolution  = node.clientWidth,
       axis        = flotr.xaxis,
       min         = axis.min,
       max         = axis.max,
