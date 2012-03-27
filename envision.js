@@ -1668,6 +1668,7 @@ Flotr.defaultOptions = {
     horizontalLines: true, // => whether to show gridlines in horizontal direction
     minorHorizontalLines: null, // => whether to show gridlines for minor ticks in horizontal dir.
     outlineWidth: 1,       // => width of the grid outline/border in pixels
+    outline : 'nsew',      // => walls of the outline to display
     circular: false        // => if set to true, the grid will be circular, must be used when radars are drawn
   },
   mouse: {
@@ -2191,6 +2192,7 @@ Graph = function(el, data, options){
 Graph.prototype = {
 
   destroy: function () {
+    E.fire(this.el, 'flotr:destroy');
     _.each(this._handles, function (handle) {
       E.stopObserving.apply(this, handle);
     });
@@ -4034,6 +4036,9 @@ Flotr.addPlugin('selection', {
         _.bind(this.selection.updateSelection, this),
         1000/this.options.selection.fps
       );
+    },
+    'flotr:destroy' : function (event) {
+      clearInterval(this.selection.interval);
     }
   },
 
@@ -7260,7 +7265,7 @@ function Finance (options) {
     price, volume, connection, summary;
 
   if (options.defaults) {
-    defaults = Flotr.merge(defaults, options.defaults);
+    defaults = Flotr.merge(options.defaults, defaults);
   }
 
   defaults.price.data = data.price;
@@ -7380,7 +7385,7 @@ function TimeSeries (options) {
 
   // Fill Defaults
   if (options.defaults) {
-    defaults = Flotr.merge(defaults, options.defaults);
+    defaults = Flotr.merge(options.defaults, defaults);
   }
   defaults.detail.data = data.detail;
   defaults.summary.data = data.summary;
