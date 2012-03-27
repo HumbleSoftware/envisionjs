@@ -109,7 +109,7 @@ function Finance (options) {
     price, volume, connection, summary;
 
   if (options.defaults) {
-    defaults = Flotr.merge(defaults, options.defaults);
+    defaults = Flotr.merge(options.defaults, defaults);
   }
 
   defaults.price.data = data.price;

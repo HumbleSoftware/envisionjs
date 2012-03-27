@@ -51,7 +51,7 @@ function TimeSeries (options) {
 
   // Fill Defaults
   if (options.defaults) {
-    defaults = Flotr.merge(defaults, options.defaults);
+    defaults = Flotr.merge(options.defaults, defaults);
   }
   defaults.detail.data = data.detail;
   defaults.summary.data = data.summary;
