@@ -4,6 +4,10 @@ envision.actions.selection =  {
       handler : 'select',
       consumer : 'zoom'
     },
-    'click'
+    // Reset on click, avoids re-drawing the leader.
+    {
+        handler : 'click',
+        consumer : 'reset'
+    }
   ]
 };

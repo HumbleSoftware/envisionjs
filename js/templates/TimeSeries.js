@@ -7,13 +7,20 @@ function getDefaults () {
   return {
     detail : {
       name : 'envision-timeseries-detail',
-      flotr : {
-
+      config : {
+        'lite-lines' : {
+            lineWidth : 1,
+            show : true
+        }
       }
     },
     summary : {
       name : 'envision-timeseries-summary',
-      flotr : {
+      config : {
+        'lite-lines' : {
+            lineWidth : 1,
+            show : true
+        },
         handles : {
           show : true
         },
@@ -44,7 +51,7 @@ function TimeSeries (options) {
 
   // Fill Defaults
   if (options.defaults) {
-    defaults = Flotr.merge(defaults, options.defaults);
+    defaults = Flotr.merge(options.defaults, defaults);
   }
   defaults.detail.data = data.detail;
   defaults.summary.data = data.summary;
@@ -70,7 +77,7 @@ function TimeSeries (options) {
 
   // Optional initial selection
   if (options.selection) {
-    summary.trigger(summary, 'select', options.selection);
+    summary.trigger('select', options.selection);
   }
 
   this.vis = vis;

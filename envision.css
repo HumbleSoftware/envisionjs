@@ -29,3 +29,123 @@
   cursor: e-resize;
 }
 
+
+/* Dimensions */
+.envision-finance {
+  width: 600px;
+}
+.envision-finance-price .envision-component {
+  height : 200px;
+}
+.envision-finance-volume .envision-component {
+  height : 60px;
+}
+.envision-finance-connection .envision-component {
+  height: 16px;
+}
+.envision-finance-summary .envision-component {
+  cursor: all-scroll;
+  height : 70px;
+  margin-top: -2px;
+}
+
+/* Bubble Borders */
+.envision-finance-price,
+.envision-finance-volume {
+  border: 1px solid #B6D9FF;
+  background: #fff;
+}
+.envision-finance-price {
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+}
+.envision-finance-volume {
+  border-top: 0px;
+}
+
+/* Connection overlay */
+.envision-finance-connection canvas {
+  z-index: 10;
+  background: #fff;
+}
+.envision-finance-connection canvas object {
+  position: absolute;
+  top: 0px;
+}
+
+/* Y-Axis Labels */
+.envision-finance-price .flotr-grid-label {
+  margin-left: 4px;
+}
+.envision-finance-price .flotr-grid-label.first {
+  margin-top: -6px;
+}
+.envision-finance-price .flotr-grid-label.last {
+  margin-top: 6px;
+}
+
+/* X-Axis Labels */
+.envision-finance-summary .flotr-grid-label {
+  margin-top: 3px;
+}
+
+/* Mouse Tracker */
+.envision-finance-price .flotr-mouse-value {
+	font-size: 12px;
+}
+.envision-finance-volume .flotr-mouse-value {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .envision-finance {
+    width: 100%;
+  }
+  .envision-finance-price .envision-component {
+    height: 120px;
+  }
+  .envision-finance-summary .envision-component,
+  .envision-finance-volume .envision-component {
+    height: 40px;
+  }
+}
+
+/* Dimensions */
+.envision-timeseries {
+  width: auto;
+}
+.envision-timeseries-detail .envision-component {
+  height: 200px;
+}
+.envision-timeseries-connection .envision-component {
+  height: 16px;
+}
+.envision-timeseries-summary .envision-component {
+  cursor: all-scroll;
+  height: 80px;
+}
+
+/* Bubble Borders */
+.envision-timeseries-detail {
+  padding-top: 7px;
+  border: 1px solid #B6D9FF;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom: 0px;
+  background : #e2f0ff;
+}
+
+/* Connection overlay */
+.envision-timeseries-connection canvas {
+  z-index: 10;
+  background: #fff;
+}
+.envision-timeseries-connection canvas object {
+  position: absolute;
+  top: 0px;
+}
+.envision-timeseries-summary .envision-component {
+  margin-top: -2px;
+}
+
+

@@ -2,13 +2,23 @@ envision:
 	rm -rf build
 	mkdir build
 	smoosh make/build.json
-	cat lib/bonzo/bonzo.min.js > envision.js
+	# envision.js
+	cat lib/flotr2/lib/underscore.js > envision.js
+	cat lib/flotr2/lib/bean.js >> envision.js
+	cat build/flotr.js >> envision.js
+	cat lib/bonzo/bonzo.min.js >> envision.js
+	echo ";" >> envision.js
 	cat build/envision.js >> envision.js
-	cat lib/bonzo/bonzo.min.js > envision.min.js
+	# envision.min.js
+	cat lib/flotr2/lib/underscore-min.js > envision.min.js
+	cat lib/flotr2/lib/bean-min.js >> envision.min.js
+	echo ";" >> envision.min.js
+	cat build/flotr.min.js >> envision.min.js
+	echo ";" >> envision.min.js
+	cat lib/bonzo/bonzo.min.js >> envision.min.js
 	echo ";" >> envision.min.js
 	cat build/envision.min.js >> envision.min.js
-	cp build/envision-templates.js .
-	cp build/envision-templates.min.js .
+	echo ";" >> envision.js
 
 demo: envision
 	mkdir build/demos
@@ -34,3 +44,11 @@ demo: envision
 
 test:
 	jasmine-headless-webkit -j spec/jasmine.yml -c
+
+readme: api-doc
+	cat markdown/head.md > README.md
+	cat markdown/api.md >> README.md
+	cat markdown/footer.md >> README.md
+
+api-doc:
+	jsdoc -t templates/markdown js/ > markdown/api.md

@@ -12,7 +12,7 @@
 
     render : function (node) {
       var
-        canvas = document.createElement('canvas'),//bonzo.create('<canvas></canvas>')[0],
+        canvas = document.createElement('canvas'),
         offset = bonzo(node).offset();
 
       this.height = offset.height;
@@ -68,11 +68,11 @@
           context.moveTo(min, height);
           context.quadraticCurveTo(min, half, Math.max(min - half, min / 2), half);
           context.lineTo(Math.min(half, min / 2), half);
-          context.quadraticCurveTo(0, half, 0, -0.5);
+          context.quadraticCurveTo(0, half, 0.5, -0.5);
         }
 
         // Top
-        context.lineTo(width, -0.5);
+        context.lineTo(width - 0.5, -0.5);
 
         // Right
         if (max >= width - 1) {
@@ -92,8 +92,8 @@
     trigger : function (component, name, options) {
       if (name === 'zoom') {
         this.zoom(component, options);
-      } else if (name === 'click') {
-        this.click(component);
+      } else if (name === 'reset') {
+        this.reset(component);
       }
     },
     zoom : function (component, options) {
@@ -108,7 +108,7 @@
         max : max
       });
     },
-    click : function (component) {
+    reset : function (component) {
       component.draw(null, {
         min : component.width / 2,
         max : component.width / 2

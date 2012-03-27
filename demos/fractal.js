@@ -11,14 +11,25 @@ function example () {
     draw : function (options) {
 
       var
-        range     = options.data,
         context   = options.context,
         width     = options.width,
         height    = options.height,
-        minRe     = range[0][0],
-        maxRe     = range[1][0],
-        minIm     = range[1][1],
-        maxIm     = range[0][1],
+        range     = options.data,
+        xScale    = options.xScale,
+        yScale    = options.yScale,
+        xMin      = range[0][0],
+        xMax      = range[1][0],
+        yMin      = range[0][1],
+        yMax      = range[1][1],
+        xPMin     = xScale(xMin),
+        xPMax     = xScale(xMax),
+        yPMin     = yScale(yMin),
+        yPMax     = yScale(yMax),
+        // Scale bounds based upon initial data:
+        minRe     = (xMax - xMin) * (-xPMin) / (xPMax - xPMin) + xMin,
+        maxRe     = (xMax - xMin) * (-xPMin + width) / (xPMax - xPMin) + xMin,
+        minIm     = (yMax - yMin) * (-yPMin + height) / (yPMax - yPMin) + yMin,
+        maxIm     = (yMax - yMin) * (-yPMin) / (yPMax - yPMin) + yMin,
         reFactor  = (maxRe - minRe) / (width - 1),
         imFactor  = (maxIm - minIm) / (height - 1),
         max       = 50,
@@ -27,6 +38,8 @@ function example () {
         z_r, z_i,
         z_r2, z_i2,
         inside;
+
+      //console.log(test1, test2, test3, test4);
 
       var
         image = context.getImageData(0, 0, width, height),
@@ -82,40 +95,26 @@ function example () {
       data : [[-2, 1.2], [1, -1.2]],
       width : 598,
       height : 456,
-      flotr : {
+      config : {
         fractal : {
           show : true
         },
         selection : {
           mode : 'xy'
         }
-      }
+      },
+      skipPreprocess : true
     },
     vis, zoom, zoomConfig;
 
   vis = new H.Visualization();
-  fractal = new H.Child(fractalOptions);
-  zoom = new H.Interaction({leader : fractal});
+  fractal = new H.Component(fractalOptions);
+  zoom = new H.Interaction();
 
   vis
     .add(fractal)
     .render(container);
 
-  zoomConfig = {
-    callback : function (o) {
-      var
-        xaxis = o.xaxis,
-        yaxis = o.yaxis || {},
-        xmin = xaxis.min || -2,
-        xmax = xaxis.max || 1,
-        ymin = yaxis.min || -1.2,
-        ymax = yaxis.max || 1.2;
-      fractal.draw([
-        [xmin, ymax],
-        [xmax, ymin]
-      ]);
-    }
-  };
-
-  zoom.add(H.actions.selection, zoomConfig);
+  zoom.group([fractal]);
+  zoom.add(H.actions.zoom, zoomConfig);
 }

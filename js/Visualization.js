@@ -1,10 +1,5 @@
+// Visualization Class
 (function () { 
-/**
- * Options:
- *
- * element - element housing visualization
- *
- */
 
 var
   CN_FIRST  = 'envision-first',
@@ -13,6 +8,20 @@ var
   T_VISUALIZATION   = '<div class="envision-visualization"></div>';
   T_COMPONENT_CONTAINER = '<div class="envision-component-container"></div>';
 
+/**
+ * @summary Defines a visualization of componenents.
+ *
+ * @description This class manages the rendering of a visualization.
+ * It provides convenience methods for adding, removing, and reordered
+ * components dynamically as well as convenience methods for working
+ * with a logical group of components.
+ *
+ * @param {String} [name]  A name for the visualization.
+ * @param {Element} [element]  A container element for the visualization.
+ *
+ * @memberof envision
+ * @class
+ */
 function Visualization (options) {
   this.options = options || {};
   this.components = [];
@@ -22,6 +31,16 @@ function Visualization (options) {
 
 Visualization.prototype = {
 
+  /**
+   * Render the visualization.
+   *
+   * If no element is submitted, the visualization will
+   * render in the element configured in the constructor.
+   *
+   * This method is chainable.
+   *
+   * @param {Element} [element]
+   */
   render : function (element) {
 
     var options = this.options;
@@ -45,6 +64,16 @@ Visualization.prototype = {
     return this;
   },
 
+  /**
+   * Add a component to the visualization.
+   *
+   * If the visualization has already been rendered,
+   * it will render the new component.
+   *
+   * This method is chainable.
+   *
+   * @param {envision.Component} component
+   */
   add : function (component) {
     this.components.push(component);
     if (this.rendered) {
@@ -54,6 +83,17 @@ Visualization.prototype = {
     return this;
   },
 
+  /**
+   * Remove a component from the visualization.
+   *
+   * This removes the components from the list of components in the
+   * visualization and removes its container from the DOM.  It does not
+   * destroy the component.
+   *
+   * This method is chainable.
+   *
+   * @returns {envision.Visualization} This visualization.
+   */
   remove : function (component) {
     var
       components  = this.components,
@@ -66,6 +106,14 @@ Visualization.prototype = {
     return this;
   },
 
+  /**
+   * Reorders a component.
+   *
+   * This method is chainable.
+   *
+   * @param {envision.Component} component
+   * @param {Number} newIndex
+   */
   setPosition : function (component, newIndex) {
     var
       components  = this.components;
@@ -82,23 +130,54 @@ Visualization.prototype = {
     return this;
   },
 
+  /**
+   * Gets the position of a component.
+   *
+   * @param {envision.Component} component
+   */
   indexOf : function (component) {
     return _.indexOf(this.components, component);
   },
 
+  /**
+   * Gets the component at a position.
+   *
+   * @param {envision.Component} component
+   * @returns {envision.Component}  The found component.
+   */
   getComponent : function (index) {
     var components = this.components;
     if (index < components.length) return components[index];
   },
 
+  /**
+   * Gets whether or not the component is the first component
+   * in the visualization.
+   *
+   * @param {envision.Component} component
+   * @returns {Boolean}
+   */
   isFirst : function (component) {
     return (this.indexOf(component) === 0 ? true : false);
   },
 
+  /**
+   * Gets whether or not the component is the last component
+   * in the visualization.
+   *
+   * @param {envision.Component} component
+   * @returns {Boolean}
+   */
   isLast : function (component) {
     return (this.indexOf(component) === this.components.length - 1 ? true : false);
   },
 
+  /**
+   * Destroys the visualization.
+   *
+   * This empties the container and destroys all the components which are part
+   * of the visualization.
+   */
   destroy : function () {
     _.each(this.components, function (component) {
       component.destroy();

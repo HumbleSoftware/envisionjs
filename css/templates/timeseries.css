@@ -9,6 +9,7 @@
   height: 16px;
 }
 .envision-timeseries-summary .envision-component {
+  cursor: all-scroll;
   height: 80px;
 }
 
@@ -26,6 +27,10 @@
 .envision-timeseries-connection canvas {
   z-index: 10;
   background: #fff;
+}
+.envision-timeseries-connection canvas object {
+  position: absolute;
+  top: 0px;
 }
 .envision-timeseries-summary .envision-component {
   margin-top: -2px;

@@ -12,6 +12,7 @@
   height: 16px;
 }
 .envision-finance-summary .envision-component {
+  cursor: all-scroll;
   height : 70px;
   margin-top: -2px;
 }
@@ -36,7 +37,8 @@
   background: #fff;
 }
 .envision-finance-connection canvas object {
-  margin-top: -2px;
+  position: absolute;
+  top: 0px;
 }
 
 /* Y-Axis Labels */
@@ -64,9 +66,6 @@
 }
 
 @media screen and (max-width: 600px) {
-  div#demo {
-    height: 253px;
-  }
   .envision-finance {
     width: 100%;
   }
