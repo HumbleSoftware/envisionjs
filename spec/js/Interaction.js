@@ -49,6 +49,52 @@ describe('Interaction', function () {
     expect(interaction.followers).toContain(b);
   });
 
+  describe('Actions', function () {
+    var
+      interaction, action, a, b;
+
+    beforeEach(function () {
+      interaction = new H.Interaction();
+      action = new MockAction();
+      a = new H.Component({adapter : new MockAdapter()});
+      b = new H.Component({adapter : new MockAdapter()});
+    });
+
+    it('adds an action', function () {
+      interaction.add(action);
+      expect(interaction.actions).toContain(action);
+    });
+
+    it('triggers an action on followers', function () {
+
+      interaction.leader(a);
+      interaction.follower(b);
+      interaction.add(action);
+
+      spyOn(b, 'trigger').andCallThrough();
+      a.trigger('handle');
+
+      expect(b.trigger).toHaveBeenCalled();
+    });
+
+    it('triggers an action on followers', function () {
+
+      interaction.leader(a);
+      interaction.follower(b);
+      interaction.add(action);
+
+      spyOn(a, 'trigger').andCallThrough();
+      spyOn(b, 'trigger').andCallThrough();
+
+      a.trigger('handleConsume');
+
+      expect(b.trigger).toHaveBeenCalled();
+      expect(a.trigger.callCount).toBe(1);
+      expect(b.trigger.callCount).toBe(1);
+    });
+
+  });
+
   describe('Chaining', function () {
     var
       interaction, component;

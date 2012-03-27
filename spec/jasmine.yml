@@ -11,6 +11,7 @@ src_files:
   - "js/Preprocessor.js"
   - "js/Interaction.js"
 helper_files:
+  - "MockAction.js"
   - "MockAdapter.js"
   - "MockComponent.js"
 spec_files:
