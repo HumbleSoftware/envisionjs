@@ -6195,6 +6195,8 @@ function bound (that) {
     x.slice(start, end + 1),
     y.slice(start, end + 1)
   ]);
+  that.start = start;
+  that.end = end;
 };
 
 Preprocessor.prototype = {
@@ -6307,6 +6309,8 @@ Preprocessor.prototype = {
       newY.push(y[end]);
 
       this.setData([newX, newY]);
+      this.start = start;
+      this.end = end;
     } else {
       this.bounded = true;
     }
@@ -6357,6 +6361,8 @@ Preprocessor.prototype = {
       newY.push(y[end]);
 
       this.setData([newX, newY]);
+      this.start = start;
+      this.end = end;
     }
 
     return this;
@@ -6481,8 +6487,7 @@ Child.prototype = {
     data = data || o.data;
 
     if (flotr) {
-      flotr = Flotr.clone(flotr);
-      flotr = Flotr.merge(o, flotr);
+      flotr = Flotr.merge(flotr, Flotr.clone(o));
     } else {
       flotr = o;
     }
@@ -6491,6 +6496,10 @@ Child.prototype = {
     min = flotr.xaxis.min;
     max = flotr.xaxis.max;
 
+    // Clean up old preprocessor.  Eventually, we will
+    // re-use this from render to render.
+    delete this.preprocessor;
+
     data = this._getDataArray(data);
     if (skipPreprocess) {
       flotrData = data;
@@ -6498,8 +6507,9 @@ Child.prototype = {
       _.each(data, function (d, index) {
 
         var
-          isObject = !_.isArray(d),
-          unprocessed = isObject ? d.data : d,
+          isArray = _.isArray(d),
+          isFunction = _.isFunction(d),
+          unprocessed = isArray ? d : (isFunction ? d : d.data),
           processed = this._processData(unprocessed, flotr, node, processData),
           x = processed[0],
           y = processed[1],
@@ -6511,14 +6521,14 @@ Child.prototype = {
           data.push([x[i], y[i]]);
         }
 
-        if (isObject) {
+        if (isFunction || isArray) {
+          flotrData.push(data);
+        } else {
+          // Object
           o = _.extend({}, d);
           o.data = data;
           flotrData.push(o);
-        } else {
-          flotrData.push(data);
         }
-
       }, this);
     }
 
@@ -6553,6 +6563,7 @@ Child.prototype = {
         .subsampleMinMax(resolution);
     }
 
+    this.preprocessor = preprocessor;
     return preprocessor.getData();
   },
 
@@ -6910,6 +6921,21 @@ Flotr.addType('lite-lines', {
       if (options.fillBorder) {
         context.stroke();
       }
+    }
+  },
+
+  extendYRange : function (axis, data, options, lines) {
+
+    var o = axis.options;
+
+    // HACK
+    if ((!o.max && o.max !== 0) || (!o.min && o.min !== 0)) {
+      axis.max += options.lineWidth * .01;
+      axis.min -= options.lineWidth * .01;
+      /*
+      axis.max = axis.p2d((axis.d2p(axis.max) + options.lineWidth));
+      axis.min = axis.p2d((axis.d2p(axis.max) - options.lineWidth));
+      */
     }
   }
 });
@@ -7276,8 +7302,13 @@ function Finance (options) {
 
     var
       index = o.index,
-      value = 'Price: $' + data.price[1][index] + ", Vol: " + data.volume[1][index],
-      day;
+      value;
+
+    if (price.api.preprocessor) {
+      index += price.api.preprocessor.start;
+    }
+
+    value = 'Price: $' + data.price[1][index] + ", Vol: " + data.volume[1][index];
 
     return value;
   };
