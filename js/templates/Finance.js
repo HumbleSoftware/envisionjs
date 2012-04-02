@@ -120,8 +120,13 @@ function Finance (options) {
 
     var
       index = o.index,
-      value = 'Price: $' + data.price[1][index] + ", Vol: " + data.volume[1][index],
-      day;
+      value;
+
+    if (price.api.preprocessor) {
+      index += price.api.preprocessor.start;
+    }
+
+    value = 'Price: $' + data.price[1][index] + ", Vol: " + data.volume[1][index];
 
     return value;
   };
