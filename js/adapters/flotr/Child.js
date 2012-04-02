@@ -30,8 +30,7 @@ Child.prototype = {
     data = data || o.data;
 
     if (flotr) {
-      flotr = Flotr.clone(flotr);
-      flotr = Flotr.merge(o, flotr);
+      flotr = Flotr.merge(flotr, Flotr.clone(o));
     } else {
       flotr = o;
     }
