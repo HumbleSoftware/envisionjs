@@ -40,6 +40,10 @@ Child.prototype = {
     min = flotr.xaxis.min;
     max = flotr.xaxis.max;
 
+    // Clean up old preprocessor.  Eventually, we will
+    // re-use this from render to render.
+    delete this.preprocessor;
+
     data = this._getDataArray(data);
     if (skipPreprocess) {
       flotrData = data;
@@ -102,6 +106,7 @@ Child.prototype = {
         .subsampleMinMax(resolution);
     }
 
+    this.preprocessor = preprocessor;
     return preprocessor.getData();
   },
 
