@@ -46,8 +46,9 @@ Child.prototype = {
       _.each(data, function (d, index) {
 
         var
-          isObject = !_.isArray(d),
-          unprocessed = isObject ? d.data : d,
+          isArray = _.isArray(d),
+          isFunction = _.isFunction(d),
+          unprocessed = isArray ? d : (isFunction ? d : d.data),
           processed = this._processData(unprocessed, flotr, node, processData),
           x = processed[0],
           y = processed[1],
@@ -59,14 +60,14 @@ Child.prototype = {
           data.push([x[i], y[i]]);
         }
 
-        if (isObject) {
+        if (isFunction || isArray) {
+          flotrData.push(data);
+        } else {
+          // Object
           o = _.extend({}, d);
           o.data = data;
           flotrData.push(o);
-        } else {
-          flotrData.push(data);
         }
-
       }, this);
     }
 
