@@ -109,6 +109,8 @@ function bound (that) {
     x.slice(start, end + 1),
     y.slice(start, end + 1)
   ]);
+  that.start = start;
+  that.end = end;
 };
 
 Preprocessor.prototype = {
@@ -221,6 +223,8 @@ Preprocessor.prototype = {
       newY.push(y[end]);
 
       this.setData([newX, newY]);
+      this.start = start;
+      this.end = end;
     } else {
       this.bounded = true;
     }
@@ -271,6 +275,8 @@ Preprocessor.prototype = {
       newY.push(y[end]);
 
       this.setData([newX, newY]);
+      this.start = start;
+      this.end = end;
     }
 
     return this;
