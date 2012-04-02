@@ -30,8 +30,10 @@ demo: envision
 	cp demos/ajax.html build/demos
 	cp demos/ajax.js build/demos
 	cp demos/finance.html build/demos
-	cp demos/finance.css build/demos
 	cp demos/finance.js build/demos
+	cp demos/fractal.html build/demos
+	cp demos/fractal.js build/demos
+	cp demos/fractal.css build/demos
 	cp demos/million.html build/demos
 	cp demos/million.js build/demos
 	cp demos/weierstrass.html build/demos
@@ -41,6 +43,7 @@ demo: envision
 	cp demos/yepnope.js build/demos
 	cp -R demos/data build/demos
 	cp -R lib/ build/demos
+	cp -R css/ build/
 
 test:
 	jasmine-headless-webkit -j spec/jasmine.yml -c

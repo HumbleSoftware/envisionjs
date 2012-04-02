@@ -69,5 +69,20 @@ Flotr.addType('lite-lines', {
         context.stroke();
       }
     }
+  },
+
+  extendYRange : function (axis, data, options, lines) {
+
+    var o = axis.options;
+
+    // HACK
+    if ((!o.max && o.max !== 0) || (!o.min && o.min !== 0)) {
+      axis.max += options.lineWidth * .01;
+      axis.min -= options.lineWidth * .01;
+      /*
+      axis.max = axis.p2d((axis.d2p(axis.max) + options.lineWidth));
+      axis.min = axis.p2d((axis.d2p(axis.max) - options.lineWidth));
+      */
+    }
   }
 });

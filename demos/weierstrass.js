@@ -45,23 +45,32 @@ function example () {
     }
 
     // Render Zoom template
-    new envision.templates.Zoom({
+    new envision.templates.TimeSeries({
+      name : 'weierstrass',
       container : container,
-      summary : {
-        data : weierstrass,
-        flotr : {
-          xaxis : {
-            min : -1,
-            max : 1
-          }
-        }
+      data : {
+        detail : weierstrass,
+        summary : weierstrass 
       },
-      zoom : {
-        data : weierstrass,
-        flotr : {
-          xaxis : {
-            min : -1,
-            max : 1
+      defaults : {
+        detail : {
+          config : {
+            xaxis : {
+              min : -1,
+              max : 1
+            }
+          }
+        },
+        summary : {
+          config : {
+            yaxis : {
+              autoscale : false,
+              autoscaleMargin : 0
+            },
+            xaxis : {
+              min : -1,
+              max : 1
+            }
           }
         }
       }
@@ -113,13 +122,21 @@ function example () {
     // womp womp womp
     function letsWomp () {
       // Render Zoom template
-      new envision.templates.Zoom({
+      new envision.templates.TimeSeries({
+        name : 'weierstrass',
         container : container,
-        summary : {
-          data : data
+        data : {
+          detail : data,
+          summary : data
         },
-        zoom : {
-          data : data
+        defaults : {
+          summary : {
+            config : {
+              yaxis : {
+                autoscale : false
+              }
+            }
+          }
         }
       });
     }

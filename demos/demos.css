@@ -42,6 +42,28 @@ div#footer a:visited {
   color: #666;
 }
 
+.weierstrass .envision-timeseries-summary .envision-component {
+  height: 200px;
+}
+
+.million .envision-timeseries-connector,
+.million .envision-timeseries-summary {
+  background: #fff;
+
+}
+.million .envision-timeseries-detail {
+  padding-top: 26px;
+  padding-bottom: 18px;
+}
+.million .envision-timeseries-detail .envision-component {
+  height: 104px;
+}
+.million .envision-timeseries-summary {
+}
+.million .envision-timeseries-summary .envision-component {
+  height: 150px;
+}
+
 @media screen and (max-width: 600px) {
   div#demo {
     height: 253px;
