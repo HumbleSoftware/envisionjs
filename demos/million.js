@@ -3,19 +3,36 @@ function example () {
   var
     hash = window.location.hash,
     container = document.getElementById('demo'),
-    amplitude = (hash ? .05 : .0015),
+    count = 1e6,
+    periods = 3,
+    period = 2 * Math.PI * periods / count,
+    amplitude = (hash ? .15 : .0015),
     x = [],
     y = [],
     data = [x, y],
-    detail = {},
-    summary = {},
+    detail = {
+      config : {
+        yaxis : {
+          //autoscale: true
+        }
+      }
+    },
+    summary = {
+      config : {
+        yaxis : {
+          min : -1.5,
+          max : 1.5
+        }
+      }
+    },
+    PI = Math.PI,
     options,
     million;
 
   // Data Generation
-  for (i = 0; i < 1e6; i++) {
+  for (i = 0; i < count; i++) {
     x.push(i/10000);
-    y.push(Math.sin(i/50000) + amplitude * Math.sin(i/25));
+    y.push(Math.sin(i * period) + amplitude * Math.sin(i * period * 1000));
   }
 
   // Subsampling Demos
