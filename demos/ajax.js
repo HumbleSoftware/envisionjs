@@ -24,7 +24,7 @@ function example () {
           index = o.index,
           value;
 
-        value = currentData.data[index].date + ': $' + currentData.price[1][index] + ", Vol: " + currentData.volume[1][index];
+        value = currentData.data[index].date + ': $' + currentData.price[index][1] + ", Vol: " + currentData.volume[index][1];
 
         return value;
       },
