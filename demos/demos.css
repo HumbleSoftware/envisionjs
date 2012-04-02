@@ -42,6 +42,10 @@ div#footer a:visited {
   color: #666;
 }
 
+.weierstrass .envision-timeseries-summary .envision-component {
+  height: 200px;
+}
+
 @media screen and (max-width: 600px) {
   div#demo {
     height: 253px;
