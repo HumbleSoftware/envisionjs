@@ -31,6 +31,9 @@ demo: envision
 	cp demos/ajax.js build/demos
 	cp demos/finance.html build/demos
 	cp demos/finance.js build/demos
+	cp demos/fractal.html build/demos
+	cp demos/fractal.js build/demos
+	cp demos/fractal.css build/demos
 	cp demos/million.html build/demos
 	cp demos/million.js build/demos
 	cp demos/weierstrass.html build/demos
