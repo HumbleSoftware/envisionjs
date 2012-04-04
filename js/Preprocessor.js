@@ -34,8 +34,16 @@ function Preprocessor (options) {
    * Returns data.
    */
   this.getData = function () {
+
+    var processed;
+
     if (this.bounded) bound(this);
-    return data;
+
+    processed = this.processing;
+    this.processing = data;
+    console.log(processed);
+
+    return processed;
   }
 
   /**
@@ -53,6 +61,7 @@ function Preprocessor (options) {
     }
 
     data = newData;
+    this.processing = data;
 
     return this;
   }
@@ -96,19 +105,20 @@ function bound (that) {
   delete that.bounded;
 
   var
-    data    = that.getData(),
+    data    = that.processing,
     length  = that.length(),
     x       = data[0],
     y       = data[1],
     min     = that.min || 0,
-    max     = that.max || that.length(),
+    max     = that.max || length,
     start   = getStartIndex(x, min),
     end     = getEndIndex(x, max);
 
-  that.setData([
+  that.processing = [
     x.slice(start, end + 1),
     y.slice(start, end + 1)
-  ]);
+  ];
+
   that.start = start;
   that.end = end;
 };
@@ -156,7 +166,7 @@ Preprocessor.prototype = {
     delete this.bounded;
 
     var
-      data    = this.getData(),
+      data    = this.processing,
       length  = this.length(),
       x       = data[0],
       y       = data[1],
@@ -222,7 +232,7 @@ Preprocessor.prototype = {
       newX.push(x[end]);
       newY.push(y[end]);
 
-      this.setData([newX, newY]);
+      this.processing = [newX, newY];
       this.start = start;
       this.end = end;
     } else {
@@ -246,7 +256,7 @@ Preprocessor.prototype = {
     delete this.bounded;
 
     var
-      data    = this.getData(),
+      data    = this.processing,
       length  = this.length(),
       x       = data[0],
       y       = data[1],
@@ -274,7 +284,7 @@ Preprocessor.prototype = {
       newX.push(x[end]);
       newY.push(y[end]);
 
-      this.setData([newX, newY]);
+      this.processing = [newX, newY];
       this.start = start;
       this.end = end;
     }

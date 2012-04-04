@@ -50,6 +50,7 @@ function Component (options) {
   this.options = options;
   this.node = node;
 
+  // Instantiate Adapter
   if (options.adapter) {
     this.api = options.adapter;
   } else if (options.adapterConstructor) {
@@ -59,6 +60,11 @@ function Component (options) {
   } else if (options.config) {
     this.api = new V.adapters.flotr.Child(options.config || {});
   }
+
+  // Instantiate Preprocessor
+  this.preprocessor = new V.Preprocessor({
+      data : options.data
+  });
 }
 
 Component.prototype = {
@@ -97,10 +103,43 @@ Component.prototype = {
    * @param {Array} [data] Data for the adapter.
    * @param {Object} [options] Configuration object for the adapters draw method.
    */
-  draw : function (data, options) {
-    if (this.api) {
-      this.api.draw(data || this.options.data, options, this.node, this.options.skipPreprocess, this.options.processData);
+  draw : function (data, config) {
+
+    var
+      api = this.api,
+      options = this.options,
+      data = data || options.data,
+      config = config || options.config,
+      clientData = data;
+
+    if (!options.skipPreprocess && data) {
+
+      if (data !== options.data) this.preprocessor.setData(data);
+
+      clientData = [];
+      _.each(api.getDataArray(data), function (d, index) {
+
+        console.log(d);
+        var
+          isArray = _.isArray(d),
+          isFunction = _.isFunction(d),
+          unprocessed = isArray ? d : (isFunction ? d : d.data),
+          processed = api.processData(unprocessed, config, this.node, this.preprocessor, options.processData);
+
+        if (!isFunction && !isArray) {
+          // Objects
+          //
+          // o = _.extend({}, d);
+          // o.data = data;
+          d.data = api.transformData(processed);
+        } else {
+          // Arrays
+          clientData.push(api.transformData(processed));
+        }
+      }, this);
     }
+
+    if (api) api.draw(clientData, config, this.node);
   },
 
   /**
@@ -154,6 +193,7 @@ Component.prototype = {
     this[attribute] = options[attribute];
   }
 };
+
 
 V.Component = Component;
 
