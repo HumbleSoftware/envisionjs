@@ -66,14 +66,8 @@ function Preprocessor (options) {
 }
 
 function getStartIndex (data, min) {
-
   var
-    length = data.length,
-    i;
-
-  for (i = 0; i < length; i++) {
-    if (data[i] >= min) break;
-  }
+    i = _.sortedIndex(data, min);
 
   // Include point outside range when not exact match
   if (data[i] > min && i > 0) i--;
@@ -82,18 +76,7 @@ function getStartIndex (data, min) {
 }
 
 function getEndIndex (data, max) {
-
-  var
-    i;
-
-  for (i = data.length; i--;) {
-    if (data[i] <= max) break;
-  }
-
-  // Include point outside range when not exact match
-  if (data[i] < max && i > 0) i++;
-
-  return i;
+  return _.sortedIndex(data, max);
 }
 
 function bound (that) {
