@@ -10,13 +10,7 @@ function example () {
     x = [],
     y = [],
     data = [x, y],
-    detail = {
-      config : {
-        yaxis : {
-          //autoscale: true
-        }
-      }
-    },
+    detail = {},
     summary = {
       config : {
         yaxis : {
@@ -42,7 +36,7 @@ function example () {
     detail.processData = summary.processData = function (o) {
       o.preprocessor
         .bound(o.min, o.max)
-        .subsample(1000);
+        .subsample(container.clientWidth);
     }
   } else {
 
@@ -50,7 +44,7 @@ function example () {
     detail.processData = summary.processData = function (o) {
       o.preprocessor
         .bound(o.min, o.max)
-        .subsampleMinMax(o.resolution * 1.5);
+        .subsampleMinMax(o.resolution);
     }
   }
 
