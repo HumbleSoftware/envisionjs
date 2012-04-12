@@ -36,7 +36,7 @@ function example () {
     detail.processData = summary.processData = function (o) {
       o.preprocessor
         .bound(o.min, o.max)
-        .subsample(container.clientWidth);
+        .subsample(o.resolution);
     }
   } else {
 
