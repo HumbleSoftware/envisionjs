@@ -21,79 +21,37 @@ Child.prototype = {
     this.flotr.destroy();
   },
 
-  draw : function (data, flotr, node, skipPreprocess, processData) {
+  draw : function (data, flotr, node) {
 
     var
-      o           = this.options,
-      flotrData   = [];
-
-    data = data || o.data;
+      options = this.options,
+      data = this.getDataArray(data || options.data);
 
     if (flotr) {
-      flotr = Flotr.merge(flotr, Flotr.clone(o));
+      flotr = Flotr.merge(flotr, Flotr.clone(options));
     } else {
-      flotr = o;
+      flotr = options;
     }
 
-    o.data = data;
-    min = flotr.xaxis.min;
-    max = flotr.xaxis.max;
-
-    // Clean up old preprocessor.  Eventually, we will
-    // re-use this from render to render.
-    delete this.preprocessor;
-
-    data = this._getDataArray(data);
-    if (skipPreprocess) {
-      flotrData = data;
-    } else {
-      _.each(data, function (d, index) {
-
-        var
-          isArray = _.isArray(d),
-          isFunction = _.isFunction(d),
-          unprocessed = isArray ? d : (isFunction ? d : d.data),
-          processed = this._processData(unprocessed, flotr, node, processData),
-          x = processed[0],
-          y = processed[1],
-          data = [],
-          o, i;
-
-        // Transform for Flotr
-        for (i = 0; i < x.length; i++) {
-          data.push([x[i], y[i]]);
-        }
-
-        if (isFunction || isArray) {
-          flotrData.push(data);
-        } else {
-          // Object
-          o = _.extend({}, d);
-          o.data = data;
-          flotrData.push(o);
-        }
-      }, this);
-    }
+    options.data = data;
 
     if (!flotr) throw 'No graph submitted.';
 
-    this.flotr = Flotr.draw(node, flotrData, flotr);
+    this.flotr = Flotr.draw(node, data, flotr);
   },
 
-  _processData : function (data, flotr, node, processData) {
+  processData : function (data, flotr, node, preprocessor, processData) {
 
     var
       options     = this.options,
       resolution  = node.clientWidth,
       axis        = flotr.xaxis,
       min         = axis.min,
-      max         = axis.max,
-      preprocessor;
+      max         = axis.max;
 
     if (_.isFunction(data)) {
       return data(min, max, resolution);
     } else if (processData) {
-      preprocessor = new V.Preprocessor({data : data});
       processData.apply(this, [{
         preprocessor : preprocessor,
         min : min,
@@ -101,16 +59,36 @@ Child.prototype = {
         resolution : resolution
       }]);
     } else {
-      preprocessor = new V.Preprocessor({data : data})
+      preprocessor
         .bound(min, max)
         .subsampleMinMax(resolution);
     }
 
-    this.preprocessor = preprocessor;
     return preprocessor.getData();
   },
 
-  _getDataArray : function (data) {
+  // Transform for Flotr
+  transformData : function (data) {
+
+    var
+      length = data[0].length,
+      dimension = data.length,
+      newData = [],
+      point,
+      i, j;
+
+    for (i = 0; i < length; i++) {
+      point = [];
+      for (j = 0; j < dimension; j++) {
+        point.push(data[j][i]);
+      }
+      newData.push(point);
+    }
+
+    return newData;
+  },
+
+  getDataArray : function (data) {
 
     if (data[0] && (!_.isArray(data[0]) || (data[0][0] && _.isArray(data[0][0]))))
       return data;

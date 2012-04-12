@@ -27,32 +27,37 @@ function Preprocessor (options) {
 
   options = options || {};
 
-  var
-    data;
-
   /**
    * Returns data.
    */
   this.getData = function () {
+
     if (this.bounded) bound(this);
-    return data;
+
+    return this.processing;
+  }
+
+  this.reset = function () {
+    this.processing = this.data;
+    return this;
   }
 
   /**
    * Set the data object.
    */
-  this.setData = function (newData) {
+  this.setData = function (data) {
     var
       i, length;
-    if (!_.isArray(newData)) throw new Error('Array expected.');
-    if (newData.length < 2) throw new Error('Data must contain at least two dimensions.');
-    length = newData[0].length;
-    for (i = newData.length; i--;) {
-      if (!_.isArray(newData[i])) throw new Error('Data dimensions must be arrays.');
-      if (newData[i].length !== length) throw new Error('Data dimensions must contain the same number of points.');
+    if (!_.isArray(data)) throw new Error('Array expected.');
+    if (data.length < 2) throw new Error('Data must contain at least two dimensions.');
+    length = data[0].length;
+    for (i = data.length; i--;) {
+      if (!_.isArray(data[i])) throw new Error('Data dimensions must be arrays.');
+      if (data[i].length !== length) throw new Error('Data dimensions must contain the same number of points.');
     }
 
-    data = newData;
+    this.processing = data;
+    this.data = data;
 
     return this;
   }
@@ -61,14 +66,8 @@ function Preprocessor (options) {
 }
 
 function getStartIndex (data, min) {
-
   var
-    length = data.length,
-    i;
-
-  for (i = 0; i < length; i++) {
-    if (data[i] >= min) break;
-  }
+    i = _.sortedIndex(data, min);
 
   // Include point outside range when not exact match
   if (data[i] > min && i > 0) i--;
@@ -77,18 +76,7 @@ function getStartIndex (data, min) {
 }
 
 function getEndIndex (data, max) {
-
-  var
-    i;
-
-  for (i = data.length; i--;) {
-    if (data[i] <= max) break;
-  }
-
-  // Include point outside range when not exact match
-  if (data[i] < max && i > 0) i++;
-
-  return i;
+  return _.sortedIndex(data, max);
 }
 
 function bound (that) {
@@ -96,19 +84,20 @@ function bound (that) {
   delete that.bounded;
 
   var
-    data    = that.getData(),
+    data    = that.processing,
     length  = that.length(),
     x       = data[0],
     y       = data[1],
     min     = that.min || 0,
-    max     = that.max || that.length(),
+    max     = that.max || length,
     start   = getStartIndex(x, min),
     end     = getEndIndex(x, max);
 
-  that.setData([
+  that.processing = [
     x.slice(start, end + 1),
     y.slice(start, end + 1)
-  ]);
+  ];
+
   that.start = start;
   that.end = end;
 };
@@ -156,7 +145,7 @@ Preprocessor.prototype = {
     delete this.bounded;
 
     var
-      data    = this.getData(),
+      data    = this.processing,
       length  = this.length(),
       x       = data[0],
       y       = data[1],
@@ -222,7 +211,7 @@ Preprocessor.prototype = {
       newX.push(x[end]);
       newY.push(y[end]);
 
-      this.setData([newX, newY]);
+      this.processing = [newX, newY];
       this.start = start;
       this.end = end;
     } else {
@@ -246,7 +235,7 @@ Preprocessor.prototype = {
     delete this.bounded;
 
     var
-      data    = this.getData(),
+      data    = this.processing,
       length  = this.length(),
       x       = data[0],
       y       = data[1],
@@ -274,7 +263,7 @@ Preprocessor.prototype = {
       newX.push(x[end]);
       newY.push(y[end]);
 
-      this.setData([newX, newY]);
+      this.processing = [newX, newY];
       this.start = start;
       this.end = end;
     }
