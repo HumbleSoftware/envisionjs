@@ -108,6 +108,7 @@ Component.prototype = {
     var
       api = this.api,
       options = this.options,
+      preprocessor = this.preprocessor,
       data = data || options.data,
       config = config || options.config,
       clientData = data;
@@ -115,9 +116,9 @@ Component.prototype = {
     if (!options.skipPreprocess && data) {
 
       if (data !== options.data) {
-        this.preprocessor.setData(data);
+        preprocessor.setData(data);
       } else {
-        this.preprocessor.reset();
+        preprocessor.reset();
       }
 
       clientData = [];
@@ -127,7 +128,29 @@ Component.prototype = {
           isArray = _.isArray(d),
           isFunction = _.isFunction(d),
           unprocessed = isArray ? d : (isFunction ? d : d.data),
-          processed = api.processData(unprocessed, config, this.node, this.preprocessor, options.processData);
+          processData = options.processData,
+          range = api.range(config),
+          min = range.min,
+          max = range.max,
+          resolution = this.node.clientWidth,
+          processed;
+
+        if (isFunction) {
+          processed = data(min, max, resolution);
+        } else if (processData) {
+          processData.apply(this, [{
+            preprocessor : preprocessor,
+            min : min,
+            max : max,
+            resolution : resolution
+          }]);
+          processed = preprocessor.getData();
+        } else {
+          processed = preprocessor
+            .bound(min, max)
+            .subsampleMinMax(resolution)
+            .getData();
+        }
 
         if (!isFunction && !isArray) {
           // Objects

@@ -40,31 +40,13 @@ Child.prototype = {
     this.flotr = Flotr.draw(node, data, flotr);
   },
 
-  processData : function (data, flotr, node, preprocessor, processData) {
-
+  range : function (flotr) {
     var
-      options     = this.options,
-      resolution  = node.clientWidth,
-      axis        = flotr.xaxis,
-      min         = axis.min,
-      max         = axis.max;
-
-    if (_.isFunction(data)) {
-      return data(min, max, resolution);
-    } else if (processData) {
-      processData.apply(this, [{
-        preprocessor : preprocessor,
-        min : min,
-        max : max,
-        resolution : resolution
-      }]);
-    } else {
-      preprocessor
-        .bound(min, max)
-        .subsampleMinMax(resolution);
-    }
-
-    return preprocessor.getData();
+      axis  = flotr.xaxis;
+    return {
+      min : axis.min,
+      max : axis.max
+    };
   },
 
   // Transform for Flotr
@@ -73,7 +55,7 @@ Child.prototype = {
     var
       length = data[0].length,
       dimension = data.length,
-      newData = [],
+      transformed = [],
       point,
       i, j;
 
@@ -82,10 +64,10 @@ Child.prototype = {
       for (j = 0; j < dimension; j++) {
         point.push(data[j][i]);
       }
-      newData.push(point);
+      transformed.push(point);
     }
 
-    return newData;
+    return transformed;
   },
 
   getDataArray : function (data) {
