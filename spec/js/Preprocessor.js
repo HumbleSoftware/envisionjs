@@ -114,6 +114,18 @@ describe('Preprocessor', function () {
       ]);
     });
 
+    it('resets data', function () {
+
+      var
+        data = preprocessor.getData(),
+        bounded = preprocessor.bound(4, 6).getData();
+
+      preprocessor.reset();
+
+      expect(bounded).not.toBe(data);
+      expect(preprocessor.getData()).toBe(data);
+    });
+
     it('makes empty data for bounds out of range', function () {
       preprocessor.bound(10, 12);
       expect(preprocessor.length()).toBe(0);
@@ -261,6 +273,10 @@ describe('Preprocessor', function () {
 
     it('chains setData', function () {
       expect(preprocessor.setData([[],[]])).toBe(preprocessor);
+    });
+
+    it('chains reset', function () {
+      expect(preprocessor.reset()).toBe(preprocessor);
     });
 
     it('chains bound', function () {
