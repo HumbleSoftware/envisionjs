@@ -27,41 +27,37 @@ function Preprocessor (options) {
 
   options = options || {};
 
-  var
-    data;
-
   /**
    * Returns data.
    */
   this.getData = function () {
 
-    var processed;
-
     if (this.bounded) bound(this);
 
-    processed = this.processing;
-    this.processing = data;
-    console.log(processed);
+    return this.processing;
+  }
 
-    return processed;
+  this.reset = function () {
+    this.processing = this.data;
+    return this;
   }
 
   /**
    * Set the data object.
    */
-  this.setData = function (newData) {
+  this.setData = function (data) {
     var
       i, length;
-    if (!_.isArray(newData)) throw new Error('Array expected.');
-    if (newData.length < 2) throw new Error('Data must contain at least two dimensions.');
-    length = newData[0].length;
-    for (i = newData.length; i--;) {
-      if (!_.isArray(newData[i])) throw new Error('Data dimensions must be arrays.');
-      if (newData[i].length !== length) throw new Error('Data dimensions must contain the same number of points.');
+    if (!_.isArray(data)) throw new Error('Array expected.');
+    if (data.length < 2) throw new Error('Data must contain at least two dimensions.');
+    length = data[0].length;
+    for (i = data.length; i--;) {
+      if (!_.isArray(data[i])) throw new Error('Data dimensions must be arrays.');
+      if (data[i].length !== length) throw new Error('Data dimensions must contain the same number of points.');
     }
 
-    data = newData;
     this.processing = data;
+    this.data = data;
 
     return this;
   }
