@@ -160,7 +160,11 @@ Component.prototype = {
           d.data = api.transformData(processed);
         } else {
           // Arrays
-          clientData.push(api.transformData(processed));
+          if (api.transformData) {
+            clientData.push(api.transformData(processed));
+          } else {
+            clientData.push(processed);
+          }
         }
       }, this);
     }
