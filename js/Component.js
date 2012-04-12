@@ -114,12 +114,15 @@ Component.prototype = {
 
     if (!options.skipPreprocess && data) {
 
-      if (data !== options.data) this.preprocessor.setData(data);
+      if (data !== options.data) {
+        this.preprocessor.setData(data);
+      } else {
+        this.preprocessor.reset();
+      }
 
       clientData = [];
       _.each(api.getDataArray(data), function (d, index) {
 
-        console.log(d);
         var
           isArray = _.isArray(d),
           isFunction = _.isFunction(d),
