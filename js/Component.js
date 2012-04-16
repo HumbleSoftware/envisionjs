@@ -61,10 +61,8 @@ function Component (options) {
     this.api = new V.adapters.flotr.Child(options.config || {});
   }
 
-  // Instantiate Preprocessor
-  this.preprocessor = new V.Preprocessor({
-      data : options.data
-  });
+  // this.id = _.uniqueId(CN_COMPONENT);
+  this.preprocessors = [];
 }
 
 Component.prototype = {
@@ -108,23 +106,19 @@ Component.prototype = {
     var
       api = this.api,
       options = this.options,
-      preprocessor = this.preprocessor,
+      preprocessors = this.preprocessors,
       data = data || options.data,
       config = config || options.config,
       clientData = data;
 
     if (!options.skipPreprocess && data) {
 
-      if (data !== options.data) {
-        preprocessor.setData(data);
-      } else {
-        preprocessor.reset();
-      }
-
       clientData = [];
+
       _.each(api.getDataArray(data), function (d, index) {
 
         var
+          preprocessor = preprocessors[index] || new V.Preprocessor(),
           isArray = _.isArray(d),
           isFunction = _.isFunction(d),
           unprocessed = isArray ? d : (isFunction ? d : d.data),
@@ -133,38 +127,59 @@ Component.prototype = {
           min = range.min,
           max = range.max,
           resolution = this.node.clientWidth,
-          processed;
+          dataArray = d,
+          processed, objectData;
 
-        if (isFunction) {
-          processed = data(min, max, resolution);
-        } else if (processData) {
-          processData.apply(this, [{
-            preprocessor : preprocessor,
-            min : min,
-            max : max,
-            resolution : resolution
-          }]);
-          processed = preprocessor.getData();
-        } else {
-          processed = preprocessor
-            .bound(min, max)
-            .subsampleMinMax(resolution)
-            .getData();
+        // For object data
+        if (!isFunction && !isArray) {
+          dataArray = d.data;
+          objectData = _.extend({}, d);
         }
 
-        if (!isFunction && !isArray) {
-          // Objects
-          //
-          // o = _.extend({}, d);
-          // o.data = data;
-          d.data = api.transformData(processed);
+        // Do data function preprocessing
+        if (isFunction) {
+          processed = data(min, max, resolution);
         } else {
-          // Arrays
-          if (api.transformData) {
-            clientData.push(api.transformData(processed));
+
+          // Update if new data
+          if (dataArray !== preprocessor.data) {
+            preprocessor.setData(dataArray);
           } else {
-            clientData.push(processed);
+            preprocessor.reset();
           }
+
+          // Do custom callback preprocessing
+          if (processData) {
+            processData.apply(this, [{
+              preprocessor : preprocessor,
+              min : min,
+              max : max,
+              resolution : resolution
+            }]);
+            processed = preprocessor.getData();
+          }
+          // Default preprocessing
+          else {
+            processed = preprocessor
+              .bound(min, max)
+              .subsampleMinMax(resolution)
+              .getData();
+          }
+        }
+
+        // If present, transform the data for the API
+        if (api.transformData) {
+          processed = api.transformData(processed);
+        }
+
+        // Object Data
+        if (objectData) {
+          objectData.data = processed;
+          clientData.push(objectData);
+        }
+        // Array Data
+        else {
+          clientData.push(processed);
         }
       }, this);
     }
