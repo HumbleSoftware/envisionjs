@@ -107,9 +107,10 @@ Component.prototype = {
       api = this.api,
       options = this.options,
       preprocessors = this.preprocessors,
-      data = data || options.data,
-      config = config || options.config,
-      clientData = data;
+      clientData;
+
+    clientData = data = data || options.data;
+    config = config || options.config;
 
     if (!options.skipPreprocess && data) {
 

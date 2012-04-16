@@ -84,7 +84,7 @@ function TimeSeries (options) {
   this.selection = selection;
   this.detail = detail;
   this.summary = summary;
-};
+}
 
 V.templates.TimeSeries = TimeSeries;
 

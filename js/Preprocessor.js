@@ -35,12 +35,12 @@ function Preprocessor (options) {
     if (this.bounded) bound(this);
 
     return this.processing;
-  }
+  };
 
   this.reset = function () {
     this.processing = this.data;
     return this;
-  }
+  };
 
   /**
    * Set the data object.
@@ -60,7 +60,7 @@ function Preprocessor (options) {
     this.data = data;
 
     return this;
-  }
+  };
 
   if (options.data) this.setData(options.data);
 }
@@ -100,7 +100,7 @@ function bound (that) {
 
   that.start = start;
   that.end = end;
-};
+}
 
 Preprocessor.prototype = {
 
@@ -159,7 +159,7 @@ Preprocessor.prototype = {
       minI    = 1,
       maxI    = 1,
       unit    = (end - start)/ count,
-      position, min, max, datum, i, j;
+      position, datum, i, j;
 
     if (end - start + 1 > resolution) {
 

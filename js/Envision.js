@@ -15,6 +15,6 @@ envision = {
     return function () {
       root.envision = previous;
       return this;
-    }
+    };
   })(this)
 };

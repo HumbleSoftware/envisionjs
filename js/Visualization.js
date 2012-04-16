@@ -49,7 +49,7 @@ Visualization.prototype = {
     if (!element) throw 'No element to render within.';
 
     this.node = bonzo.create(T_VISUALIZATION)[0];
-    bonzo(this.node).addClass(options.name || '')
+    bonzo(this.node).addClass(options.name || '');
     this.container = element;
     bonzo(element).append(this.node);
     bonzo(element).data('envision', this);

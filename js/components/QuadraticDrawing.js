@@ -45,7 +45,7 @@
         context = this.context,
         height = this.height,
         width = this.width,
-        half = Math.round(height / 2) - .5,
+        half = Math.round(height / 2) - 0.5,
         min, max;
 
       options = options || { min : width / 2, max : width / 2};

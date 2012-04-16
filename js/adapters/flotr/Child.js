@@ -24,8 +24,9 @@ Child.prototype = {
   draw : function (data, flotr, node) {
 
     var
-      options = this.options,
-      data = this.getDataArray(data || options.data);
+      options = this.options;
+
+    data = this.getDataArray(data || options.data);
 
     if (flotr) {
       flotr = Flotr.merge(flotr, Flotr.clone(options));
@@ -98,8 +99,9 @@ Child.prototype = {
 
     var
       event = this.events[name] || {},
-      name = event.name || false,
       handler = event.handler || false;
+
+    name = event.name || false;
 
     if (handler) {
 
@@ -345,7 +347,7 @@ function selectHandler (component, selection) {
     },
     x : x,
     y : y
-  }
+  };
 
   return options;
 }

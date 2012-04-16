@@ -49,7 +49,7 @@ Flotr.addType('whiskers', {
 
     if (data.length < 1) return;
 
-    context.translate(-options.lineWidth, 0)
+    context.translate(-options.lineWidth, 0);
     context.beginPath();
     for (i = 0; i < data.length; i++) {
       x = xScale(data[i][0]);
@@ -74,7 +74,7 @@ Flotr.addType('whiskers', {
       y               = yScale(args.y);
 
     context.save();
-    context.translate(-options.lineWidth, 0)
+    context.translate(-options.lineWidth, 0);
     context.beginPath();
     context.moveTo(x, zero);
     context.lineTo(x, y);

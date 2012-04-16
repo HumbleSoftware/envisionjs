@@ -57,7 +57,7 @@ function getDefaults () {
         },
         yaxis : {
           autoscale : true,
-          autoscaleMargin : .5 
+          autoscaleMargin : 0.5 
         }
       },
       processData : processData
