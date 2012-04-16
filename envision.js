@@ -1625,6 +1625,8 @@ Flotr.defaultOptions = {
     color: null,           // => color of the ticks
     mode: 'normal',        // => can be 'time' or 'normal'
     timeFormat: null,
+    timeMode:'UTC',        // => For UTC time ('local' for local time).
+    timeUnit:'millisecond',// => Unit for time (millisecond, second, minute, hour, day, month, year)
     scaling: 'linear',     // => Scaling, can be 'linear' or 'logarithmic'
     base: Math.E,
     titleAlign: 'center',
@@ -1856,23 +1858,38 @@ Flotr.Color = Color;
  * Flotr Date
  */
 Flotr.Date = {
-  format: function(d, format) {
+
+  set : function (date, name, mode, value) {
+    mode = mode || 'UTC';
+    name = 'set' + (mode === 'UTC' ? 'UTC' : '') + name;
+    date[name](value);
+  },
+
+  get : function (date, name, mode) {
+    mode = mode || 'UTC';
+    name = 'get' + (mode === 'UTC' ? 'UTC' : '') + name;
+    return date[name]();
+  },
+
+  format: function(d, format, mode) {
     if (!d) return;
-    
+
     // We should maybe use an "official" date format spec, like PHP date() or ColdFusion 
     // http://fr.php.net/manual/en/function.date.php
     // http://livedocs.adobe.com/coldfusion/8/htmldocs/help.html?content=functions_c-d_29.html
-    var tokens = {
-      h: d.getUTCHours().toString(),
-      H: leftPad(d.getUTCHours()),
-      M: leftPad(d.getUTCMinutes()),
-      S: leftPad(d.getUTCSeconds()),
-      s: d.getUTCMilliseconds(),
-      d: d.getUTCDate().toString(),
-      m: (d.getUTCMonth() + 1).toString(),
-      y: d.getUTCFullYear().toString(),
-      b: Flotr.Date.monthNames[d.getUTCMonth()]
-    };
+    var
+      get = this.get,
+      tokens = {
+        h: get(d, 'Hours', mode).toString(),
+        H: leftPad(get(d, 'Hours', mode)),
+        M: leftPad(get(d, 'Minutes', mode)),
+        S: leftPad(get(d, 'Seconds', mode)),
+        s: get(d, 'Milliseconds', mode),
+        d: get(d, 'Date', mode).toString(),
+        m: (get(d, 'Month') + 1).toString(),
+        y: get(d, 'FullYear').toString(),
+        b: Flotr.Date.monthNames[get(d, 'Month', mode)]
+      };
 
     function leftPad(n){
       n += '';
@@ -1906,69 +1923,121 @@ Flotr.Date = {
     else                       return "%y";
   },
   formatter: function (v, axis) {
-    var d = new Date(v);
+    var
+      options = axis.options,
+      scale = Flotr.Date.timeUnits[options.timeUnit],
+      d = new Date(v * scale);
 
     // first check global format
     if (axis.options.timeFormat)
-      return Flotr.Date.format(d, axis.options.timeFormat);
+      return Flotr.Date.format(d, options.timeFormat, options.timeMode);
     
-    var span = axis.max - axis.min,
+    var span = (axis.max - axis.min) * scale,
         t = axis.tickSize * Flotr.Date.timeUnits[axis.tickUnit];
-        
-    return Flotr.Date.format(d, Flotr.Date.getFormat(t, span));
+
+    return Flotr.Date.format(d, Flotr.Date.getFormat(t, span), options.timeMode);
   },
   generator: function(axis) {
-    var ticks = [],
-      d = new Date(axis.min),
-      tu = Flotr.Date.timeUnits;
-    
-    var step = axis.tickSize * tu[axis.tickUnit];
 
-    switch (axis.tickUnit) {
-      case "millisecond": d.setUTCMilliseconds(Flotr.floorInBase(d.getUTCMilliseconds(), axis.tickSize)); break;
-      case "second": d.setUTCSeconds(Flotr.floorInBase(d.getUTCSeconds(), axis.tickSize)); break;
-      case "minute": d.setUTCMinutes(Flotr.floorInBase(d.getUTCMinutes(), axis.tickSize)); break;
-      case "hour":   d.setUTCHours(Flotr.floorInBase(d.getUTCHours(), axis.tickSize)); break;
-      case "month":  d.setUTCMonth(Flotr.floorInBase(d.getUTCMonth(), axis.tickSize)); break;
-      case "year":   d.setUTCFullYear(Flotr.floorInBase(d.getUTCFullYear(), axis.tickSize));break;
+     var
+      set       = this.set,
+      get       = this.get,
+      timeUnits = this.timeUnits,
+      spec      = this.spec,
+      options   = axis.options,
+      mode      = options.timeMode,
+      scale     = timeUnits[options.timeUnit],
+      min       = axis.min * scale,
+      max       = axis.max * scale,
+      delta     = (max - min) / options.noTicks,
+      ticks     = [],
+      tickSize  = axis.tickSize,
+      tickUnit,
+      formatter, i;
+
+    // Use custom formatter or time tick formatter
+    formatter = (options.tickFormatter === Flotr.defaultTickFormatter ?
+      this.formatter : options.tickFormatter
+    );
+
+    for (i = 0; i < spec.length - 1; ++i) {
+      var d = spec[i][0] * timeUnits[spec[i][1]];
+      if (delta < (d + spec[i+1][0] * timeUnits[spec[i+1][1]]) / 2 && d >= tickSize)
+        break;
+    }
+    tickSize = spec[i][0];
+    tickUnit = spec[i][1];
+
+    // special-case the possibility of several years
+    if (tickUnit == "year") {
+      tickSize = Flotr.getTickSize(options.noTicks*timeUnits.year, min, max, 0);
+
+      // Fix for 0.5 year case
+      if (tickSize == 0.5) {
+        tickUnit = "month";
+        tickSize = 6;
+      }
+    }
+
+    axis.tickUnit = tickUnit;
+    axis.tickSize = tickSize;
+
+    var
+      d = new Date(min);
+
+    var step = tickSize * timeUnits[tickUnit];
+
+    function setTick (name) {
+      set(d, name, mode, Flotr.floorInBase(
+        get(d, name, mode), tickSize
+      ));
+    }
+
+    switch (tickUnit) {
+      case "millisecond": setTick('Milliseconds'); break;
+      case "second": setTick('Seconds'); break;
+      case "minute": setTick('Minutes'); break;
+      case "hour": setTick('Hours'); break;
+      case "month": setTick('Month'); break;
+      case "year": setTick('FullYear'); break;
     }
     
     // reset smaller components
-    if (step >= tu.second)  d.setUTCMilliseconds(0);
-    if (step >= tu.minute)  d.setUTCSeconds(0);
-    if (step >= tu.hour)    d.setUTCMinutes(0);
-    if (step >= tu.day)     d.setUTCHours(0);
-    if (step >= tu.day * 4) d.setUTCDate(1);
-    if (step >= tu.year)    d.setUTCMonth(0);
+    if (step >= timeUnits.second)  set(d, 'Milliseconds', mode, 0);
+    if (step >= timeUnits.minute)  set(d, 'Seconds', mode, 0);
+    if (step >= timeUnits.hour)    set(d, 'Minutes', mode, 0);
+    if (step >= timeUnits.day)     set(d, 'Hours', mode, 0);
+    if (step >= timeUnits.day * 4) set(d, 'Date', mode, 1);
+    if (step >= timeUnits.year)    set(d, 'Month', mode, 0);
 
     var carry = 0, v = NaN, prev;
     do {
       prev = v;
       v = d.getTime();
-      ticks.push({ v:v, label:Flotr.Date.formatter(v, axis) });
-      if (axis.tickUnit == "month") {
-        if (axis.tickSize < 1) {
+      ticks.push({ v: v / scale, label: formatter(v / scale, axis) });
+      if (tickUnit == "month") {
+        if (tickSize < 1) {
           /* a bit complicated - we'll divide the month up but we need to take care of fractions
            so we don't end up in the middle of a day */
-          d.setUTCDate(1);
+          set(d, 'Date', mode, 1);
           var start = d.getTime();
-          d.setUTCMonth(d.getUTCMonth() + 1);
+          set(d, 'Month', mode, get(d, 'Month', mode) + 1)
           var end = d.getTime();
-          d.setTime(v + carry * tu.hour + (end - start) * axis.tickSize);
-          carry = d.getUTCHours();
-          d.setUTCHours(0);
+          d.setTime(v + carry * timeUnits.hour + (end - start) * tickSize);
+          carry = get(d, 'Hours', mode)
+          set(d, 'Hours', mode, 0);
         }
         else
-          d.setUTCMonth(d.getUTCMonth() + axis.tickSize);
+          set(d, 'Month', mode, get(d, 'Month', mode) + tickSize);
       }
-      else if (axis.tickUnit == "year") {
-        d.setUTCFullYear(d.getUTCFullYear() + axis.tickSize);
+      else if (tickUnit == "year") {
+        set(d, 'FullYear', mode, get(d, 'FullYear', mode) + tickSize);
       }
       else
         d.setTime(v + step);
 
-    } while (v < axis.max && v != prev);
-    
+    } while (v < max && v != prev);
+
     return ticks;
   },
   timeUnits: {
@@ -2189,6 +2258,12 @@ Graph = function(el, data, options){
   }*/
 };
 
+function observe (object, name, callback) {
+  E.observe.apply(this, arguments);
+  this._handles.push(arguments);
+  return this;
+}
+
 Graph.prototype = {
 
   destroy: function () {
@@ -2200,11 +2275,13 @@ Graph.prototype = {
     this.el.graph = null;
   },
 
-  _observe: function (object, name, callback) {
-    E.observe.apply(this, arguments);
-    this._handles.push(arguments);
-    return this;
-  },
+  observe : observe,
+
+  /**
+   * @deprecated
+   */
+  _observe : observe,
+
   processColor: function(color, options){
     var o = { x1: 0, y1: 0, x2: this.plotWidth, y2: this.plotHeight, opacity: 1, ctx: this.ctx };
     _.extend(o, options);
@@ -2412,6 +2489,7 @@ Graph.prototype = {
         textEnabled : this.textEnabled,
         htmlText    : this.options.HtmlText,
         text        : this._text, // TODO Is this necessary?
+        element     : this.el,
         data        : series.data,
         color       : series.color,
         shadowSize  : series.shadowSize,
@@ -2491,8 +2569,8 @@ Graph.prototype = {
   mouseMoveHandler: function(event){
     if (this.mouseDownMoveHandler) return;
     var pos = this.getEventPosition(event);
-    this.lastMousePos = pos;
     E.fire(this.el, 'flotr:mousemove', [event, pos, this]);
+    this.lastMousePos = pos;
   },
   /**
    * Observes the 'mousedown' event.
@@ -2529,8 +2607,8 @@ Graph.prototype = {
     }, this);
     this.mouseDownMoveHandler = _.bind(function (e) {
         var pos = this.getEventPosition(e);
-        this.lastMousePos = pos;
         E.fire(this.el, 'flotr:mousemove', [event, pos, this]);
+        this.lastMousePos = pos;
     }, this);
     E.observe(document, 'mouseup', this.mouseUpHandler);
     E.observe(document, 'mousemove', this.mouseDownMoveHandler);
@@ -2624,15 +2702,15 @@ Graph.prototype = {
         }
       }, this);
 
-      this._observe(this.overlay, 'touchstart', _.bind(function (e) {
+      this.observe(this.overlay, 'touchstart', _.bind(function (e) {
         movement = false;
         touchend = false;
         this.ignoreClick = false;
         E.fire(el, 'flotr:mousedown', [event, this]);
-        this._observe(document, 'touchend', touchendHandler);
+        this.observe(document, 'touchend', touchendHandler);
       }, this));
 
-      this._observe(this.overlay, 'touchmove', _.bind(function (e) {
+      this.observe(this.overlay, 'touchmove', _.bind(function (e) {
 
         e.preventDefault();
 
@@ -2642,19 +2720,18 @@ Graph.prototype = {
           pageY = e.touches[0].pageY,
           pos = this.getEventPosition(e.touches[0]);
 
-        this.lastMousePos.pageX = pageX;
-        this.lastMousePos.pageY = pageY;
         if (!touchend) {
           E.fire(el, 'flotr:mousemove', [event, pos, this]);
         }
+        this.lastMousePos = pos;
       }, this));
 
     } else {
       this.
-        _observe(this.overlay, 'mousedown', _.bind(this.mouseDownHandler, this)).
-        _observe(el, 'mousemove', _.bind(this.mouseMoveHandler, this)).
-        _observe(this.overlay, 'click', _.bind(this.clickHandler, this)).
-        _observe(el, 'mouseout', function () {
+        observe(this.overlay, 'mousedown', _.bind(this.mouseDownHandler, this)).
+        observe(el, 'mousemove', _.bind(this.mouseMoveHandler, this)).
+        observe(this.overlay, 'click', _.bind(this.clickHandler, this)).
+        observe(el, 'mouseout', function () {
           E.fire(el, 'flotr:mouseout');
         });
     }
@@ -2689,7 +2766,9 @@ Graph.prototype = {
     }
 
     D.setStyles(el, {position: 'relative'}); // For positioning labels and overlay.
-    size = D.size(el);
+    size = {};
+    size.width = el.clientWidth;
+    size.height = el.clientHeight;
 
     if(size.width <= 0 || size.height <= 0 || o.resolution <= 0){
       throw 'Invalid dimensions for plot, width = ' + size.width + ', height = ' + size.height + ', resolution = ' + o.resolution;
@@ -2703,8 +2782,8 @@ Graph.prototype = {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.octx = getContext(this.overlay);
     this.ctx.clearRect(0, 0, this.overlay.width, this.overlay.height);
-    this.canvasHeight = size.height*o.resolution;
-    this.canvasWidth = size.width*o.resolution;
+    this.canvasHeight = size.height;
+    this.canvasWidth = size.width;
     this.textEnabled = !!this.ctx.drawText || !!this.ctx.fillText; // Enable text functions
 
     function getCanvas(canvas, name){
@@ -2741,7 +2820,7 @@ Graph.prototype = {
     // TODO Should be moved to flotr and mixed in.
     _.each(flotr.plugins, function(plugin, name){
       _.each(plugin.callbacks, function(fn, c){
-        this._observe(this.el, c, _.bind(fn, this));
+        this.observe(this.el, c, _.bind(fn, this));
       }, this);
       this[name] = flotr.clone(plugin);
       _.each(this[name], function(fn, p){
@@ -2850,12 +2929,11 @@ Graph.prototype = {
 
   _setEl: function(el) {
     if (!el) throw 'The target container doesn\'t exist';
-    if (!el.clientWidth) throw 'The target container must be visible';
+    else if (el.graph instanceof Graph) el.graph.destroy();
+    else if (!el.clientWidth) throw 'The target container must be visible';
+
+    el.graph = this;
     this.el = el;
-
-    if (this.el.graph) this.el.graph.destroy();
-
-    this.el.graph = this;
   }
 };
 
@@ -2942,8 +3020,8 @@ Axis.prototype = {
 
     if (max == min) {
       var widen = max ? 0.01 : 1.00;
-      min -= widen;
-      max += widen;
+      if (o.min === null) min -= widen;
+      if (o.max === null) max += widen;
     }
 
     if (o.scaling === 'logarithmic') {
@@ -3043,28 +3121,7 @@ Axis.prototype = {
   },
 
   _calculateTimeTicks : function () {
-    var axis = this,
-        tu = Flotr.Date.timeUnits,
-        spec = Flotr.Date.spec,
-        delta = (axis.max - axis.min) / axis.options.noTicks,
-        size, unit, i;
-
-    for (i = 0; i < spec.length - 1; ++i) {
-      var d = spec[i][0] * tu[spec[i][1]];
-      if (delta < (d + spec[i+1][0] * tu[spec[i+1][1]]) / 2 && d >= axis.tickSize)
-        break;
-    }
-    size = spec[i][0];
-    unit = spec[i][1];
-    
-    // special-case the possibility of several years
-    if (unit == "year") {
-      size = Flotr.getTickSize(axis.options.noTicks*tu.year, axis.min, axis.max, 0);
-    }
-    
-    axis.tickSize = size;
-    axis.tickUnit = unit;
-    axis.ticks = Flotr.Date.generator(axis);
+    this.ticks = Flotr.Date.generator(this);
   },
 
   _calculateLogTicks : function () {
@@ -3127,7 +3184,7 @@ Axis.prototype = {
 
       if (o.minorTickFreq) {
         for (j = 0; j < o.minorTickFreq && (i * tickSize + j * minorTickSize) < max; ++j) {
-          v = (v2 + j * minorTickSize).toFixed(decimals);
+          v = v2 + j * minorTickSize;
           axis.minorTicks.push({ v: v, label: o.tickFormatter(v, {min : axis.min, max : axis.max}) });
         }
       }
@@ -3409,8 +3466,8 @@ Flotr.addType('lines', {
 
     var
       context   = options.context,
-      width     = options.plotWidth, 
-      height    = options.plotHeight,
+      width     = options.width, 
+      height    = options.height,
       xScale    = options.xScale,
       yScale    = options.yScale,
       data      = options.data, 
@@ -3458,10 +3515,12 @@ Flotr.addType('lines', {
         y2 = yScale(data[i+1][1]);
       }
 
-      if ((y1 >= height && y2 >= width) || 
-        (y1 <= 0 && y2 <= 0) ||
-        (x1 <= 0 && x2 <= 0) ||
-        (x1 >= width && x2 >= width)) continue;
+      if (
+        (y1 > height && y2 > height) ||
+        (y1 < 0 && y2 < 0) ||
+        (x1 < 0 && x2 < 0) ||
+        (x1 > width && x2 > width)
+      ) continue;
 
       if((prevx != x1) || (prevy != y1 + shadowOffset))
         context.moveTo(x1, y1 + shadowOffset);
@@ -4010,8 +4069,8 @@ Flotr.addPlugin('selection', {
       if (!this.options.selection || !this.options.selection.mode) return;
       if (this.selection.interval) clearInterval(this.selection.interval);
 
-      var pointer = E.eventPointer(event);
-      this.selection.setSelectionPos(this.selection.selection.second, {pageX:pointer.x, pageY:pointer.y});
+      var pointer = this.getEventPosition(event);
+      this.selection.setSelectionPos(this.selection.selection.second, pointer);
       this.selection.clearSelection();
 
       if(this.selection.selecting && this.selection.selectionIsSane()){
@@ -4024,9 +4083,8 @@ Flotr.addPlugin('selection', {
       if (!this.options.selection || !this.options.selection.mode) return;
       if (!this.options.selection.mode || (!isLeftClick(event) && _.isUndefined(event.touches))) return;
 
-      var pointer = E.eventPointer(event);
-
-      this.selection.setSelectionPos(this.selection.selection.first, {pageX:pointer.x, pageY:pointer.y});
+      var pointer = this.getEventPosition(event);
+      this.selection.setSelectionPos(this.selection.selection.first, pointer);
 
       if (this.selection.interval) clearInterval(this.selection.interval);
 
@@ -4117,20 +4175,19 @@ Flotr.addPlugin('selection', {
    * @param {Event} event - Event object.
    */
   setSelectionPos: function(pos, pointer) {
-    var options = this.options,
-        offset = D.position(this.overlay),
-        s = this.selection.selection;
+    var mode = this.options.selection.mode,
+        selection = this.selection.selection;
 
-    if(options.selection.mode.indexOf('x') == -1){
-      pos.x = (pos == s.first) ? 0 : this.plotWidth;         
+    if(mode.indexOf('x') == -1) {
+      pos.x = (pos == selection.first) ? 0 : this.plotWidth;         
     }else{
-      pos.x = boundX(pointer.pageX - offset.left - this.plotOffset.left, this);
+      pos.x = boundX(pointer.relX, this);
     }
 
-    if (options.selection.mode.indexOf('y') == -1){
-      pos.y = (pos == s.first) ? 0 : this.plotHeight - 1;
+    if (mode.indexOf('y') == -1) {
+      pos.y = (pos == selection.first) ? 0 : this.plotHeight - 1;
     }else{
-      pos.y = boundY(pointer.pageY - offset.top - this.plotOffset.top, this);
+      pos.y = boundY(pointer.relY, this);
     }
   },
   /**
@@ -4916,8 +4973,9 @@ Flotr.addPlugin('labels', {
       var
         isX     = axis.orientation === 1,
         isFirst = axis.n === 1,
+        name = '',
         left, style, top,
-        offset = graph.plotOffset, name;
+        offset = graph.plotOffset;
 
       if (!isX && !isFirst) {
         ctx.save();
@@ -4939,13 +4997,13 @@ Flotr.addPlugin('labels', {
               axis.d2p(tick.v) - axis.maxLabel.height / 2);
           left = isX ? (offset.left + axis.d2p(tick.v) - xBoxWidth / 2) : 0;
 
+          name = '';
           if (i === 0) {
             name = ' first';
           } else if (i === axis.ticks.length - 1) {
             name = ' last';
-          } else {
-            name = '';
           }
+          name += isX ? ' flotr-grid-label-x' : ' flotr-grid-label-y';
 
           html += [
             '<div style="position:absolute; text-align:' + (isX ? 'center' : 'right') + '; ',
@@ -5384,10 +5442,10 @@ function init() {
     handles.left = left;
     handles.right = right;
 
-    this._observe(left, 'mousedown', function () {
+    this.observe(left, 'mousedown', function () {
       handles.moveHandler = leftMoveHandler;
     });
-    this._observe(right, 'mousedown', function () {
+    this.observe(right, 'mousedown', function () {
       handles.moveHandler = rightMoveHandler;
     });
   }
@@ -5398,12 +5456,12 @@ function init() {
     D.insert(container, scroll);
     D.hide(scroll);
     handles.scroll = scroll;
-    this._observe(scroll, 'mousedown', function () {
+    this.observe(scroll, 'mousedown', function () {
       handles.moveHandler = scrollMoveHandler;
     });
   }
 
-  this._observe(document, 'mouseup', function() {
+  this.observe(document, 'mouseup', function() {
     handles.moveHandler = null;
   });
 
@@ -5554,7 +5612,7 @@ envision = {
     return function () {
       root.envision = previous;
       return this;
-    }
+    };
   })(this)
 };
 
@@ -5609,7 +5667,7 @@ Visualization.prototype = {
     if (!element) throw 'No element to render within.';
 
     this.node = bonzo.create(T_VISUALIZATION)[0];
-    bonzo(this.node).addClass(options.name || '')
+    bonzo(this.node).addClass(options.name || '');
     this.container = element;
     bonzo(element).append(this.node);
     bonzo(element).data('envision', this);
@@ -5833,6 +5891,7 @@ function Component (options) {
   this.options = options;
   this.node = node;
 
+  // Instantiate Adapter
   if (options.adapter) {
     this.api = options.adapter;
   } else if (options.adapterConstructor) {
@@ -5842,6 +5901,9 @@ function Component (options) {
   } else if (options.config) {
     this.api = new V.adapters.flotr.Child(options.config || {});
   }
+
+  // this.id = _.uniqueId(CN_COMPONENT);
+  this.preprocessors = [];
 }
 
 Component.prototype = {
@@ -5880,10 +5942,91 @@ Component.prototype = {
    * @param {Array} [data] Data for the adapter.
    * @param {Object} [options] Configuration object for the adapters draw method.
    */
-  draw : function (data, options) {
-    if (this.api) {
-      this.api.draw(data || this.options.data, options, this.node, this.options.skipPreprocess, this.options.processData);
+  draw : function (data, config) {
+
+    var
+      api = this.api,
+      options = this.options,
+      preprocessors = this.preprocessors,
+      clientData;
+
+    clientData = data = data || options.data;
+    config = config || options.config;
+
+    if (!options.skipPreprocess && data) {
+
+      clientData = [];
+
+      _.each(api.getDataArray(data), function (d, index) {
+
+        var
+          preprocessor = preprocessors[index] || new V.Preprocessor(),
+          isArray = _.isArray(d),
+          isFunction = _.isFunction(d),
+          unprocessed = isArray ? d : (isFunction ? d : d.data),
+          processData = options.processData,
+          range = api.range(config),
+          min = range.min,
+          max = range.max,
+          resolution = this.node.clientWidth,
+          dataArray = d,
+          processed, objectData;
+
+        // For object data
+        if (!isFunction && !isArray) {
+          dataArray = d.data;
+          objectData = _.extend({}, d);
+        }
+
+        // Do data function preprocessing
+        if (isFunction) {
+          processed = data(min, max, resolution);
+        } else {
+
+          // Update if new data
+          if (dataArray !== preprocessor.data) {
+            preprocessor.setData(dataArray);
+          } else {
+            preprocessor.reset();
+          }
+
+          // Do custom callback preprocessing
+          if (processData) {
+            processData.apply(this, [{
+              preprocessor : preprocessor,
+              min : min,
+              max : max,
+              resolution : resolution
+            }]);
+            processed = preprocessor.getData();
+          }
+          // Default preprocessing
+          else {
+            processed = preprocessor
+              .bound(min, max)
+              .subsampleMinMax(resolution)
+              .getData();
+          }
+        }
+
+        // If present, transform the data for the API
+        if (api.transformData) {
+          processed = api.transformData(processed);
+        }
+
+        // Object Data
+        if (objectData) {
+          objectData.data = processed;
+          clientData.push(objectData);
+        }
+        // Array Data
+        else {
+          clientData.push(processed);
+        }
+      }, this);
     }
+
+    if (api) api.draw(clientData, config, this.node);
   },
 
   /**
@@ -5937,6 +6080,7 @@ Component.prototype = {
     this[attribute] = options[attribute];
   }
 };
+
 
 V.Component = Component;
 
@@ -6113,48 +6257,47 @@ function Preprocessor (options) {
 
   options = options || {};
 
-  var
-    data;
-
   /**
    * Returns data.
    */
   this.getData = function () {
+
     if (this.bounded) bound(this);
-    return data;
-  }
+
+    return this.processing;
+  };
+
+  this.reset = function () {
+    this.processing = this.data;
+    return this;
+  };
 
   /**
    * Set the data object.
    */
-  this.setData = function (newData) {
+  this.setData = function (data) {
     var
       i, length;
-    if (!_.isArray(newData)) throw new Error('Array expected.');
-    if (newData.length < 2) throw new Error('Data must contain at least two dimensions.');
-    length = newData[0].length;
-    for (i = newData.length; i--;) {
-      if (!_.isArray(newData[i])) throw new Error('Data dimensions must be arrays.');
-      if (newData[i].length !== length) throw new Error('Data dimensions must contain the same number of points.');
+    if (!_.isArray(data)) throw new Error('Array expected.');
+    if (data.length < 2) throw new Error('Data must contain at least two dimensions.');
+    length = data[0].length;
+    for (i = data.length; i--;) {
+      if (!_.isArray(data[i])) throw new Error('Data dimensions must be arrays.');
+      if (data[i].length !== length) throw new Error('Data dimensions must contain the same number of points.');
     }
 
-    data = newData;
+    this.processing = data;
+    this.data = data;
 
     return this;
-  }
+  };
 
   if (options.data) this.setData(options.data);
 }
 
 function getStartIndex (data, min) {
-
   var
-    length = data.length,
-    i;
-
-  for (i = 0; i < length; i++) {
-    if (data[i] >= min) break;
-  }
+    i = _.sortedIndex(data, min);
 
   // Include point outside range when not exact match
   if (data[i] > min && i > 0) i--;
@@ -6163,18 +6306,7 @@ function getStartIndex (data, min) {
 }
 
 function getEndIndex (data, max) {
-
-  var
-    i;
-
-  for (i = data.length; i--;) {
-    if (data[i] <= max) break;
-  }
-
-  // Include point outside range when not exact match
-  if (data[i] < max && i > 0) i++;
-
-  return i;
+  return _.sortedIndex(data, max);
 }
 
 function bound (that) {
@@ -6182,22 +6314,23 @@ function bound (that) {
   delete that.bounded;
 
   var
-    data    = that.getData(),
+    data    = that.processing,
     length  = that.length(),
     x       = data[0],
     y       = data[1],
     min     = that.min || 0,
-    max     = that.max || that.length(),
+    max     = that.max || length,
     start   = getStartIndex(x, min),
     end     = getEndIndex(x, max);
 
-  that.setData([
+  that.processing = [
     x.slice(start, end + 1),
     y.slice(start, end + 1)
-  ]);
+  ];
+
   that.start = start;
   that.end = end;
-};
+}
 
 Preprocessor.prototype = {
 
@@ -6242,7 +6375,7 @@ Preprocessor.prototype = {
     delete this.bounded;
 
     var
-      data    = this.getData(),
+      data    = this.processing,
       length  = this.length(),
       x       = data[0],
       y       = data[1],
@@ -6256,7 +6389,7 @@ Preprocessor.prototype = {
       minI    = 1,
       maxI    = 1,
       unit    = (end - start)/ count,
-      position, min, max, datum, i, j;
+      position, datum, i, j;
 
     if (end - start + 1 > resolution) {
 
@@ -6308,11 +6441,11 @@ Preprocessor.prototype = {
       newX.push(x[end]);
       newY.push(y[end]);
 
-      this.setData([newX, newY]);
+      this.processing = [newX, newY];
       this.start = start;
       this.end = end;
     } else {
-      this.bounded = true;
+      this.bounded = bounded;
     }
 
     return this;
@@ -6332,7 +6465,7 @@ Preprocessor.prototype = {
     delete this.bounded;
 
     var
-      data    = this.getData(),
+      data    = this.processing,
       length  = this.length(),
       x       = data[0],
       y       = data[1],
@@ -6343,7 +6476,7 @@ Preprocessor.prototype = {
       newY    = [],
       i, index;
 
-    if (length > resolution) {
+    if (end - start + 1 > resolution) {
 
       // First
       newX.push(x[start]);
@@ -6360,9 +6493,11 @@ Preprocessor.prototype = {
       newX.push(x[end]);
       newY.push(y[end]);
 
-      this.setData([newX, newY]);
+      this.processing = [newX, newY];
       this.start = start;
       this.end = end;
+    } else {
+      this.bounded = bounded;
     }
 
     return this;
@@ -6478,96 +6613,57 @@ Child.prototype = {
     this.flotr.destroy();
   },
 
-  draw : function (data, flotr, node, skipPreprocess, processData) {
+  draw : function (data, flotr, node) {
 
     var
-      o           = this.options,
-      flotrData   = [];
+      options = this.options;
 
-    data = data || o.data;
+    data = this.getDataArray(data || options.data);
 
     if (flotr) {
-      flotr = Flotr.merge(flotr, Flotr.clone(o));
+      flotr = Flotr.merge(flotr, Flotr.clone(options));
     } else {
-      flotr = o;
+      flotr = options;
     }
 
-    o.data = data;
-    min = flotr.xaxis.min;
-    max = flotr.xaxis.max;
-
-    // Clean up old preprocessor.  Eventually, we will
-    // re-use this from render to render.
-    delete this.preprocessor;
-
-    data = this._getDataArray(data);
-    if (skipPreprocess) {
-      flotrData = data;
-    } else {
-      _.each(data, function (d, index) {
-
-        var
-          isArray = _.isArray(d),
-          isFunction = _.isFunction(d),
-          unprocessed = isArray ? d : (isFunction ? d : d.data),
-          processed = this._processData(unprocessed, flotr, node, processData),
-          x = processed[0],
-          y = processed[1],
-          data = [],
-          o, i;
-
-        // Transform for Flotr
-        for (i = 0; i < x.length; i++) {
-          data.push([x[i], y[i]]);
-        }
-
-        if (isFunction || isArray) {
-          flotrData.push(data);
-        } else {
-          // Object
-          o = _.extend({}, d);
-          o.data = data;
-          flotrData.push(o);
-        }
-      }, this);
-    }
+    options.data = data;
 
     if (!flotr) throw 'No graph submitted.';
 
-    this.flotr = Flotr.draw(node, flotrData, flotr);
+    this.flotr = Flotr.draw(node, data, flotr);
   },
 
-  _processData : function (data, flotr, node, processData) {
+  range : function (flotr) {
+    var
+      axis  = flotr.xaxis;
+    return {
+      min : axis.min,
+      max : axis.max
+    };
+  },
+
+  // Transform for Flotr
+  transformData : function (data) {
 
     var
-      options     = this.options,
-      resolution  = node.clientWidth,
-      axis        = flotr.xaxis,
-      min         = axis.min,
-      max         = axis.max,
-      preprocessor;
+      length = data[0].length,
+      dimension = data.length,
+      transformed = [],
+      point,
+      i, j;
 
-    if (_.isFunction(data)) {
-      return data(min, max, resolution);
-    } else if (processData) {
-      preprocessor = new V.Preprocessor({data : data});
-      processData.apply(this, [{
-        preprocessor : preprocessor,
-        min : min,
-        max : max,
-        resolution : resolution
-      }]);
-    } else {
-      preprocessor = new V.Preprocessor({data : data})
-        .bound(min, max)
-        .subsampleMinMax(resolution);
+    for (i = 0; i < length; i++) {
+      point = [];
+      for (j = 0; j < dimension; j++) {
+        point.push(data[j][i]);
+      }
+      transformed.push(point);
     }
 
-    this.preprocessor = preprocessor;
-    return preprocessor.getData();
+    return transformed;
   },
 
-  _getDataArray : function (data) {
+  getDataArray : function (data) {
 
     if (data[0] && (!_.isArray(data[0]) || (data[0][0] && _.isArray(data[0][0]))))
       return data;
@@ -6595,8 +6691,9 @@ Child.prototype = {
 
     var
       event = this.events[name] || {},
-      name = event.name || false,
       handler = event.handler || false;
+
+    name = event.name || false;
 
     if (handler) {
 
@@ -6842,7 +6939,7 @@ function selectHandler (component, selection) {
     },
     x : x,
     y : y
-  }
+  };
 
   return options;
 }
@@ -6930,8 +7027,8 @@ Flotr.addType('lite-lines', {
 
     // HACK
     if ((!o.max && o.max !== 0) || (!o.min && o.min !== 0)) {
-      axis.max += options.lineWidth * .01;
-      axis.min -= options.lineWidth * .01;
+      axis.max += options.lineWidth * 0.01;
+      axis.min -= options.lineWidth * 0.01;
       /*
       axis.max = axis.p2d((axis.d2p(axis.max) + options.lineWidth));
       axis.min = axis.p2d((axis.d2p(axis.max) - options.lineWidth));
@@ -6991,7 +7088,7 @@ Flotr.addType('whiskers', {
 
     if (data.length < 1) return;
 
-    context.translate(-options.lineWidth, 0)
+    context.translate(-options.lineWidth, 0);
     context.beginPath();
     for (i = 0; i < data.length; i++) {
       x = xScale(data[i][0]);
@@ -7016,7 +7113,7 @@ Flotr.addType('whiskers', {
       y               = yScale(args.y);
 
     context.save();
-    context.translate(-options.lineWidth, 0)
+    context.translate(-options.lineWidth, 0);
     context.beginPath();
     context.moveTo(x, zero);
     context.lineTo(x, y);
@@ -7097,7 +7194,7 @@ envision.components = envision.components || {};
         context = this.context,
         height = this.height,
         width = this.width,
-        half = Math.round(height / 2) - .5,
+        half = Math.round(height / 2) - 0.5,
         min, max;
 
       options = options || { min : width / 2, max : width / 2};
@@ -7239,7 +7336,7 @@ function getDefaults () {
         },
         yaxis : {
           autoscale : true,
-          autoscaleMargin : .5 
+          autoscaleMargin : 0.5 
         }
       },
       processData : processData
@@ -7449,7 +7546,7 @@ function TimeSeries (options) {
   this.selection = selection;
   this.detail = detail;
   this.summary = summary;
-};
+}
 
 V.templates.TimeSeries = TimeSeries;
 
