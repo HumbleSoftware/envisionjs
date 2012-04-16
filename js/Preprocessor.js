@@ -215,7 +215,7 @@ Preprocessor.prototype = {
       this.start = start;
       this.end = end;
     } else {
-      this.bounded = true;
+      this.bounded = bounded;
     }
 
     return this;
