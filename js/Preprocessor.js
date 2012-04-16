@@ -266,6 +266,8 @@ Preprocessor.prototype = {
       this.processing = [newX, newY];
       this.start = start;
       this.end = end;
+    } else {
+      this.bounded = bounded;
     }
 
     return this;
