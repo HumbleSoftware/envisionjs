@@ -91,6 +91,7 @@ describe('Preprocessor', function () {
       var
         x = [],
         y = [],
+        data = [x, y],
         i;
 
       for (i = 0; i < 10; i++) {
@@ -98,7 +99,8 @@ describe('Preprocessor', function () {
         y.push(10 - 1 - i);
       }
 
-      preprocessor = new Preprocessor({ data : [x, y] });
+      this.data = data;
+      preprocessor = new Preprocessor({ data : data });
     });
 
     afterEach(function () {
@@ -148,6 +150,12 @@ describe('Preprocessor', function () {
         [3, 4, 5, 6, 7],
         [6, 5, 4, 3, 2]
       ]);
+    });
+
+    it('skips bounding when boundary null / undefined', function () {
+      preprocessor.bound(null, undefined);
+      expect(preprocessor.length()).toBe(10);
+      expect(preprocessor.getData()).toBe(this.data);
     });
   });
 
