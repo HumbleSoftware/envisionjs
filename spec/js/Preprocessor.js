@@ -260,6 +260,78 @@ describe('Preprocessor', function () {
     });
   });
 
+  describe('Subsample Bounding', function () {
+
+    var
+      length = 10,
+      strategies = ['subsample', 'subsampleMinMax'];
+ 
+    beforeEach(function () {
+
+      var
+        x = [],
+        y = [],
+        data = [x, y],
+        i;
+
+      for (i = 0; i < length; i++) {
+        x.push(i);
+        y.push(10 - 1 - i);
+      }
+
+      this.data = data;
+      this.preprocessor = new Preprocessor({ data : data });
+    });
+
+    it('subsamples and bounds', function () {
+
+      // TODO implement strategies
+
+      var
+        preprocessor = this.preprocessor;
+
+      preprocessor
+        .bound(0, 7)
+        .subsample(4);
+      expect(preprocessor.length()).toBe(4);
+      expect(preprocessor.getData()).toEqual([
+        [0, 2, 4, 7],
+        [9, 7, 5, 2]
+      ]);
+    });
+
+    _.each(strategies, function (strategy) {
+
+      it('skips ' + strategy + ' but bounds when res > bounded count', function () {
+
+        var
+          preprocessor = this.preprocessor;
+
+        preprocessor
+          .bound(0, 7)
+          [strategy](9); // > 8 (bound length), < length
+
+        expect(preprocessor.length()).toBe(8);
+        expect(preprocessor.getData()).toEqual([
+          [0, 1, 2, 3, 4, 5, 6, 7],
+          [9, 8, 7, 6, 5, 4, 3, 2]
+        ]);
+      });
+
+      it('skips bounding ' + strategy + ' when subsampling but not bounding', function () {
+
+        var
+          preprocessor = this.preprocessor;
+
+        preprocessor[strategy](10);
+
+        expect(preprocessor.length()).toBe(10);
+        expect(preprocessor.getData()).toBe(this.data);
+      });
+
+    }, this);
+  });
+
   describe('Chaining', function  () {
 
     var
