@@ -246,7 +246,7 @@ Preprocessor.prototype = {
       newY    = [],
       i, index;
 
-    if (length > resolution) {
+    if (end - start + 1 > resolution) {
 
       // First
       newX.push(x[start]);
