@@ -15,11 +15,7 @@ helper_files:
   - "MockAdapter.js"
   - "MockComponent.js"
 spec_files:
-  - "js/Envision.js"
-  - "js/Visualization.js"
-  - "js/Component.js"
-  - "js/Preprocessor.js"
-  - "js/Interaction.js"
+  - "js/*"
 src_dir: "."
 spec_dir: "spec/"
 helper_dir: "spec/helpers/"
