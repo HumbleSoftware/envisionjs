@@ -2782,8 +2782,8 @@ Graph.prototype = {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.octx = getContext(this.overlay);
     this.ctx.clearRect(0, 0, this.overlay.width, this.overlay.height);
-    this.canvasHeight = size.height;
-    this.canvasWidth = size.width;
+    this.canvasHeight = size.height;//o.resolution;
+    this.canvasWidth = size.width;//*o.resolution;
     this.textEnabled = !!this.ctx.drawText || !!this.ctx.fillText; // Enable text functions
 
     function getCanvas(canvas, name){
@@ -4997,7 +4997,6 @@ Flotr.addPlugin('labels', {
               axis.d2p(tick.v) - axis.maxLabel.height / 2);
           left = isX ? (offset.left + axis.d2p(tick.v) - xBoxWidth / 2) : 0;
 
-          name = '';
           if (i === 0) {
             name = ' first';
           } else if (i === axis.ticks.length - 1) {
@@ -6665,7 +6664,14 @@ Child.prototype = {
 
   getDataArray : function (data) {
 
-    if (data[0] && (!_.isArray(data[0]) || (data[0][0] && _.isArray(data[0][0]))))
+    if (
+      data[0] && // Data exists and
+      (
+        !_.isArray(data[0]) || // data not an array
+        !data[0].length || // data is an empty series
+        (data[0][0] && _.isArray(data[0][0])) // data is a series
+      )
+    )
       return data;
     else
       return [data];
