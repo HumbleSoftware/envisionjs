@@ -290,9 +290,13 @@ Preprocessor.prototype = {
       newY = [],
       i, j, delta;
 
+    newX.push(x[start]);
+    newY.push(y[start]);
     if (end - start + 1 < resolution) {
-      for (i = start + 1; i < end - 2; i++) {
+      for (i = start; i < end; i++) {
         delta = x[i + 1] - x[i];
+        newX.push(x[i]);
+        newY.push(y[i]);
         for (j = x[i + 0] + unit; j < x[i + 1]; j += unit) {
           newX.push(j);
           newY.push(cubicHermiteSpline(
@@ -321,15 +325,14 @@ Preprocessor.prototype = {
 function cubicHermiteSpline (x, tk0, pk0, tk1, pk1, tk2, pk2, tk3, pk3) {
 
   var
-    c = 0.10,
     t = (x - tk1) / (tk2 - tk1),
     t1 = 1 - t,
     h00 = (1 + 2 * t) * t1 * t1,
     h10 = t * t1 * t1,
     h01 = t * t * (3 - 2 * t),
     h11 = t * t * (t - 1),
-    mk = (1 - c) * (pk2 - pk0) / (tk2 - tk0),
-    mk1 = (1 - c) * (pk3 - pk1) / (tk3 - tk1),
+    mk = (pk2 - pk1) / (2 * (tk2 - tk1)) + (typeof pk0 === 'undefined' ? 0 : (pk1 - pk0) / (2 * (tk1 - tk0))),
+    mk1 = (typeof pk3 === 'undefined' ? 0 : (pk3 - pk2) / (2 * (tk3 - tk2))) + (pk2 - pk1) / (2 * (tk2 - tk1)),
     px = h00 * pk1 + h10 * (tk2 - tk1) * mk + h01 * pk2 + h11 * (tk2 - tk1) * mk1;
 
   return px;
