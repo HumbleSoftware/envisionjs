@@ -73,6 +73,11 @@ function example () {
     }
   }
 
+  detail.processData = function (o) {
+    o.preprocessor
+      .interpolate(o.resolution);
+  };
+
   // Options
   options = {
     container : container,
