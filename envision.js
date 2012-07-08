@@ -6639,8 +6639,72 @@ Preprocessor.prototype = {
     }
 
     return this;
+  },
+
+  interpolate : function (resolution) {
+
+    var bounded = this.bounded;
+    delete this.bounded;
+
+    var
+      data = this.processing,
+      length = this.length(),
+      x = data[0],
+      y = data[1],
+      start = bounded ? getStartIndex(x, this.min) : 0,
+      end = bounded ? getEndIndex(x, this.max) : length - 1,
+      unit = (x[end] - x[start]) / resolution,
+      newX = [],
+      newY = [],
+      i, j, delta;
+
+    newX.push(x[start]);
+    newY.push(y[start]);
+    if (end - start + 1 < resolution) {
+      for (i = start; i < end; i++) {
+        delta = x[i + 1] - x[i];
+        newX.push(x[i]);
+        newY.push(y[i]);
+        for (j = x[i + 0] + unit; j < x[i + 1]; j += unit) {
+          newX.push(j);
+          newY.push(cubicHermiteSpline(
+            j,
+            x[i - 1],
+            y[i - 1],
+            x[i + 0],
+            y[i + 0],
+            x[i + 1],
+            y[i + 1],
+            x[i + 2],
+            y[i + 2]
+          ));
+        }
+      }
+
+      this.processing = [newX, newY];
+      this.start = start;
+      this.end = end;
+    }
+
+    return this;
   }
 };
+
+function cubicHermiteSpline (x, tk0, pk0, tk1, pk1, tk2, pk2, tk3, pk3) {
+
+  var
+    t = (x - tk1) / (tk2 - tk1),
+    t1 = 1 - t,
+    h00 = (1 + 2 * t) * t1 * t1,
+    h10 = t * t1 * t1,
+    h01 = t * t * (3 - 2 * t),
+    h11 = t * t * (t - 1),
+    mk = (pk2 - pk1) / (2 * (tk2 - tk1)) + (typeof pk0 === 'undefined' ? 0 : (pk1 - pk0) / (2 * (tk1 - tk0))),
+    mk1 = (typeof pk3 === 'undefined' ? 0 : (pk3 - pk2) / (2 * (tk3 - tk2))) + (pk2 - pk1) / (2 * (tk2 - tk1)),
+    px = h00 * pk1 + h10 * (tk2 - tk1) * mk + h01 * pk2 + h11 * (tk2 - tk1) * mk1;
+
+  return px;
+}
 
 envision.Preprocessor = Preprocessor;
 
