@@ -70,10 +70,10 @@ function TimeSeries (options) {
 
   // Selection action
   selection
-    .add(V.actions.selection)
     .follower(detail)
     .follower(connection)
-    .leader(summary);
+    .leader(summary)
+    .add(V.actions.selection, options.selectionCallback ? { callback : options.selectionCallback } : null);
 
   // Optional initial selection
   if (options.selection) {
