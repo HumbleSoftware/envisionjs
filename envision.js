@@ -4188,15 +4188,27 @@ Flotr.addPlugin('selection', {
   // TODO This isn't used.  Maybe it belongs in the draw area and fire select event methods?
   getArea: function() {
 
-    var s = this.selection.selection,
+    var
+      s = this.selection.selection,
+      a = this.axes,
       first = s.first,
-      second = s.second;
+      second = s.second,
+      x1, x2, y1, y2;
+
+    x1 = a.x.p2d(s.first.x);
+    x2 = a.x.p2d(s.second.x);
+    y1 = a.y.p2d(s.first.y);
+    y2 = a.y.p2d(s.second.y);
 
     return {
-      x1: Math.min(first.x, second.x),
-      x2: Math.max(first.x, second.x),
-      y1: Math.min(first.y, second.y),
-      y2: Math.max(first.y, second.y)
+      x1 : Math.min(x1, x2),
+      y1 : Math.min(y1, y2),
+      x2 : Math.max(x1, x2),
+      y2 : Math.max(y1, y2),
+      xfirst : x1,
+      xsecond : x2,
+      yfirst : y1,
+      ysecond : y2
     };
   },
 
@@ -4208,25 +4220,11 @@ Flotr.addPlugin('selection', {
    * Fires the 'flotr:select' event when the user made a selection.
    */
   fireSelectEvent: function(name){
-    var a = this.axes,
-        s = this.selection.selection,
-        x1, x2, y1, y2;
-
+    var
+      area = this.selection.getArea();
     name = name || 'select';
-
-    x1 = a.x.p2d(s.first.x);
-    x2 = a.x.p2d(s.second.x);
-    y1 = a.y.p2d(s.first.y);
-    y2 = a.y.p2d(s.second.y);
-
-    E.fire(this.el, 'flotr:'+name, [{
-      x1:Math.min(x1, x2), 
-      y1:Math.min(y1, y2), 
-      x2:Math.max(x1, x2), 
-      y2:Math.max(y1, y2),
-      xfirst:x1, xsecond:x2, yfirst:y1, ysecond:y2,
-      selection : s
-    }, this]);
+    area.selection = this.selection.selection;
+    E.fire(this.el, 'flotr:'+name, [area, this]);
   },
 
   /**
@@ -5684,7 +5682,7 @@ function mouseMoveHandler(e, position) {
   if (!this.handles.moveHandler) return;
 
   var
-    delta = position.dX,
+    delta = position.x - this.lastMousePos.x,
     selection = this.selection.selection,
     area = this.selection.getArea(),
     handles = this.handles;
@@ -6993,23 +6991,23 @@ Child.prototype = {
         if (!x && data.x) {
           // Translate data to pixels
           x = data.x;
-          options.x1 = axes.x.d2p(x.min);
-          options.x2 = axes.x.d2p(x.max);
-        } else if (x) {
-          // Use pixels
           options.x1 = x.min;
           options.x2 = x.max;
+        } else if (x) {
+          // Use pixels
+          options.x1 = axes.x.p2d(x.min);
+          options.x2 = axes.x.p2d(x.max);
         }
 
         if (!y && data.y) {
           // Translate data to pixels
           y = data.y;
-          options.y1 = axes.y.d2p(y.min);
-          options.y2 = axes.y.d2p(y.max);
-        } else if (y) {
-          // Use pixels
           options.y1 = y.min;
           options.y2 = y.max;
+        } else if (y) {
+          // Use pixels
+          options.y1 = axes.y.d2p(y.min);
+          options.y2 = axes.y.d2p(y.max);
         }
 
         graph.selection.setSelection(options);
