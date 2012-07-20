@@ -4447,7 +4447,7 @@ Flotr.addPlugin('legend', {
           legendHeight = Math.round(itemCount*(lbm+lbh) + lbm);
 
       // Default Opacity
-      if (!opacity && !opacity === 0) {
+      if (!opacity && opacity !== 0) {
         opacity = 0.1;
       }
 
@@ -4866,11 +4866,6 @@ Flotr.addPlugin('hit', {
       if      (p.charAt(1) == 'e') pos += 'right:' + (m + right) + 'px;left:auto;';
       else if (p.charAt(1) == 'w') pos += 'left:' + (m + left) + 'px;right:auto;';
 
-    // Bars
-    } else if (s.bars && s.bars.show) {
-        pos += 'bottom:' + (m - top - n.yaxis.d2p(n.y/2) + this.canvasHeight) + 'px;top:auto;';
-        pos += 'left:' + (m + left + n.xaxis.d2p(n.x - options.bars.barWidth/2)) + 'px;right:auto;';
-
     // Pie
     } else if (s.pie && s.pie.show) {
       var center = {
@@ -4884,16 +4879,15 @@ Flotr.addPlugin('hit', {
       pos += 'left:' + (m + left + center.x + Math.cos(bisection) * radius/2) + 'px;right:auto;';
 
     // Default
-    } else {
+    } else {    
       if (/n/.test(p)) pos += 'bottom:' + (m - top - n.yaxis.d2p(n.y) + this.canvasHeight) + 'px;top:auto;';
       else             pos += 'top:' + (m + top + n.yaxis.d2p(n.y)) + 'px;bottom:auto;';
-      if (/e/.test(p)) pos += 'right:' + (m - left - n.xaxis.d2p(n.x) + this.canvasWidth) + 'px;left:auto;';
+      if (/w/.test(p)) pos += 'right:' + (m - left - n.xaxis.d2p(n.x) + this.canvasWidth) + 'px;left:auto;';
       else             pos += 'left:' + (m + left + n.xaxis.d2p(n.x)) + 'px;right:auto;';
     }
 
     elStyle += pos;
     mouseTrack.style.cssText = elStyle;
-
     if (!decimals || decimals < 0) decimals = 0;
     
     if (x && x.toFixed) x = x.toFixed(decimals);
@@ -5227,7 +5221,7 @@ Flotr.addPlugin('legend', {
           legendHeight = Math.round(itemCount*(lbm+lbh) + lbm);
 
       // Default Opacity
-      if (!opacity && !opacity === 0) {
+      if (!opacity && opacity !== 0) {
         opacity = 0.1;
       }
 
@@ -5735,7 +5729,7 @@ function scrollMoveHandler(area, delta) {
  * The Envision namespace.
  * @namespace
  */
-envision = {
+var envision = {
 
   // Globals
   _ : Flotr._,        // Underscore.js, functional microlib

@@ -20,6 +20,15 @@ envision:
 	cat build/envision.min.js >> envision.min.js
 	echo ";" >> envision.js
 
+amd: envision
+	mkdir build/amd
+	cat make/pre.js > build/amd/envision.js
+	cat build/envision.js >> build/amd/envision.js
+	cat make/post.js >> build/amd/envision.js
+	cat lib/flotr2/js/amd/pre.js > build/amd/flotr2.js
+	cat build/flotr.js >> build/amd/flotr2.js
+	cat lib/flotr2/js/amd/post.js >> build/amd/flotr2.js
+
 demo: envision
 	mkdir build/demos
 	cp lib/flotr2/flotr2.min.js build/demos

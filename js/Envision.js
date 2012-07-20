@@ -2,7 +2,7 @@
  * The Envision namespace.
  * @namespace
  */
-envision = {
+var envision = {
 
   // Globals
   _ : Flotr._,        // Underscore.js, functional microlib
