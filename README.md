@@ -328,13 +328,13 @@ Subsample data using MinMax.
 
 MinMax will display the extrema of the subsample intervals.  This is
 slower than regular interval subsampling but necessary for data that 
-is very non-homogenous.
+is very non-homogeneous.
 
 ##### `subsample (resolution)`
 Subsample data at a regular interval for resolution.
 
 This is the fastest subsampling and good for monotonic data and fairly
-homogenous data (not a lot of up and down).
+homogeneous data (not a lot of up and down).
 
 ### Class `envision.Interaction`
 _Defines an interaction between components._
